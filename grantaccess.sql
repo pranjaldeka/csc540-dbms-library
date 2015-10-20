@@ -7,3 +7,11 @@ BEGIN
    END LOOP;
 END;
 /
+
+SET SERVEROUTPUT ON;
+BEGIN
+   FOR R IN (SELECT  VIEW_NAME FROM user_views) LOOP
+      EXECUTE IMMEDIATE 'GRANT ALL ON '||R.view_name||' to dsingh4';
+   END LOOP;
+END;
+/
