@@ -5,17 +5,24 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
+import com.ncsu.dbms.lib.exception.InvalidCredentialException;
 
 public class Login {
 
 	private DBConnection dbConn;
-	public Login(DBConnection dbConn) {
+	public Login(DBConnection dbConn) throws InvalidCredentialException{
 		// TODO Auto-generated constructor stub
 		this.dbConn = dbConn;
-		validateLogin();
+		try{
+			validateLogin();
+		}
+		catch(Exception e)
+		{
+			throw e;
+		}
 	}
 	
-	public void validateLogin(){
+	public void validateLogin() throws InvalidCredentialException{
 		
 		System.out.println("Enter user id:");
 		@SuppressWarnings("resource")
@@ -24,26 +31,28 @@ public class Login {
 		System.out.println("Enter password:");
 		String password = scanner.nextLine();
 		
-		System.out.println("Username is " + username + " and password is " + password);
+		//System.out.println("Username is " + username + " and password is " + password);
 		
-		String query = "Select count(1) from ssingh25.admin where admin_id = "+ username + " and password = " + password;
+		String query = "Select * from ssingh25.admin where admin_id = "+ username + " and password = " + password;
 		
 		ResultSet rs;
 		try {
 			rs = dbConn.executeQuery(query);
-			while(rs.next()){
-				if(rs.getInt(1)>0){
-					System.out.println("User is valid");
-				}
-				else{
-					System.out.println("User is invalid");
-				}
+			if(rs.next()){
+					System.out.println("Hello " + rs.getString(2) + " " + rs.getString(3) + " !!!");
 			}
-//			while(rs.next()) {
-//				System.out.print(rs.getInt(1) + "\t");
-//				System.out.println(rs.getString(2));
-//			}
-		} catch (SQLException e) {
+			else
+				//System.out.println("Invalid credential!!!");
+				throw new InvalidCredentialException ();
+		} 
+		catch(InvalidCredentialException e){
+			throw e;
+		}
+		catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
