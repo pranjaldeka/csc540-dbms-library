@@ -9,7 +9,7 @@ import java.sql.Statement;
 
 public class DBConnection {
 
-	private Connection con = null;
+	public Connection con = null;
 	public DBConnection() {
 		// TODO Auto-generated constructor stub
 		initialize();
