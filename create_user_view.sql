@@ -1,6 +1,34 @@
-create view user_view (user_id, user_password, user_type) as
-select STUDENT_NUMBER, password,'S' from students
+create view user_view
+ (  user_id,
+    user_password,
+    user_type,
+    first_name,
+    last_name
+  )
+as
+select
+	 STUDENT_NUMBER,
+	 password,
+	 'S', 
+	 first_name, 
+	 last_name
+ from 
+ 	students
 union all
-select FACULTY_NUMBER, password,'F' from faculties
+select 
+	FACULTY_NUMBER,
+	password,
+	'F', 
+	first_name, 
+	last_name 
+	from 
+faculties
 union all
-select ADMIN_ID, password,'A' from ADMIN;
+select 
+	ADMIN_ID, 
+	password,
+	'A',
+	first_name, 
+	last_name 
+from 
+	ADMIN;
