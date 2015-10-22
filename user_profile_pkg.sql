@@ -36,7 +36,8 @@ BEGIN
 	first_name,last_name;
 EXCEPTION
 	WHEN NO_DATA_FOUND THEN
-		SELECT 0, null,null INTO count_rows, first_name, last_name FROM dual;
+		--SELECT 0, null,null INTO count_rows, first_name, last_name FROM dual;
+		count_rows:=0;
 END validate_user_proc;
 
 END user_profile_pkg;
