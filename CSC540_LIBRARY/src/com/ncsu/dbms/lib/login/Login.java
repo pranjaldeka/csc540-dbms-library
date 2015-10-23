@@ -1,12 +1,14 @@
 package com.ncsu.dbms.lib.login;
 
 import java.sql.CallableStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.exception.InvalidCredentialException;
+import com.ncsu.dbms.lib.users.Admin;
+import com.ncsu.dbms.lib.users.Faculty;
+import com.ncsu.dbms.lib.users.Student;
 
 public class Login {
 
@@ -63,23 +65,33 @@ public class Login {
 		}
 	}
 
-	private void validateUserLogin(String username, String password) throws InvalidCredentialException, SQLException{
+	private void validateUserLogin(String userName, String password) throws InvalidCredentialException, SQLException{
 		CallableStatement callStmt = null;
 		String validateCall = "{call user_profile_pkg.validate_user_proc(?,?,?,?,?)}";
 		try{
 			callStmt = dbConn.con.prepareCall(validateCall);
-			callStmt.setString(1, username);
+			callStmt.setString(1, userName);
 			callStmt.setString(2, password);
 			callStmt.registerOutParameter(3, java.sql.Types.VARCHAR);
 			callStmt.registerOutParameter(4, java.sql.Types.VARCHAR);
 			callStmt.registerOutParameter(5, java.sql.Types.VARCHAR);
 			callStmt.executeQuery();
-			int flag = callStmt.getInt(3);
-			if(flag==0)
+			String user_type = callStmt.getString(3);
+			String firstName = callStmt.getString(4);
+			String lastName = callStmt.getString(5);
+			if(user_type.equals(""))
 				throw new InvalidCredentialException();
-			else
+			else if(user_type.equals("A")){ // call admin welcome window
+				adminWelcomeMenu(userName, firstName, lastName);
+			}
+			else if(user_type.equals("S")){ // call Student welcome window
+				studentWelcomeMenu(user_type, firstName, lastName);
+			}
+			else if(user_type.equals("F")) {// call faculty welcome window
 				System.out.println("Hello " + callStmt.getString(4) + " " + callStmt.getString(5) + " !!!");
-			
+				facultyWelcomeMenu(userName,firstName,lastName);
+			}
+
 		}
 		catch (InvalidCredentialException e) {
 
@@ -96,5 +108,26 @@ public class Login {
 			callStmt.close();
 		}
 		}	
+	}
+	
+	// Admin welcome  Screen Menu Items
+	private void adminWelcomeMenu(String userName, String firstName, String lastName){
+		System.out.println("Hello Admin...");
+		@SuppressWarnings("unused")
+		Admin admin = new Admin(userName,firstName, lastName);
+	}
+	// Student welcome  Screen Menu Items
+
+	private void studentWelcomeMenu(String userName, String firstName, String lastName){
+		@SuppressWarnings("unused")
+		Student student = new Student(userName,firstName, lastName);
+
+	}
+	// Faculty welcome  Screen Menu Items
+
+	private void facultyWelcomeMenu(String userName, String firstName, String lastName){
+		@SuppressWarnings("unused")
+		Faculty faculty = new Faculty(userName,firstName, lastName);
+
 	}
 }

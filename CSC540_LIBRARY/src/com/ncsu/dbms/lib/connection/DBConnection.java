@@ -19,7 +19,7 @@ public class DBConnection {
 		try {
 			Class.forName("oracle.jdbc.driver.OracleDriver");
 			con =  DriverManager.getConnection(
-					"jdbc:oracle:thin:ssingh25/@ora.csc.ncsu.edu:1521:orcl");
+					"jdbc:oracle:thin:ssingh25/200103842@ora.csc.ncsu.edu:1521:orcl");
 
 			
 		} catch (ClassNotFoundException e) {
