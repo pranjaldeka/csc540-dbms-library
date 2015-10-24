@@ -62,3 +62,6 @@ INSERT INTO STUDENTS VALUES
   6,
   'CHEMISTRY'
 );
+
+commit;
+/

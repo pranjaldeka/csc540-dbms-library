@@ -1,0 +1,12 @@
+INSERT INTO LIBRARIES VALUES
+(
+	'LIB1',
+	'D. H. Hill'
+);
+INSERT INTO LIBRARIES VALUES
+(
+	'LIB2',
+	'J.B. Hunt'
+);
+COMMIT;
+/
