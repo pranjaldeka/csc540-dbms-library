@@ -4,7 +4,7 @@ user_profile_pkg.sql : checks user profile whether it exists or not
 CREATE OR REPLACE PACKAGE user_profile_pkg AS 
 
 PROCEDURE validate_user_proc(
-	user_name 		IN 	NUMBER,
+	user_name 		IN 	VARCHAR2,
 	user_password 	IN 	VARCHAR2,
 	user_type		OUT	VARCHAR2,
 	first_name		OUT VARCHAR2,
@@ -15,7 +15,7 @@ END user_profile_pkg;
 CREATE OR REPLACE PACKAGE BODY user_profile_pkg 
 IS
 PROCEDURE validate_user_proc(
-	user_name 		IN 	NUMBER,
+	user_name 		IN 	VARCHAR2,
 	user_password 	IN 	VARCHAR2,
 	user_type		OUT	VARCHAR2,
 	first_name		OUT VARCHAR2,

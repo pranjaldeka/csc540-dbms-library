@@ -7,7 +7,7 @@ create view user_view
   )
 as
 select
-	 STUDENT_NUMBER,
+	 user_id,
 	 password,
 	 'S', 
 	 first_name, 
@@ -16,7 +16,7 @@ select
  	students
 union all
 select 
-	FACULTY_NUMBER,
+	user_id,
 	password,
 	'F', 
 	first_name, 
@@ -25,7 +25,7 @@ select
 faculties
 union all
 select 
-	ADMIN_ID, 
+	admin_id, 
 	password,
 	'A',
 	first_name, 
