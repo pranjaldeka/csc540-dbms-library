@@ -78,6 +78,8 @@ INSERT INTO SSINGH25.ROOMS VALUES
   2,
 	'S'
 );
+COMMIT;
+/
 
 /*
 

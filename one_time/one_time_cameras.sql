@@ -33,5 +33,8 @@ values
 '18-135mm EF-S IS STM Lens',
 '32'
 );
+COMMIT;
+/
 
-select * from SSINGH25.Cameras
+/*select * from SSINGH25.Cameras
+*/
