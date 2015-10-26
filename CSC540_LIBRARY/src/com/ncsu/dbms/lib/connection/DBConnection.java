@@ -9,7 +9,7 @@ import java.sql.Statement;
 
 public class DBConnection {
 
-	public Connection con = null;
+	public static Connection con = null;
 	public DBConnection() {
 		// TODO Auto-generated constructor stub
 		initialize();
@@ -36,7 +36,7 @@ public class DBConnection {
 			}
 		}
 	}
-	public ResultSet executeQuery( String query) throws SQLException{
+	public static ResultSet executeQuery( String query) throws SQLException{
 		Statement stmt = null;
 		ResultSet rs = null;
 		stmt = ((java.sql.Connection) con).createStatement();
