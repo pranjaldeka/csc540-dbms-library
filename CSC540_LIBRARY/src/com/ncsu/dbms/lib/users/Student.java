@@ -2,6 +2,8 @@ package com.ncsu.dbms.lib.users;
 
 import java.util.Scanner;
 
+import com.ncsu.dbms.lib.utilities.SearchResources;
+
 public class Student extends User {
 	@SuppressWarnings("unused")
 	private String userName;
@@ -12,60 +14,65 @@ public class Student extends User {
 		System.out.println("\n*******************************************");
 		showMenuItems();
 	}
-	private void showMenuItems() {
+	public static void showMenuItems() {
 		// TODO Auto-generated method stub
 		System.out.println("Please select from the below options: ");
-		System.out.println("\n1. Search a Book \t\t 2. Reserve a Book");
-		System.out.println("3. Search Camera \t\t 4. Reserve a Camera");
-		System.out.println("5. Search a Study Room \t\t 6. Reserve a Study Room");
-		System.out.println("7. Check all reserved resources   \t\t 8. Cancel a reservation");
+		System.out.println("\n1. Search a Resource \t\t 2. Reserve a Resource");
+		System.out.println("3. Check all reserved resources  4. Cancel a reservation");
 		selectAnAction();
 	}
 
-	private void selectAnAction() {
-		boolean flag = true;
-		while(flag){
-				@SuppressWarnings("resource")
-				Scanner scanner = new Scanner(System.in);
-				String value = scanner.nextLine();
-				int choice = Integer.parseInt(value);
-				switch(choice){
-				case 1:
-					System.out.println("Adding a new Book"); // call add book functionality
-					flag = false;
+	private static void selectAnAction() {
+		try{
+			boolean flag = true;
+			while(flag){
+					@SuppressWarnings("resource")
+					Scanner scanner = new Scanner(System.in);
+					String value = scanner.nextLine();
+					int choice = Integer.parseInt(value);
+					switch(choice){
+					case 1:
+						SearchResources.searchResources();
+						flag = false;
+							break;
+					case 2:
+						System.out.println("Deleting a new Book");
+						flag = false;
 						break;
-				case 2:
-					System.out.println("Deleting a new Book");
-					flag = false;
-					break;
-				case 3:
-					System.out.println("Adding a new Student");
-					flag = false;
-					break;
-				case 4:
-					System.out.println("Deleting a new Student");
-					flag = false;
-					break;
-				case 5:
-					System.out.println("Adding a new Faculty");
-					flag = false;
-					break;
-				case 6:
-					System.out.println("Deleting a new Faculty");
-					flag = false;
-					break;
-				case 7:
-					System.out.println("Adding a new Admin");
-					flag = false;
-					break;
-				case 8:
-					System.out.println("Deleting a new Admin");
-					flag = false;
-					break;
-				default:
-					System.out.println("Invalid choice: Please enter again.");
-						
+					case 3:
+						System.out.println("Adding a new Student");
+						flag = false;
+						break;
+					case 4:
+						System.out.println("Deleting a new Student");
+						flag = false;
+						break;
+					case 5:
+						System.out.println("Adding a new Faculty");
+						flag = false;
+						break;
+					case 6:
+						System.out.println("Deleting a new Faculty");
+						flag = false;
+						break;
+					case 7:
+						System.out.println("Adding a new Admin");
+						flag = false;
+						break;
+					case 8:
+						System.out.println("Deleting a new Admin");
+						flag = false;
+						break;
+					default:
+						System.out.println("Invalid choice: Please enter again.");
+							
+					}
 				}
+		}
+			catch(Exception e){
+				System.out.println("Something bad happened!!! Please try again...");
+				showMenuItems();
+
 			}
 		
 	

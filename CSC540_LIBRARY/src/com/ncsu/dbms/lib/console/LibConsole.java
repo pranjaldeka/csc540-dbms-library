@@ -25,36 +25,42 @@ public class LibConsole {
 		
 	}
 	public void loginScreen(){
-		boolean flag = true;
-		while(flag){
-			System.out.println("Please enter 1 to login into database and 0 to exit.");			
-				@SuppressWarnings("resource")
-				Scanner scanner = new Scanner(System.in);
-				String value = scanner.nextLine();
-				int choice = Integer.parseInt(value);
-				switch(choice){
-				case 1:
-					System.out.println("------Please Enter your login credentials------");
-					try{
-						@SuppressWarnings("unused")
-						Login login = new Login(dbConn);
-						flag= false;
+		try{
+			boolean flag = true;
+			while(flag){
+				System.out.println("Please enter 1 to login into database and 0 to exit.");			
+					@SuppressWarnings("resource")
+					Scanner scanner = new Scanner(System.in);
+					String value = scanner.nextLine();
+					int choice = Integer.parseInt(value);
+					switch(choice){
+					case 1:
+						System.out.println("------Please Enter your login credentials------");
+						try{
+							@SuppressWarnings("unused")
+							Login login = new Login(dbConn);
+							flag= false;
+							break;
+						}
+						catch(InvalidCredentialException e){
+							System.out.println(e.toString()+" Please try again.");
+							flag = true;
+							continue;
+						}
+					case 0:
+						System.out.println("Goodbye !!!");
+						flag = false;
 						break;
+					default:
+						System.out.println("Invalid choice: Please enter again.");
+							
 					}
-					catch(InvalidCredentialException e){
-						System.out.println(e.toString()+" Please try again.");
-						flag = true;
-						continue;
-					}
-				case 0:
-					System.out.println("Goodbye !!!");
-					flag = false;
-					break;
-				default:
-					System.out.println("Invalid choice: Please enter again.");
-						
 				}
-			}
-		
+		}
+		catch(Exception e){
+			System.out.println("Something bad happened!!! Please try again...");
+			loginScreen();
+
+		}
 	}
 }

@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.exception.InvalidCredentialException;
+import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.users.Admin;
 import com.ncsu.dbms.lib.users.Faculty;
 import com.ncsu.dbms.lib.users.Student;
@@ -79,7 +80,7 @@ public class Login {
 			String user_type = callStmt.getString(3);
 			String firstName = callStmt.getString(4);
 			String lastName = callStmt.getString(5);
-			if(user_type.equals(""))
+			if(user_type == null)
 				throw new InvalidCredentialException();
 			else if(user_type.equals("A")){ // call admin welcome window
 				adminWelcomeMenu(userName, firstName, lastName);
@@ -99,7 +100,8 @@ public class Login {
 		}
 	 catch (SQLException e) {
 
-		System.out.println(e.getMessage());
+		PrintSQLException p = new PrintSQLException();
+		p.printSQLException(e);
 
 	}
 		finally {
