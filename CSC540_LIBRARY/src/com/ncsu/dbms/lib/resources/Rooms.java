@@ -7,53 +7,50 @@ import java.util.Scanner;
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.users.Student;
 
-public class Cameras {
-	public Cameras() {
+public class Rooms {
+	public Rooms(){
 		showDialogueBox();
 	}
 	public static void showDialogueBox(){
 		
-		System.out.println("Please enter a keyword(model or make or id number):");
+		System.out.println("Please enter a keyword(either Room number/Capacity/Room type):");
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		String keyword = scanner.nextLine();
 		String queryString = new StringBuilder().append("\'").append("%").append(keyword).append("%").append("\'").toString().toUpperCase();
-		searchCamera(queryString);
+		searchRoom(queryString);
 	}
-
-	private static void searchCamera(String queryString) {
+	private static void searchRoom(String queryString) {
 		// Searching a book;
         ResultSet rs;
     	String query;
-    	query = "SELECT camera_id, " +
+    	query = "SELECT room_no, " +
     	"library_id, "+
-    	"make, "+
-    	"model, "+
-    	"lens_config, "+
-    	"memory_available "+
-    	"FROM cameras "+
-    	"WHERE upper(camera_id) LIKE "+ queryString +
-    	" OR upper(model) LIKE "+ queryString +
-    	" OR upper(make) LIKE "+ queryString;
+    	"capacity, "+
+    	"floor_no, "+
+       	"room_type "+
+    	"FROM rooms "+
+    	"WHERE upper(room_no) LIKE "+ queryString +
+    	" OR capacity LIKE "+ queryString +
+    	" OR upper(room_type) LIKE "+ queryString;
         try {
 			rs = DBConnection.executeQuery(query);
             
             if (!rs.next() ) {
-                System.out.println("No Camera found with the entered keyword. Please try a different keyword:");
+                System.out.println("No Room found with the entered keyword. Please try a different keyword:");
                 showDialogueBox();
                 return;
             } else {
-                System.out.println("Camera id"+"\t" +"Library" +"\t" + "Make"+"\t  " +"Model" +"\t" + "Lens" +"\t " + "Memory");
+                System.out.println("Room No"+"\t" +"Library" +"\t" + "Capacity" + "\t "+ "Floor#" +"\t  " +"Room Type");
                 System.out.println("-----------------------------------------------------------------------------------------");
 
                 do {
-                	String camera_id = rs.getString("camera_id");
+                	String room_no = rs.getString("room_no");
 		            String library_id = rs.getString("library_id");
-		            String make = rs.getString("make");
-		            String model = rs.getString("model");
-		            String lens_config = rs.getString("lens_config");
-		            String memory_available = rs.getString("memory_available");
-		            System.out.println(camera_id +"\t" + library_id +"\t\t" + make +"\t\t" + model +"\t" + lens_config +"\t\t" + memory_available);
+		            String capacity = rs.getString("capacity");
+		            String floor_no = rs.getString("floor_no");
+		            String room_type = rs.getString("room_type");
+		            System.out.println(room_no +"\t" + library_id +"\t\t" + capacity +"\t\t" + floor_no +"\t" + room_type);
                 } while (rs.next());
             }
 			 displayDialogueAfterSearch();
@@ -61,16 +58,12 @@ public class Cameras {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-       
-        //conn.close();
-
 	}
-	
 	public static void displayDialogueAfterSearch(){
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Check-out a Camera.\t0:Go back to previous menu.");
+			System.out.println("1: Reserve the room.\t0:Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -78,7 +71,7 @@ public class Cameras {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Checking out a Camera");
+						System.out.println("Reserving Room");
 						// Call check out method
 						flag = false;
 							break;
@@ -99,3 +92,5 @@ public class Cameras {
 		}
 	}
 }
+
+       

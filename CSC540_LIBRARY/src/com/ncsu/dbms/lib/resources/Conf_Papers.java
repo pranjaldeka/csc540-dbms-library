@@ -7,53 +7,53 @@ import java.util.Scanner;
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.users.Student;
 
-public class Cameras {
-	public Cameras() {
+public class Conf_Papers {
+	public Conf_Papers(){
 		showDialogueBox();
 	}
+		
+	
 	public static void showDialogueBox(){
 		
-		System.out.println("Please enter a keyword(model or make or id number):");
+		System.out.println("Please enter a keyword(either paper id/Title/authors):");
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		String keyword = scanner.nextLine();
 		String queryString = new StringBuilder().append("\'").append("%").append(keyword).append("%").append("\'").toString().toUpperCase();
-		searchCamera(queryString);
+		searchBook(queryString);
 	}
-
-	private static void searchCamera(String queryString) {
+	private static void searchBook(String queryString) {
 		// Searching a book;
         ResultSet rs;
     	String query;
-    	query = "SELECT camera_id, " +
-    	"library_id, "+
-    	"make, "+
-    	"model, "+
-    	"lens_config, "+
-    	"memory_available "+
-    	"FROM cameras "+
-    	"WHERE upper(camera_id) LIKE "+ queryString +
-    	" OR upper(model) LIKE "+ queryString +
-    	" OR upper(make) LIKE "+ queryString;
+    	query = "SELECT conf_paper_id, " +
+    	"conf_name, "+
+    	"authors, "+
+    	"year_of_publication, "+
+    	"title, "+
+   		"FROM conference_papers "+
+    	"WHERE upper(conf_paper_id) LIKE "+ queryString +
+    	" OR upper(authors) LIKE "+ queryString +
+    	" OR upper(title) LIKE "+ queryString;
         try {
 			rs = DBConnection.executeQuery(query);
             
             if (!rs.next() ) {
-                System.out.println("No Camera found with the entered keyword. Please try a different keyword:");
+                System.out.println("No Conference Paper found with the entered keyword. Please try a different keyword:");
                 showDialogueBox();
                 return;
             } else {
-                System.out.println("Camera id"+"\t" +"Library" +"\t" + "Make"+"\t  " +"Model" +"\t" + "Lens" +"\t " + "Memory");
+                System.out.println("Conf Paper Id"+"\t" +"Conf Name" +"\t" + "Authors"+"\t\t\t  " +"Year_Of_Pub" +"\t" + "Title" +"\t\t\t");
                 System.out.println("-----------------------------------------------------------------------------------------");
 
                 do {
-                	String camera_id = rs.getString("camera_id");
-		            String library_id = rs.getString("library_id");
-		            String make = rs.getString("make");
-		            String model = rs.getString("model");
-		            String lens_config = rs.getString("lens_config");
-		            String memory_available = rs.getString("memory_available");
-		            System.out.println(camera_id +"\t" + library_id +"\t\t" + make +"\t\t" + model +"\t" + lens_config +"\t\t" + memory_available);
+                	String conf_paper_id = rs.getString("conf_paper_id");
+		            String conf_name = rs.getString("conf_name");
+		            String authors = rs.getString("authors");
+		            String yearOfPub = rs.getString("year_of_publication");
+		            String title = rs.getString("title");
+		            String publisher = rs.getString("publisher");
+		            System.out.println(conf_paper_id +"\t" + conf_name +"\t\t" + authors +"\t\t" + yearOfPub +"\t" + title +"\t\t" );
                 } while (rs.next());
             }
 			 displayDialogueAfterSearch();
@@ -70,7 +70,7 @@ public class Cameras {
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Check-out a Camera.\t0:Go back to previous menu.");
+			System.out.println("1: Check-out a Conference Paper.\t0:Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -78,7 +78,7 @@ public class Cameras {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Checking out a Camera");
+						System.out.println("Checking out a Conference Paper");
 						// Call check out method
 						flag = false;
 							break;
@@ -98,4 +98,6 @@ public class Cameras {
 			displayDialogueAfterSearch();
 		}
 	}
+
+
 }
