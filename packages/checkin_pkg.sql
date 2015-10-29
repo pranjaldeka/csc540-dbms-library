@@ -1,4 +1,4 @@
-
+set serveroutput on;
 /*********************************************************************
 user_profile_pkg.sql : checks in a publicaation and camera
 **********************************************************************/
@@ -40,30 +40,46 @@ BEGIN
   THEN
       user_id_column :='FACULTY_ID';
   END IF;
+  /*
+  #######################CHECKIN TRANSACTION#######################;
+  */
   
-  /*Calculte current date time*/
+  SET TRANSACTION NAME 'CHECKIN';
+  
+    /*Calculte current date time*/
   SELECT TO_CHAR
     (SYSDATE, 'YYYY-MM-DD HH24:MI:SS') into current_datetime
      FROM DUAL;
-  /*Update the checkout record*/
+     
+     /*Update the checkout record*/
+     
   sql_statement := 'update ssingh25.'||user_table||'_CO_'||table_name||' 
     set return_date=TIMESTAMP'''||current_datetime||'''
     where '||search_parameter|| '='''||search_variable||'''
     and '||user_id_column|| '='''||user_id||'''
     and  library_id='''||library_id||'''
     and return_date is null';
-    
-    DBMS_OUTPUT.PUT_LINE(sql_statement);
-    /*insert into jolly_dummy values(1,sql_statement);
-    commit;
-    */
+    DBMS_OUTPUT.PUT_LINE(sql_statement); 
     EXECUTE IMMEDIATE sql_statement ;
-IF SQL%NOTFOUND 
+    /*Update the no. of hardcopies*/
+    
+   sql_statement := 'UPDATE 
+    SSINGH25.'||table_name||'_in_libraries T
+    SET NO_OF_HARDCOPIES =NO_OF_HARDCOPIES+1
+    WHERE T.library_id= '''||library_id||''' 
+    and T.'||search_parameter|| '='''||search_variable||'''';
+    DBMS_OUTPUT.PUT_LINE(sql_statement);
+    EXECUTE IMMEDIATE sql_statement;
+    
+    COMMIT;
+      
+    
+/*IF SQL%NOTFOUND 
 THEN
     DBMS_OUTPUT.PUT_LINE('No such record');
 END IF;
-   
-COMMIT;
+  */ 
+
    
 END check_in_proc;
 
