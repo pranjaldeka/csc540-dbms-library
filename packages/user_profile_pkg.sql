@@ -105,11 +105,11 @@ BEGIN
 	  IF user_type = 'S' 
 	  THEN
 	     user_table := 'STUDENTS';
-	     user_id_column := 'STUDENT_ID';
+	     /*user_id_column := 'STUDENT_ID';*/
 	  ELSIF user_type = 'F'
 	  THEN
 	     user_table := 'FACULTIES';
-	     user_id_column := 'FACULTY_ID';
+	     /*user_id_column := 'FACULTY_ID';*/
 	  ELSE
 	     invalid := 1;
 	  END IF;
@@ -123,7 +123,7 @@ BEGIN
 	            sql_statement := '
 	            UPDATE SSINGH25.'||user_table||
 	            ' SET USER_ID = '''||new_column_value||'''
-	            WHERE '||user_id_column||' = '''||user_id||'''
+	            WHERE user_id = '''||user_id||'''
 	            AND NOT EXISTS 
 	                          (
 	                          SELECT 1
@@ -134,7 +134,7 @@ BEGIN
 	            sql_statement := '
 	            UPDATE SSINGH25.'||user_table||
 	            ' SET ' || update_column ||' = '''||new_column_value||'''
-	            WHERE '||user_id_column||' = '''||user_id||'''';
+	            WHERE user_id = '''||user_id||'''';
 	            
 	        END IF;     
 	        
