@@ -1,27 +1,27 @@
 SET SERVEROUTPUT ON;
-CREATE OR REPLACE PACKAGE  CHECK_IN_PKG 
+CREATE OR REPLACE PACKAGE  check_in_pkg 
 IS
-PROCEDURE CHECK_IN_PROC(
+PROCEDURE check_in_proc(
     
-	ISSUE_TYPE	    	IN 	VARCHAR2,
-	ISSUE_TYPE_ID		IN 	VARCHAR2,
-	USER_TYPE           IN  VARCHAR2,
-	USER_ID 			IN  VARCHAR2,
-	LIBRARY_ID 			IN  VARCHAR2,
-  OUTPUT    OUT VARCHAR2
+	issue_type	    	in 	varchar2,
+	issue_type_id		in 	varchar2,
+	user_type           in  varchar2,
+	user_id 			in  varchar2,
+	library_id 			in  varchar2,
+	output    			out varchar2
 );
-END CHECK_IN_PKG;
+END check_in_pkg;
 /
-CREATE OR REPLACE PACKAGE BODY CHECK_IN_PKG 
+CREATE OR REPLACE PACKAGE BODY check_in_pkg 
 IS
-PROCEDURE CHECK_IN_PROC(
+PROCEDURE check_in_proc(
     
-	ISSUE_TYPE	    	IN 	VARCHAR2,
-	ISSUE_TYPE_ID		IN 	VARCHAR2,
-	USER_TYPE           IN  VARCHAR2,
-	USER_ID 			IN  VARCHAR2,
-	LIBRARY_ID 			IN  VARCHAR2,
-  OUTPUT    OUT  VARCHAR2
+	issue_type	    	in 	varchar2,
+	issue_type_id		in 	varchar2,
+	user_type           in  varchar2,
+	user_id 			in  varchar2,
+	library_id 			in  varchar2,
+	output    			out  varchar2
 )
 IS
 avail_flag 			number(2);
@@ -34,11 +34,11 @@ invalid 			number(2);
 search_parameter 	VARCHAR2(50);
 BEGIN
   invalid := 0;
-  IF USER_TYPE = 'S' 
+  IF user_type = 'S' 
 	  THEN
 		 user_table := 'STUDENTS';
 		 user_id_column := 'STUDENT_ID';
-  ELSIF USER_TYPE = 'F'
+  ELSIF user_type = 'F'
 	  THEN
 		 user_table := 'FACULTIES';
 		 user_id_column := 'FACULTY_ID';
@@ -51,19 +51,20 @@ BEGIN
   IF invalid = 0
   /*Assign table name and its primary to apppropriate variables*/
    THEN
-			      IF ISSUE_TYPE = 'B' 
+			IF issue_type = 'B' 
             THEN
                 table_name := 'BOOKS';
                 search_parameter := 'ISBN';
-						ELSIF ISSUE_TYPE = 'J' 
+						
+			ELSIF issue_type = 'J' 
             THEN
                 table_name := 'JOURNALS';
                 search_parameter := 'ISSN';
-            ELSIF ISSUE_TYPE = 'P' 
+            ELSIF issue_type = 'P' 
             THEN
                 table_name := 'CONFERENCE_PAPERS';
                 search_parameter := 'CONF_PAPER_ID';
-          	ELSIF ISSUE_TYPE = 'C' 
+          	ELSIF issue_type = 'C' 
             THEN
                 table_name := 'CAMERAS';
                 search_parameter := 'CAMERA_ID';
@@ -73,23 +74,23 @@ BEGIN
 						
 					
 				
-     IF  invalid = 0
+			IF  invalid = 0
 			THEN
     	/*
 				#######################CHECKIN TRANSACTION#######################;
 				*/
 					
-             SELECT TO_CHAR
-						(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') into current_datetime
+						 SELECT TO_CHAR
+									(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') INTO current_datetime
 						 FROM DUAL;
-						 
+									 
 						sql_statement := 
-            'update ssingh25.'||user_table||'_CO_'||table_name||' 
-            set return_date=TIMESTAMP'''||current_datetime||'''
-            where '||search_parameter|| '='''||ISSUE_TYPE_ID||'''
-            and '||user_id_column|| '='''||user_id||'''
-            and  library_id='''||library_id||'''
-            and return_date is null';
+						'UPDATE ssingh25.'||user_table||'_CO_'||table_name||' 
+						set return_date=TIMESTAMP'''||current_datetime||'''
+						WHERE '||search_parameter|| '='''||issue_type_id||'''
+						AND '||user_id_column|| '='''||user_id||'''
+						AND  library_id='''||library_id||'''
+						AND return_date IS NULL';
 						
 						/*DBMS_OUTPUT.PUT_LINE(sql_statement);
 						*/
@@ -100,31 +101,31 @@ BEGIN
 						sql_statement := 'UPDATE 
 						SSINGH25.'||table_name||'_in_libraries T
 						SET NO_OF_HARDCOPIES =NO_OF_HARDCOPIES+1
-						WHERE T.LIBRARY_ID= '''||LIBRARY_ID||''' 
-						and T.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''';
+						WHERE T.library_id= '''||library_id||''' 
+						AND T.'||search_parameter|| '='''||issue_type_id||'''';
 						/*DBMS_OUTPUT.PUT_LINE(sql_statement);
 						*/
-            EXECUTE IMMEDIATE sql_statement;
+						EXECUTE IMMEDIATE sql_statement;
 					
-					COMMIT;
-				OUTPUT := 'CHECK IN SUCCESSFUL';
+						COMMIT;
+						output :=  'CHECK IN SUCCESSFUL';
         
-    
-	ELSE
-        OUTPUT := 'INVALID PARAMETERS';
-        /*DBMS_OUTPUT.PUT_LINE('BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
-	END IF;	
+			ELSE
+						output := 'INVALID PARAMETERS';
+        
+			END IF;	
 			
 	ELSE
-        OUTPUT := 'INVALID PARAMETERS';
-        /*DBMS_OUTPUT.PUT_LINE('BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
-  END IF;
-  /*DBMS_OUTPUT.PUT_LINE(avail_flag);
-  */
+			output := 'INVALID PARAMETERS';
+       
+	END IF;
+  
   EXCEPTION
 	WHEN NO_DATA_FOUND THEN
     /*DBMS_OUTPUT.PUT_LINE('Invalid Inputs');*/
-		 OUTPUT := 'CHECKIN UNCSUCCESSFUL';
-END CHECK_IN_proc;
+		 output := 'CHECKIN UNCSUCCESSFUL';
+	WHEN OTHERS THEN
+		 output := SQLERRM;	
+END check_in_proc;
 
-END CHECK_IN_pkg;
+END check_in_pkg;
