@@ -7,50 +7,53 @@ import java.util.Scanner;
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.users.Student;
 
-public class Rooms {
-	public Rooms(){
+
+public class Book {
+	public Book() {
 		showDialogueBox();
 	}
 	public static void showDialogueBox(){
-		
-		System.out.println("Please enter a keyword(either Room number/Capacity/Room type):");
+			
+		System.out.println("Please enter a keyword(either ISBN/Title/Pubisher):");
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		String keyword = scanner.nextLine();
 		String queryString = new StringBuilder().append("\'").append("%").append(keyword).append("%").append("\'").toString().toUpperCase();
-		searchRoom(queryString);
+		searchBook(queryString);
 	}
-	private static void searchRoom(String queryString) {
+	private static void searchBook(String queryString) {
 		// Searching a book;
         ResultSet rs;
     	String query;
-    	query = "SELECT room_no, " +
-    	"library_id, "+
-    	"capacity, "+
-    	"floor_no, "+
-       	"room_type "+
-    	"FROM rooms "+
-    	"WHERE upper(room_no) LIKE "+ queryString +
-    	" OR capacity LIKE "+ queryString +
-    	" OR upper(room_type) LIKE "+ queryString;
+    	query = "SELECT isbn, " +
+    	"title, "+
+    	"authors, "+
+    	"year_of_publication, "+
+    	"edition, "+
+    	"publisher "+
+    	"FROM books "+
+    	"WHERE upper(ISBN) LIKE "+ queryString +
+    	" OR upper(authors) LIKE "+ queryString +
+    	" OR upper(title) LIKE "+ queryString;
         try {
 			rs = DBConnection.executeQuery(query);
             
             if (!rs.next() ) {
-                System.out.println("No Room found with the entered keyword. Please try a different keyword:");
+                System.out.println("No Books found with the entered keyword. Please try a different keyword:");
                 showDialogueBox();
                 return;
             } else {
-                System.out.println("Room No"+"\t" +"Library" +"\t" + "Capacity" + "\t "+ "Floor#" +"\t  " +"Room Type");
+                System.out.println("ISBN"+"\t" +"Publisher" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title");
                 System.out.println("-----------------------------------------------------------------------------------------");
 
                 do {
-                	String room_no = rs.getString("room_no");
-		            String library_id = rs.getString("library_id");
-		            String capacity = rs.getString("capacity");
-		            String floor_no = rs.getString("floor_no");
-		            String room_type = rs.getString("room_type");
-		            System.out.println(room_no +"\t" + library_id +"\t\t" + capacity +"\t\t" + floor_no +"\t" + room_type);
+                	String isbn = rs.getString("isbn");
+		            String title = rs.getString("title");
+		            String authors = rs.getString("authors");
+		            String yearOfPub = rs.getString("year_of_publication");
+		            String edition = rs.getString("edition");
+		            String publisher = rs.getString("publisher");
+		            System.out.println(isbn +"\t" + publisher +"\t\t" + edition +"\t\t" + yearOfPub +"\t" + authors +"\t\t" + title);
                 } while (rs.next());
             }
 			 displayDialogueAfterSearch();
@@ -58,12 +61,16 @@ public class Rooms {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+       
+        //conn.close();
+
 	}
+	
 	public static void displayDialogueAfterSearch(){
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Reserve the room.\t0:Go back to previous menu.");
+			System.out.println("1: Check-out a book.\t0:Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -71,7 +78,7 @@ public class Rooms {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Reserving Room");
+						System.out.println("Checking out a book");
 						// Call check out method
 						flag = false;
 							break;
@@ -92,5 +99,3 @@ public class Rooms {
 		}
 	}
 }
-
-       

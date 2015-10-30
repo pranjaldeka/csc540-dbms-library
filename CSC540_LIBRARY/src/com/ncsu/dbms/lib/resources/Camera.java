@@ -7,49 +7,53 @@ import java.util.Scanner;
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.users.Student;
 
-public class Journals {
-	public Journals(){
+public class Camera {
+	public Camera() {
 		showDialogueBox();
-		
 	}
 	public static void showDialogueBox(){
 		
-		System.out.println("Please enter a keyword(either ISSN/Authors/Title):");
+		System.out.println("Please enter a keyword(model or make or id number):");
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		String keyword = scanner.nextLine();
 		String queryString = new StringBuilder().append("\'").append("%").append(keyword).append("%").append("\'").toString().toUpperCase();
-		searchJournal(queryString);
+		searchCamera(queryString);
 	}
-	private static void searchJournal(String queryString) {
+
+	private static void searchCamera(String queryString) {
 		// Searching a book;
         ResultSet rs;
     	String query;
-    	query = "SELECT ISSN, " +
-    	"authors, "+
-    	"year_of_publication, "+
-    	"title "+
-    	"FROM journals "+
-    	"WHERE upper(ISSN) LIKE "+ queryString +
-    	" OR upper(authors) LIKE "+ queryString +
-    	" OR upper(title) LIKE "+ queryString;
+    	query = "SELECT camera_id, " +
+    	"library_id, "+
+    	"make, "+
+    	"model, "+
+    	"lens_config, "+
+    	"memory_available "+
+    	"FROM cameras "+
+    	"WHERE upper(camera_id) LIKE "+ queryString +
+    	" OR upper(model) LIKE "+ queryString +
+    	" OR upper(make) LIKE "+ queryString;
         try {
 			rs = DBConnection.executeQuery(query);
             
             if (!rs.next() ) {
-                System.out.println("No Journal found with the entered keyword. Please try a different keyword:");
+                System.out.println("No Camera found with the entered keyword. Please try a different keyword:");
                 showDialogueBox();
                 return;
             } else {
-                System.out.println("ISSN"+"\t" +"Authors" +"\t\t\t" + "Publication Year" + "\t "+ "Title" );
+                System.out.println("Camera id"+"\t" +"Library" +"\t" + "Make"+"\t  " +"Model" +"\t" + "Lens" +"\t " + "Memory");
                 System.out.println("-----------------------------------------------------------------------------------------");
 
                 do {
-                	String ISSN = rs.getString("ISSN");
-		            String authors = rs.getString("authors");
-		            String year_of_publication = rs.getString("year_of_publication");
-		            String title = rs.getString("title");
-		            System.out.println(ISSN +"\t" + authors +"\t\t" + year_of_publication +"\t\t" + title);
+                	String camera_id = rs.getString("camera_id");
+		            String library_id = rs.getString("library_id");
+		            String make = rs.getString("make");
+		            String model = rs.getString("model");
+		            String lens_config = rs.getString("lens_config");
+		            String memory_available = rs.getString("memory_available");
+		            System.out.println(camera_id +"\t" + library_id +"\t\t" + make +"\t\t" + model +"\t" + lens_config +"\t\t" + memory_available);
                 } while (rs.next());
             }
 			 displayDialogueAfterSearch();
@@ -57,12 +61,16 @@ public class Journals {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+       
+        //conn.close();
+
 	}
+	
 	public static void displayDialogueAfterSearch(){
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Check out Journal.\t0:Go back to previous menu.");
+			System.out.println("1: Check-out a Camera.\t0:Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -70,7 +78,7 @@ public class Journals {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Checking out Journal");
+						System.out.println("Checking out a Camera");
 						// Call check out method
 						flag = false;
 							break;
@@ -90,5 +98,4 @@ public class Journals {
 			displayDialogueAfterSearch();
 		}
 	}
-
 }

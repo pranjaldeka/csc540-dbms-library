@@ -2,7 +2,7 @@ package com.ncsu.dbms.lib.users;
 
 import java.util.Scanner;
 
-import com.ncsu.dbms.lib.utilities.SearchResources;
+import com.ncsu.dbms.lib.utilities.SearchResource;
 
 public class Student extends User {
 	@SuppressWarnings("unused")
@@ -32,7 +32,7 @@ public class Student extends User {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						SearchResources.searchResources();
+						SearchResource.searchResources();
 						flag = false;
 							break;
 					case 2:

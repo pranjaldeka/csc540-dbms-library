@@ -7,53 +7,48 @@ import java.util.Scanner;
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.users.Student;
 
-
-public class Books {
-	public Books() {
+public class ConferenceRoom {
+	public ConferenceRoom(){
 		showDialogueBox();
 	}
+
 	public static void showDialogueBox(){
-			
-		System.out.println("Please enter a keyword(either ISBN/Title/Pubisher):");
+		
+		System.out.println("Please enter a keyword(either Room number/Capacity):");
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		String keyword = scanner.nextLine();
 		String queryString = new StringBuilder().append("\'").append("%").append(keyword).append("%").append("\'").toString().toUpperCase();
-		searchBook(queryString);
+		searchConfRoom(queryString);
 	}
-	private static void searchBook(String queryString) {
+	private static void searchConfRoom(String queryString) {
 		// Searching a book;
         ResultSet rs;
     	String query;
-    	query = "SELECT isbn, " +
-    	"title, "+
-    	"authors, "+
-    	"year_of_publication, "+
-    	"edition, "+
-    	"publisher "+
-    	"FROM books "+
-    	"WHERE upper(ISBN) LIKE "+ queryString +
-    	" OR upper(authors) LIKE "+ queryString +
-    	" OR upper(title) LIKE "+ queryString;
+    	query = "SELECT room_no, " +
+    	"library_id, "+
+    	"capacity, "+
+    	"floor_no, "+
+      	"FROM conference_rooms "+
+    	"WHERE room_no LIKE "+ queryString +
+    	" OR capacity LIKE "+ queryString;
         try {
 			rs = DBConnection.executeQuery(query);
             
             if (!rs.next() ) {
-                System.out.println("No Books found with the entered keyword. Please try a different keyword:");
+                System.out.println("No Conference Room found with the entered keyword. Please try a different keyword:");
                 showDialogueBox();
                 return;
             } else {
-                System.out.println("ISBN"+"\t" +"Publisher" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title");
+                System.out.println("Room No"+"\t" +"Library" +"\t" + "Capacity" + "\t "+ "Floor#" +"\t  ");
                 System.out.println("-----------------------------------------------------------------------------------------");
 
                 do {
-                	String isbn = rs.getString("isbn");
-		            String title = rs.getString("title");
-		            String authors = rs.getString("authors");
-		            String yearOfPub = rs.getString("year_of_publication");
-		            String edition = rs.getString("edition");
-		            String publisher = rs.getString("publisher");
-		            System.out.println(isbn +"\t" + publisher +"\t\t" + edition +"\t\t" + yearOfPub +"\t" + authors +"\t\t" + title);
+                	String room_no = rs.getString("room_no");
+		            String library_id = rs.getString("library_id");
+		            String capacity = rs.getString("capacity");
+		            String floor_no = rs.getString("floor_no");
+		            System.out.println(room_no +"\t" + library_id +"\t\t" + capacity +"\t\t" + floor_no +"\t" );
                 } while (rs.next());
             }
 			 displayDialogueAfterSearch();
@@ -61,16 +56,12 @@ public class Books {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-       
-        //conn.close();
-
 	}
-	
 	public static void displayDialogueAfterSearch(){
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Check-out a book.\t0:Go back to previous menu.");
+			System.out.println("1: Reserve the conference room.\t0:Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -78,7 +69,7 @@ public class Books {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Checking out a book");
+						System.out.println("Reserving Conference Room");
 						// Call check out method
 						flag = false;
 							break;
