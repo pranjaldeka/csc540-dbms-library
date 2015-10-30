@@ -25,7 +25,8 @@ public class SearchResource {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 0:
-						Student.showMenuItems();
+						Student student = new Student();
+						student.showMenuItems();
 						flag = false;
 						break;
 					case 1:

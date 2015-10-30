@@ -1,7 +1,10 @@
 package com.ncsu.dbms.lib.users;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
+import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.utilities.SearchResource;
 
 public class Student extends User {
@@ -14,15 +17,20 @@ public class Student extends User {
 		System.out.println("\n*******************************************");
 		showMenuItems();
 	}
-	public static void showMenuItems() {
+	public Student(){
+		
+	}
+	public  void showMenuItems() {
 		// TODO Auto-generated method stub
 		System.out.println("Please select from the below options: ");
-		System.out.println("\n1. Search a Resource \t\t 2. Reserve a Resource");
-		System.out.println("3. Check all reserved resources  4. Cancel a reservation");
+		System.out.println("\n1. Profile \t\t 2. Resources");
+		System.out.println("3. Checked-Out Resources   4. Resource Request");
+		System.out.println("5. Notification\t\t  6. Due-Balance");
+		System.out.println("7. Logout");
 		selectAnAction();
 	}
 
-	private static void selectAnAction() {
+	public  void selectAnAction() {
 		try{
 			boolean flag = true;
 			while(flag){
@@ -32,35 +40,40 @@ public class Student extends User {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						SearchResource.searchResources();
-						flag = false;
+						//Profile
+						Student s = new Student();
+						s.showProfile(userName);
+						flag=false;
 							break;
 					case 2:
-						System.out.println("Deleting a new Book");
+						//Resources
+						SearchResource.searchResources();
+						flag = false;
 						flag = false;
 						break;
 					case 3:
+						//Checked-Out Resources
 						System.out.println("Adding a new Student");
 						flag = false;
 						break;
 					case 4:
+						//Resource Request
 						System.out.println("Deleting a new Student");
 						flag = false;
 						break;
 					case 5:
+						//Notifications
 						System.out.println("Adding a new Faculty");
 						flag = false;
 						break;
 					case 6:
+						//Due-Balances
 						System.out.println("Deleting a new Faculty");
 						flag = false;
 						break;
 					case 7:
+						//Log Out
 						System.out.println("Adding a new Admin");
-						flag = false;
-						break;
-					case 8:
-						System.out.println("Deleting a new Admin");
 						flag = false;
 						break;
 					default:
@@ -78,4 +91,53 @@ public class Student extends User {
 	
 		
 	}
+	
+	public void showProfile(String userId){
+		// Searching a book;
+        ResultSet rs;
+    	String query;
+    	query = "SELECT "+
+    			"STUDENT_ID         ,"+
+    			"USER_ID            ,"+
+    			"FIRST_NAME         ,"+
+    			"LAST_NAME          ,"+
+    			"SEX                          ,"+
+    			"PHONE_NUMBER                ,"+
+    			"ALT_PHONE_NUMBER            ,"+
+    			"DOB                ,"+
+    			"ADDRESS                    ,"+
+    			"NATIONALITY                 ,"+
+    			"DEGREE_TYPE_ID                ,"+
+    			"DEPT_ID "+
+    			"FROM studnets WHERE user_id = "+userId;
+        try {
+			rs = DBConnection.executeQuery(query);
+            
+            if (!rs.next() ) {
+                System.out.println("Not a valid user id.");
+                return;
+            } else {
+                System.out.println("Student ID"+"\t" +"User ID" +"\t" + "First Name"+"\t  " +"Last Name" +"\t" + "Phone No." +"\t\t\t" + "Alt. Phone No." +"\t\t" + "Date Of Birth"+"\t\t" + "Address"+"\t\t" + "Nationality"+"\t\t" + "Degree"+"\t\t\t" + "Department");
+                System.out.println("-----------------------------------------------------------------------------------------");
+
+                do {
+                	String isbn = rs.getString("isbn");
+		            String title = rs.getString("title");
+		            String authors = rs.getString("authors");
+		            String yearOfPub = rs.getString("year_of_publication");
+		            String edition = rs.getString("edition");
+		            String publisher = rs.getString("publisher");
+		            System.out.println(isbn +"\t" + publisher +"\t\t" + edition +"\t\t" + yearOfPub +"\t" + authors +"\t\t" + title);
+                } while (rs.next());
+            }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+       
+        //conn.close();
+
+	}
+	
+
 }
