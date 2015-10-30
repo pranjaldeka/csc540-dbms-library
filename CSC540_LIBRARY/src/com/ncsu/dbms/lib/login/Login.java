@@ -86,7 +86,7 @@ public class Login {
 				adminWelcomeMenu(userName, firstName, lastName);
 			}
 			else if(user_type.equals("S")){ // call Student welcome window
-				studentWelcomeMenu(user_type, firstName, lastName);
+				studentWelcomeMenu(userName, firstName, lastName);
 			}
 			else if(user_type.equals("F")) {// call faculty welcome window
 				System.out.println("Hello " + callStmt.getString(4) + " " + callStmt.getString(5) + " !!!");
