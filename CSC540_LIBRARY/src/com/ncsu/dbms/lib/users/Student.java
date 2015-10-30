@@ -14,16 +14,16 @@ import com.ncsu.dbms.lib.utilities.Utility;
 import oracle.jdbc.OracleTypes;
 
 public class Student extends User {
-	private String userName;
+	public static String userName;
 	public Student(String userName, String firstName, String lastName) {
-		this.userName = userName;
+		Student.userName = userName;
 		System.out.println("*******************Welcome*****************\n");
 		System.out.println("\t\t" + firstName + " " + lastName + "!!!");
 		System.out.println("\n*******************************************");
 		showMenuItems();
 	}
 	public Student(String userName){
-		this.userName = userName;
+		Student.userName = userName;
 	}
 	public  void showMenuItems() {
 		// TODO Auto-generated method stub
@@ -46,12 +46,13 @@ public class Student extends User {
 					switch(choice){
 					case 1:
 						//Profile
-						showProfile(this.userName);
+						showProfile(Student.userName);
 						flag=false;
 							break;
 					case 2:
 						//Resources
-						SearchResource.searchResources();
+						SearchResource sr = new SearchResource();
+						sr.searchResources();
 						flag = false;
 						flag = false;
 						break;

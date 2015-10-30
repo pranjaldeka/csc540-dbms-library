@@ -46,4 +46,10 @@ public final class Utility {
 	  }  
 	  return true;  
 	}
+	public static void welcomeMessage(String message){
+		System.out.println(message);
+	}
+	public static void badErrorMessage(){
+		System.out.println("Something bad happened!!! Please try again...");
+	}
 }

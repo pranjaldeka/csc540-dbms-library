@@ -1,59 +1,60 @@
 package com.ncsu.dbms.lib.resources;
 
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.users.Student;
+import com.ncsu.dbms.lib.utilities.SearchResource;
+
+import oracle.jdbc.OracleTypes;
 
 
 public class Book {
 	public Book() {
-		showDialogueBox();
+		//showDialogueBox();
 	}
-	public static void showDialogueBox(){
-			
-		System.out.println("Please enter a keyword(either ISBN/Title/Pubisher):");
-		@SuppressWarnings("resource")
-		Scanner scanner = new Scanner(System.in);
-		String keyword = scanner.nextLine();
-		String queryString = new StringBuilder().append("\'").append("%").append(keyword).append("%").append("\'").toString().toUpperCase();
-		searchBook(queryString);
+	public  void showDialogueBox(){
+		searchBook("");
 	}
-	private static void searchBook(String queryString) {
+	private  void searchBook(String queryString) {
 		// Searching a book;
-        ResultSet rs;
-    	String query;
-    	query = "SELECT isbn, " +
-    	"title, "+
-    	"authors, "+
-    	"year_of_publication, "+
-    	"edition, "+
-    	"publisher "+
-    	"FROM books "+
-    	"WHERE upper(ISBN) LIKE "+ queryString +
-    	" OR upper(authors) LIKE "+ queryString +
-    	" OR upper(title) LIKE "+ queryString;
+    	
         try {
-			rs = DBConnection.executeQuery(query);
-            
+        	CallableStatement cstmt = DBConnection.con.prepareCall("{call student_book_pkg.fetch_books_data_proc(?, ?)}");
+	       	 ResultSet rs; 
+	       	cstmt.registerOutParameter(1, OracleTypes.CURSOR);
+	       	cstmt.registerOutParameter(2, OracleTypes.VARCHAR);
+	       	cstmt.executeQuery();
+	       	rs = (ResultSet) cstmt.getObject(1);
+	       	String error = cstmt.getString(2);
+	       	if(error != null)
+	       	{
+	       		System.out.println(error);
+	       		showDialogueBox();
+	       	}            
             if (!rs.next() ) {
                 System.out.println("No Books found with the entered keyword. Please try a different keyword:");
-                showDialogueBox();
+                SearchResource sr = new SearchResource();
+                sr.showPublicationMenuItems();
                 return;
             } else {
-                System.out.println("ISBN"+"\t" +"Publisher" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title");
+                System.out.println("ISBN"+"\t" +"Publisher" +"\t" +"Type"+"\t" +"Library" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title"+"No. Of Hard Copies");
                 System.out.println("-----------------------------------------------------------------------------------------");
 
                 do {
                 	String isbn = rs.getString("isbn");
 		            String title = rs.getString("title");
 		            String authors = rs.getString("authors");
-		            String yearOfPub = rs.getString("year_of_publication");
-		            String edition = rs.getString("edition");
 		            String publisher = rs.getString("publisher");
-		            System.out.println(isbn +"\t" + publisher +"\t\t" + edition +"\t\t" + yearOfPub +"\t" + authors +"\t\t" + title);
+		            String edition = rs.getString("edition");
+		            String yearOfPub = rs.getString("year_of_publication");
+		            String noHardCopies = rs.getString("no_of_hardcopies");
+		            String library = rs.getString("name");
+		            String type = rs.getString("has_electronic");
+		            System.out.println(isbn +"\t" + publisher+"\t\t" + type  +"\t" + library + edition +"\t\t" + yearOfPub +"\t" + authors +"\t\t" + title +" "+noHardCopies);
                 } while (rs.next());
             }
 			 displayDialogueAfterSearch();

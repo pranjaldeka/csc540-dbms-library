@@ -2,42 +2,49 @@
 student_book_pkg.sql : checks user profile whether it exists or not
 **********************************************************************/
 CREATE OR REPLACE PACKAGE student_book_pkg AS 
+user_error       EXCEPTION;
 
-PROCEDURE validate_user_proc(
-	user_name 		IN 	VARCHAR2,
-	user_password 	IN 	VARCHAR2,
-	user_type		OUT	VARCHAR2,
-	first_name		OUT VARCHAR2,
-	last_name		OUT VARCHAR2	
+PROCEDURE fetch_books_data_proc(
+	p_ref			OUT SYS_REFCURSOR,
+	out_err_msg		OUT VARCHAR2
 );
 END student_book_pkg;
 /
 CREATE OR REPLACE PACKAGE BODY student_book_pkg 
 IS
-PROCEDURE validate_user_proc(
-	user_name 		IN 	VARCHAR2,
-	user_password 	IN 	VARCHAR2,
-	user_type		OUT	VARCHAR2,
-	first_name		OUT VARCHAR2,
-	last_name		OUT VARCHAR2		
+PROCEDURE fetch_books_data_proc(
+	p_ref			OUT SYS_REFCURSOR,
+	out_err_msg		OUT VARCHAR2
 )
 IS
 
 BEGIN
-
-	SELECT 
-		user_type, first_name,last_name INTO user_type, first_name, last_name
-	FROM 
-		user_view 
-	WHERE
-		user_id = user_name AND
-		user_password = user_password
-	GROUP BY
-	first_name,last_name,user_type;
-EXCEPTION
-	WHEN NO_DATA_FOUND THEN
-		user_type:='';
-END validate_user_proc;
+	OPEN p_ref FOR
+		SELECT 
+		      b.isbn,
+		      b.title,
+		      b.authors,
+		      b.publisher,
+		      b.edition,
+		      b.year_of_publication,
+		      bil.no_of_hardcopies,
+		      l.name,
+		      CASE bil.has_electronic 
+		        WHEN '1' THEN 'Hard Copy/Electronic'
+		        ELSE 'Hard Copy'
+		      END
+      FROM
+		        books b,
+		        books_in_libraries bil,
+		        libraries l
+       WHERE
+		       b.isbn = bil.isbn AND
+		       bil.library_id = l.library_id;
+	
+  EXCEPTION
+ WHEN NO_DATA_FOUND THEN
+    out_err_msg:='No Books found!!';
+END fetch_books_data_proc;
 
 END student_book_pkg;
 /
