@@ -75,8 +75,8 @@ public class ConferenceRoom {
 							break;
 					case 0:
 						System.out.println("Going back to previous menu");
-						Student s = new Student();
-						s.showMenuItems();
+//						Student s = new Student();
+//						s.showMenuItems();
 						flag = false;
 						break;
 					default:

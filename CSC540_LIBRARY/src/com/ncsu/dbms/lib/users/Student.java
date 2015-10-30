@@ -1,5 +1,6 @@
 package com.ncsu.dbms.lib.users;
 
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Scanner;
@@ -7,8 +8,9 @@ import java.util.Scanner;
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.utilities.SearchResource;
 
+import oracle.jdbc.OracleTypes;
+
 public class Student extends User {
-	@SuppressWarnings("unused")
 	private String userName;
 	public Student(String userName, String firstName, String lastName) {
 		this.userName = userName;
@@ -17,8 +19,8 @@ public class Student extends User {
 		System.out.println("\n*******************************************");
 		showMenuItems();
 	}
-	public Student(){
-		
+	public Student(String userName){
+		this.userName = userName;
 	}
 	public  void showMenuItems() {
 		// TODO Auto-generated method stub
@@ -41,8 +43,7 @@ public class Student extends User {
 					switch(choice){
 					case 1:
 						//Profile
-						Student s = new Student();
-						s.showProfile(userName);
+						showProfile(this.userName);
 						flag=false;
 							break;
 					case 2:
@@ -95,39 +96,49 @@ public class Student extends User {
 	public void showProfile(String userId){
 		// Searching a book;
         ResultSet rs;
-    	String query;
-    	query = "SELECT "+
-    			"STUDENT_ID         ,"+
-    			"USER_ID            ,"+
-    			"FIRST_NAME         ,"+
-    			"LAST_NAME          ,"+
-    			"SEX                          ,"+
-    			"PHONE_NUMBER                ,"+
-    			"ALT_PHONE_NUMBER            ,"+
-    			"DOB                ,"+
-    			"ADDRESS                    ,"+
-    			"NATIONALITY                 ,"+
-    			"DEGREE_TYPE_ID                ,"+
-    			"DEPT_ID "+
-    			"FROM studnets WHERE user_id = "+userId;
         try {
-			rs = DBConnection.executeQuery(query);
-            
+        	System.out.println("userid is " + userId);
+        	CallableStatement cstmt = DBConnection.con.prepareCall("{call user_profile_pkg.fetch_profile_data_proc(?, ?, ?)}");
+      	  
+        //	cstmt.registerOutParameter(3, java.sql.Types.VARCHAR);
+        	cstmt.registerOutParameter(2, OracleTypes.CURSOR);
+        	cstmt.registerOutParameter(3, OracleTypes.VARCHAR);
+        	cstmt.setString(1, userId);
+        	cstmt.executeQuery();
+        	rs = (ResultSet) cstmt.getObject(2);
+        	String error = cstmt.getString(3);
+        	if(error != null)
+        	{
+        		System.out.println(error);
+        		showMenuItems();
+        	}
             if (!rs.next() ) {
                 System.out.println("Not a valid user id.");
                 return;
             } else {
                 System.out.println("Student ID"+"\t" +"User ID" +"\t" + "First Name"+"\t  " +"Last Name" +"\t" + "Phone No." +"\t\t\t" + "Alt. Phone No." +"\t\t" + "Date Of Birth"+"\t\t" + "Address"+"\t\t" + "Nationality"+"\t\t" + "Degree"+"\t\t\t" + "Department");
-                System.out.println("-----------------------------------------------------------------------------------------");
+                System.out.println("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
                 do {
-                	String isbn = rs.getString("isbn");
-		            String title = rs.getString("title");
-		            String authors = rs.getString("authors");
-		            String yearOfPub = rs.getString("year_of_publication");
-		            String edition = rs.getString("edition");
-		            String publisher = rs.getString("publisher");
-		            System.out.println(isbn +"\t" + publisher +"\t\t" + edition +"\t\t" + yearOfPub +"\t" + authors +"\t\t" + title);
+                	String studentid = rs.getString("student_id");
+		            String userid = rs.getString("user_id");
+		            String firstName = rs.getString("first_name");
+		            String lastName = rs.getString("last_name");
+		            String sex = rs.getString("sex");
+		            String phone = rs.getString("phone_number");
+		            String altPhone = rs.getString("alt_phone_number");
+		            String dob = rs.getString("dob");
+		            String address = rs.getString("address");
+		            String nationality = rs.getString("nationality");
+		            String degree = rs.getString("degree");
+		            String department = rs.getString("name");
+
+		            System.out.println(studentid +"\t" + userid +"\t\t" +
+		            firstName +"\t\t" + lastName +"\t" + sex +"\t\t" + phone +
+		            altPhone +"\t\t" + dob +"\t" + address +"\t\t" + nationality +
+		            degree +"\t\t" + department);
+
+
                 } while (rs.next());
             }
 		} catch (SQLException e) {

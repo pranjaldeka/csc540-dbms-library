@@ -10,7 +10,6 @@ import com.ncsu.dbms.lib.resources.Room;
 import com.ncsu.dbms.lib.users.Student;
 
 public class SearchResource {
-
 	public static void searchResources(){
 		System.out.println("Hey!!!!");
 		System.out.println("Please enter your choice of search (Enter 1/2/3/0):");
@@ -25,8 +24,8 @@ public class SearchResource {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 0:
-						Student student = new Student();
-						student.showMenuItems();
+//						Student student = new Student();
+//						student.showMenuItems();
 						flag = false;
 						break;
 					case 1:
