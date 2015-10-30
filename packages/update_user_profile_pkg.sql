@@ -1,16 +1,16 @@
-set serveroutput on;
-/*==============================Update_user_profile.pkg ==============================
-================================Updates profile of faculty or users==============*/
+SET SERVEROUTPUT ON;
+/*==============================UPDATE_USER_PROFILE.PKG ==============================
+================================UPDATES PROFILE OF FACULTY OR USERS==============*/
 
-CREATE OR REPLACE PACKAGE update_user_profile_pkg AS 
+CREATE OR REPLACE PACKAGE UPDATE_USER_PROFILE_PKG AS 
 
-PROCEDURE update_user_profile_proc(
-	user_type	IN 	VARCHAR2,
-	user_id 	IN 	VARCHAR2,
-	update_column		IN	VARCHAR2,
-	new_column_value		IN VARCHAR2
+PROCEDURE UPDATE_USER_PROFILE_PROC(
+	USER_TYPE	IN 	VARCHAR2,
+	USER_ID 	IN 	VARCHAR2,
+	UPDATE_COLUMN		IN	VARCHAR2,
+	NEW_COLUMN_VALUE		IN VARCHAR2
 );
-END update_user_profile_pkg;
+END UPDATE_USER_PROFILE_PKG;
 /
 
 CREATE OR REPLACE PACKAGE BODY update_user_profile_pkg 
