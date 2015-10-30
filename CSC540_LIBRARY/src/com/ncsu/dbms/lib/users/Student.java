@@ -6,7 +6,10 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
+import com.ncsu.dbms.lib.exception.PrintSQLException;
+import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.SearchResource;
+import com.ncsu.dbms.lib.utilities.Utility;
 
 import oracle.jdbc.OracleTypes;
 
@@ -74,7 +77,7 @@ public class Student extends User {
 						break;
 					case 7:
 						//Log Out
-						System.out.println("Adding a new Admin");
+						System.out.println("Goodbye!!!");
 						flag = false;
 						break;
 					default:
@@ -97,7 +100,6 @@ public class Student extends User {
 		// Searching a book;
         ResultSet rs;
         try {
-        	System.out.println("userid is " + userId);
         	CallableStatement cstmt = DBConnection.con.prepareCall("{call user_profile_pkg.fetch_profile_data_proc(?, ?, ?)}");
       	  
         //	cstmt.registerOutParameter(3, java.sql.Types.VARCHAR);
@@ -140,15 +142,158 @@ public class Student extends User {
 
 
                 } while (rs.next());
+                showMenuForModifyProfile();
             }
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			PrintSQLException.printSQLException(e);
+			}
        
         //conn.close();
 
 	}
+	private void showMenuForModifyProfile(){
+		boolean flag = true;
+		try{
+			System.out.println("\nPlease enter your choice:");
+			System.out.println("1: Modify Profile.\t0:Go back to previous menu.");
+			while(flag){
+					@SuppressWarnings("resource")
+					Scanner scanner = new Scanner(System.in);
+					String value = scanner.nextLine();
+					int choice = Integer.parseInt(value);
+					switch(choice){
+					case 1:
+						System.out.println("Modifying Profile");
+						// Call Modify profile method method
+						modifyProfileDataMenu();
+						
+						flag = false;
+							break;
+					case 0:
+						System.out.println("Going back to previous menu");
+						showMenuItems();
+						flag = false;
+						break;
+					default:
+						System.out.println("Invalid choice: Please enter again.");
+							
+					}
+				}
+		}
+		catch(Exception e){
+			System.out.println("Something bad happened!!! Please try again...");
+			showMenuItems();
+		}
+	}
+	private void modifyProfileDataMenu() {
+		// TODO Auto-generated method stub
+		System.out.println("Please select the field, you want to modify: ");
+        System.out.println("1. User ID" +"\t\t" + "2. First Name"+"\t\t" 
+		+"3. Last Name\n" + "4. Phone No." +"\t\t"  + "5. Alt. Phone No." +"\t" +
+        "6. Date Of Birth\n"+ "7. Address"+"\t\t" + "8. Nationality"+"\t\t" +
+		"9. Password\n"+"10. Sex"+"\t\t\t"+"0. Go to the Previous Menu.");
+        modifyProfileData();
+	}
+	private void modifyProfileData() {
+		
+		int enteredValue = Integer.parseInt(Utility.enteredConsoleString());
+		if(enteredValue==6){
+			System.out.println("Please enter Date Of Birth in (MM/DD/YYYY) format.");
+			dateOfBirthValidation();
+		}
+		else if(enteredValue==1){
+			//user_id
+			updateStudentProfileData("user_id", enteredProfileData());
+		}
+		else if(enteredValue==2){
+			//first_name
+			updateStudentProfileData("first_name", enteredProfileData());
+		}else if(enteredValue==3){
+			//last_name
+			updateStudentProfileData("last_name", enteredProfileData());
+		}else if(enteredValue==4){
+			//Phone_no
+			phoneNumberValidation("phone_number");
+		}else if(enteredValue==5){
+			//alt_phone
+			phoneNumberValidation("alt_phone_number");
+		}else if(enteredValue==7){
+			//Address
+			updateStudentProfileData("address", enteredProfileData());
+		}else if(enteredValue==8){
+			//Nationality
+			updateStudentProfileData("nationality", enteredProfileData());
+		}else if(enteredValue==9){
+			//Password
+			updateStudentProfileData("password", enteredProfileData());
+		}
+		else if(enteredValue==10){
+			//sex
+			updateStudentProfileData("sex", enteredProfileData());
+		}
+		else if(enteredValue==0){
+			showMenuItems();
+		}
+	}
+	private String enteredProfileData() {
+		System.out.println("Please enter value:");
+		return Utility.enteredConsoleString();		
+	}
+	private void dateOfBirthValidation(){
+		String enteredValue = enteredProfileData();
+		if(Utility.validateDateFormat(enteredValue))
+		{
+			System.out.println("Date is valid");
+			//call save functionality
+			updateStudentProfileData("dob", enteredValue);
+		}else{
+			System.out.println("Date format is invalid.");
+			dateOfBirthValidation();
+			
+		}
+	}
+	private void phoneNumberValidation(String type){
+		String valueEntered = enteredProfileData();
+		if(Utility.isNumeric(valueEntered))
+		{
+			System.out.println("Number is valid");
+			if(type.equals("phone_number")){
+				updateStudentProfileData("phone_number", valueEntered);
+			}
+			else if(type.equals("alt_phone_number")){
+				updateStudentProfileData("alt_phone_number", valueEntered);
+			}
+		}else{
+			System.out.println("Phone number is invalid!!");
+			phoneNumberValidation(type);
+			
+		}
+	}
 	
+	private void updateStudentProfileData(String columnName, String newColumnValue){
+        try {
+        	CallableStatement cstmt = DBConnection.con.prepareCall("{call user_profile_pkg.update_user_profile_proc(?, ?, ?, ?, ?)}");
+      	  System.out.println(Constant.student + userName+ columnName+newColumnValue);
+        	cstmt.setString(1, Constant.student);
+        	cstmt.setString(2, userName);
+        	cstmt.setString(3, columnName);
+        	cstmt.setString(4, newColumnValue);
+        	cstmt.registerOutParameter(5, OracleTypes.VARCHAR);
+        	cstmt.executeQuery();
+        	String error = cstmt.getString(5);
+        	if(error != null)
+        	{
+        		System.out.println(error);
+        		showMenuForModifyProfile();
+        	}else
+        		System.out.println("Update Successful!!!");
+        	showMenuForModifyProfile();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			PrintSQLException.printSQLException(e);
+			}
+
+	}
 
 }

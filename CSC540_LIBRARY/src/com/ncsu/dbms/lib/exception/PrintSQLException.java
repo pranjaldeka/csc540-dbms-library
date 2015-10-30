@@ -7,7 +7,7 @@ public class PrintSQLException {
 	/**
 	 * 
 	 */
-	public void printSQLException(SQLException ex) {
+	public static void printSQLException(SQLException ex) {
 
 	    for (Throwable e : ex) {
 	        if (e instanceof SQLException) {
@@ -33,7 +33,7 @@ public class PrintSQLException {
 	        }
 	    }
 	}
-	public boolean ignoreSQLException(String sqlState) {
+	public static boolean ignoreSQLException(String sqlState) {
 
 	    if (sqlState == null) {
 	        System.out.println("The SQL state is not defined!");
