@@ -1,27 +1,27 @@
 SET SERVEROUTPUT ON;
-CREATE OR REPLACE PACKAGE  check_out_pkg 
+CREATE OR REPLACE PACKAGE  CHECK_OUT_PKG 
 IS
-PROCEDURE check_out_proc(
+PROCEDURE CHECK_OUT_PROC(
     
-	issue_type	    	in 	varchar2,
-	issue_type_id		in 	varchar2,
-	user_type           in  varchar2,
-	user_id 			in  varchar2,
-	library_id 			in  varchar2,
-	output    			out varchar2
+	ISSUE_TYPE	    	IN 	VARCHAR2,
+	ISSUE_TYPE_ID		IN 	VARCHAR2,
+	USER_TYPE           IN  VARCHAR2,
+	USER_ID 			IN  VARCHAR2,
+	LIBRARY_ID 			IN  VARCHAR2,
+  OUTPUT    OUT VARCHAR2
 );
-END check_out_pkg;
+END CHECK_OUT_PKG;
 /
-CREATE OR REPLACE PACKAGE BODY check_out_pkg 
+CREATE OR REPLACE PACKAGE BODY CHECK_OUT_PKG 
 IS
-PROCEDURE check_out_proc(
+PROCEDURE CHECK_OUT_PROC(
     
-	issue_type	    	in 	varchar2,
-	issue_type_id		in 	varchar2,
-	user_type           in  varchar2,
-	user_id 			in  varchar2,
-	library_id 			in  varchar2,
-	output    			out  varchar2
+	ISSUE_TYPE	    	IN 	VARCHAR2,
+	ISSUE_TYPE_ID		IN 	VARCHAR2,
+	USER_TYPE           IN  VARCHAR2,
+	USER_ID 			IN  VARCHAR2,
+	LIBRARY_ID 			IN  VARCHAR2,
+  OUTPUT    OUT  VARCHAR2
 )
 IS
 avail_flag 			number(2);
@@ -32,16 +32,17 @@ user_table 			varchar2(100);
 current_datetime 	varchar2(100);
 invalid 			number(2);
 search_parameter 	VARCHAR2(50);
+primary_id varchar(100);
 BEGIN
   invalid := 0;
-  IF user_type = 'S' 
+  IF USER_TYPE = 'S' 
 	  THEN
 		 user_table := 'STUDENTS';
-		 user_id_column := 'STUDENT_ID';
-  ELSIF user_type = 'F'
+		 user_id_column := 'student_id';
+  ELSIF USER_TYPE = 'F'
 	  THEN
 		 user_table := 'FACULTIES';
-		 user_id_column := 'FACULTY_ID';
+		 user_id_column := 'faculty_id';
   ELSE
 		 invalid := 1;
   END IF;
@@ -51,49 +52,58 @@ BEGIN
   IF invalid = 0
   /*Assign table name and its primary to apppropriate variables*/
    THEN
-			IF issue_type = 'B' 
+			      IF ISSUE_TYPE = 'B' 
             THEN
                 table_name := 'BOOKS';
                 search_parameter := 'ISBN';
-						
-			ELSIF issue_type = 'J' 
+						ELSIF ISSUE_TYPE = 'J' 
             THEN
                 table_name := 'JOURNALS';
                 search_parameter := 'ISSN';
-            ELSIF issue_type = 'P' 
+            ELSIF ISSUE_TYPE = 'P' 
             THEN
                 table_name := 'CONFERENCE_PAPERS';
                 search_parameter := 'CONF_PAPER_ID';
-          	ELSIF issue_type = 'C' 
+          	/*ELSIF ISSUE_TYPE = 'C' 
             THEN
                 table_name := 'CAMERAS';
                 search_parameter := 'CAMERA_ID';
-						ELSE
+						*/
+            ELSE
                 invalid :=1;
             END IF;
 						
 					
 				
-			IF  invalid = 0
+        IF  invalid = 0
 			THEN
+      
+        /*find student id or facultyid */
+          sql_statement := 
+          '
+          SELECT '||user_id_column||' 
+          FROM '||user_table||'
+          WHERE user_id = '''||user_id||'''';
+          /*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
+          EXECUTE IMMEDIATE sql_statement INTO primary_id;
 			  avail_flag :=0;
 			  sql_statement := 
 					'SELECT 1 
 					FROM SSINGH25.' || table_name || ' T1
-					INNER JOIN 
+					inner join 
 					SSINGH25.'||table_name||'_in_libraries T2
 					ON T1.'||search_parameter|| '=T2.'||search_parameter|| '
-					WHERE T2.library_id= '''||library_id||''' 
-					AND T1.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''
-					AND NOT EXISTS
+					WHERE T2.LIBRARY_ID= '''||LIBRARY_ID||''' 
+					and T1.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''
+					and not exists
 					(
 					select 1 
 					from ssingh25.'||user_table||'_CO_'||table_name||' 
-					WHERE '||search_parameter|| '='''||ISSUE_TYPE_ID||'''
-					AND '||user_id_column|| '='''||USER_ID||'''
-					AND return_date IS NULL
+					where '||search_parameter|| '='''||ISSUE_TYPE_ID||'''
+					and '||user_id_column|| '='''||primary_id||'''
+					and return_date is null
 					)
-					AND no_of_hardcopies <> 0';
+					and no_of_hardcopies <> 0';
 				
 				/*DBMS_OUTPUT.PUT_LINE(sql_statement);
         */
@@ -105,17 +115,18 @@ BEGIN
 				/*
 				#######################CHECKOUT TRANSACTION#######################;
 				*/
+          
 					
              SELECT TO_CHAR
-						(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') INTO current_datetime
+						(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') into current_datetime
 						 FROM DUAL;
 						 
 						sql_statement := '
 						INSERT INTO '||user_table||'_CO_'||table_name||'
 						VALUES (
-						'''||user_id||''',
-						'''||issue_type_id||''',
-						'''||library_id||''',
+						'''||primary_id||''',
+						'''||ISSUE_TYPE_ID||''',
+						'''||LIBRARY_ID||''',
 						TIMESTAMP'''||current_datetime||''',
 						NULL
 						)';
@@ -129,34 +140,34 @@ BEGIN
 						sql_statement := 'UPDATE 
 						SSINGH25.'||table_name||'_in_libraries T
 						SET NO_OF_HARDCOPIES =NO_OF_HARDCOPIES-1
-						WHERE T.library_id= '''||library_id||''' 
-						AND T.'||search_parameter|| '='''||issue_type_id||'''';
+						WHERE T.LIBRARY_ID= '''||LIBRARY_ID||''' 
+						and T.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''';
 						/*DBMS_OUTPUT.PUT_LINE(sql_statement);
 						*/
-						EXECUTE IMMEDIATE sql_statement;
+            EXECUTE IMMEDIATE sql_statement;
 					
-						COMMIT;
-						output := 'CHECK OUT SUCCESSFUL';
+					COMMIT;
+				OUTPUT := 'CHECK OUT SUCCESSFUL';
         
         ELSE
-        output := 'BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER';
+        OUTPUT := 'BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER';
 		END IF;
 	ELSE
-        output := 'INVALID PARAMETERS';
+        OUTPUT := 'INVALID PARAMETERS';
         /*DBMS_OUTPUT.PUT_LINE('BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
 	END IF;	
 			
 	ELSE
-        output := 'INVALID PARAMETERS';
+        OUTPUT := 'INVALID PARAMETERS';
         /*DBMS_OUTPUT.PUT_LINE('BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
   END IF;
   DBMS_OUTPUT.PUT_LINE(avail_flag);
   EXCEPTION
 	WHEN NO_DATA_FOUND THEN
     /*DBMS_OUTPUT.PUT_LINE('Invalid Inputs');*/
-		 output := 'BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER';
-	WHEN OTHERS THEN
-		output := SQLERRM;	
+		 OUTPUT := 'BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER';
+  WHEN OTHERS THEN
+		output :=SQLERRM;   
 END check_out_proc;
 
 END check_out_pkg;
