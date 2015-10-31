@@ -1,45 +1,48 @@
 package com.ncsu.dbms.lib.resources;
 
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
+
+import oracle.jdbc.OracleTypes;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.users.Student;
+import com.ncsu.dbms.lib.utilities.Constant;
 
 public class Journal {
-	public Journal(){
-		showDialogueBox();
+	String userName;
+	public Journal(String userName){
+		this.userName=userName;
 		
 	}
-	public static void showDialogueBox(){
+	public void showDialogueBox(){
 		
-		System.out.println("Please enter a keyword(either ISSN/Authors/Title):");
-		@SuppressWarnings("resource")
-		Scanner scanner = new Scanner(System.in);
-		String keyword = scanner.nextLine();
-		String queryString = new StringBuilder().append("\'").append("%").append(keyword).append("%").append("\'").toString().toUpperCase();
-		searchJournal(queryString);
+	
+		searchJournal("");
 	}
-	private static void searchJournal(String queryString) {
-		// Searching a book;
-        ResultSet rs;
-    	String query;
-    	query = "SELECT ISSN, " +
-    	"authors, "+
-    	"year_of_publication, "+
-    	"title "+
-    	"FROM journals "+
-    	"WHERE upper(ISSN) LIKE "+ queryString +
-    	" OR upper(authors) LIKE "+ queryString +
-    	" OR upper(title) LIKE "+ queryString;
-        try {
-			rs = DBConnection.executeQuery(query);
-            
-            if (!rs.next() ) {
-                System.out.println("No Journal found with the entered keyword. Please try a different keyword:");
-                showDialogueBox();
-                return;
+	private void searchJournal(String queryString) {
+		try{
+	    	ResultSet rs;
+        	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call STUDENT_PUBLICATION_PKG.fetch_journals_data_proc(?, ?)}");
+	       	cstmt.registerOutParameter(1, OracleTypes.CURSOR);
+	       	cstmt.registerOutParameter(2, OracleTypes.VARCHAR);
+	       	ArrayList<Object> arrayList = DBConnection.returnResultSetAndError(cstmt, 1, 2);
+	       	if(!arrayList.get(1).equals(Constant.kBlankString))
+	       	{
+	       		System.out.println(arrayList.get(1));
+	       		showDialogueBox();
+	       		return;
+	       	}  
+		
+	       	rs = (ResultSet)arrayList.get(0);
+	       	if (!rs.next() ) {
+	       		System.out.println("No conference papers found with the entered keyword. Please try a different keyword:");
+	       		Resource sr = new Resource(this.userName);
+	       		sr.showPublicationMenuItems();
+	       		return;
             } else {
                 System.out.println("ISSN"+"\t" +"Authors" +"\t\t\t" + "Publication Year" + "\t "+ "Title" );
                 System.out.println("-----------------------------------------------------------------------------------------");

@@ -40,7 +40,7 @@ public class Resource {
 						break;
 					case 3:
 						System.out.println("Cameras");
-						Journal.showDialogueBox();
+						//Journal.showDialogueBox();
 						flag = false;
 						break;
 					
@@ -82,10 +82,18 @@ public class Resource {
 						flag = false;
 						break;
 					case 3:
-						System.out.println("Cameras");
-						Journal.showDialogueBox();
+						System.out.println("Journals");
+						Journal journal=new Journal(this.userName);
+						journal.showDialogueBox();
 						flag = false;
 						break;
+					case 4:
+						System.out.println("Conference Papers");
+						// Call check out method
+						ConferencePaper confPaper = new ConferencePaper(this.userName);
+						confPaper.showDialogueBox();
+						flag = false;
+							break;
 					
 					 default:
 						System.out.println("Invalid choice: Please enter again.");

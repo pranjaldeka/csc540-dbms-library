@@ -37,7 +37,7 @@ public class Book {
 	       	rs = (ResultSet) cstmt.getObject(1);
 	       	String error = cstmt.getString(2); */
         	ResultSet rs;
-        	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call student_book_pkg.fetch_books_data_proc(?, ?)}");
+        	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call STUDENT_PUBLICATION_PKG.fetch_books_data_proc(?, ?)}");
 	       	cstmt.registerOutParameter(1, OracleTypes.CURSOR);
 	       	cstmt.registerOutParameter(2, OracleTypes.VARCHAR);
 	       	ArrayList<Object> arrayList = DBConnection.returnResultSetAndError(cstmt, 1, 2);

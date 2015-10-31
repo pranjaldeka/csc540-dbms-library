@@ -1,59 +1,63 @@
 package com.ncsu.dbms.lib.resources;
 
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
+
+import oracle.jdbc.OracleTypes;
+import com.ncsu.dbms.lib.resources.Resource;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.users.Student;
+import com.ncsu.dbms.lib.utilities.Constant;
 
 public class ConferencePaper {
-	public ConferencePaper(){
-		showDialogueBox();
+	String userName;
+	public ConferencePaper(String userName){
+		this.userName=userName;
 	}
 		
 	
-	public static void showDialogueBox(){
+	public void showDialogueBox(){
 		
-		System.out.println("Please enter a keyword(either paper id/Title/authors):");
-		@SuppressWarnings("resource")
-		Scanner scanner = new Scanner(System.in);
-		String keyword = scanner.nextLine();
-		String queryString = new StringBuilder().append("\'").append("%").append(keyword).append("%").append("\'").toString().toUpperCase();
-		searchBook(queryString);
+		searchConferencePaper(" ");
 	}
-	private static void searchBook(String queryString) {
-		// Searching a book;
-        ResultSet rs;
-    	String query;
-    	query = "SELECT conf_paper_id, " +
-    	"conf_name, "+
-    	"authors, "+
-    	"year_of_publication, "+
-    	"title, "+
-   		"FROM conference_papers "+
-    	"WHERE upper(conf_paper_id) LIKE "+ queryString +
-    	" OR upper(authors) LIKE "+ queryString +
-    	" OR upper(title) LIKE "+ queryString;
+	private void searchConferencePaper(String queryString) {
         try {
-			rs = DBConnection.executeQuery(query);
-            
+
+        	ResultSet rs;
+        	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call STUDENT_PUBLICATION_PKG.fetch_conf_papers_data_proc(?, ?)}");
+	       	cstmt.registerOutParameter(1, OracleTypes.CURSOR);
+	       	cstmt.registerOutParameter(2, OracleTypes.VARCHAR);
+	       	ArrayList<Object> arrayList = DBConnection.returnResultSetAndError(cstmt, 1, 2);
+	       	if(!arrayList.get(1).equals(Constant.kBlankString))
+	       	{
+	       		System.out.println(arrayList.get(1));
+	       		showDialogueBox();
+	       		return;
+	       	}  
+	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
-                System.out.println("No Conference Paper found with the entered keyword. Please try a different keyword:");
-                showDialogueBox();
+                System.out.println("No conference papers found with the entered keyword. Please try a different keyword:");
+                Resource sr = new Resource(this.userName);
+                sr.showPublicationMenuItems();
                 return;
             } else {
-                System.out.println("Conf Paper Id"+"\t" +"Conf Name" +"\t" + "Authors"+"\t\t\t  " +"Year_Of_Pub" +"\t" + "Title" +"\t\t\t");
-                System.out.println("-----------------------------------------------------------------------------------------");
+                System.out.println("Conf paper id"+"\t" +"Conf Name" +"\t" +"Authors"+"\t" +"Publication Year" +"\t" + "Title"+"\t  " +"Year_Of_Pub" +"No. Of Hard Copies");
+                System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------");
 
                 do {
                 	String conf_paper_id = rs.getString("conf_paper_id");
 		            String conf_name = rs.getString("conf_name");
 		            String authors = rs.getString("authors");
-		            String yearOfPub = rs.getString("year_of_publication");
+		            String year_of_publication = rs.getString("year_of_publication");
 		            String title = rs.getString("title");
-		            String publisher = rs.getString("publisher");
-		            System.out.println(conf_paper_id +"\t" + conf_name +"\t\t" + authors +"\t\t" + yearOfPub +"\t" + title +"\t\t" );
+		            String no_of_hardcopies = rs.getString("no_of_hardcopies");
+		            String library = rs.getString("name");
+		            String type = rs.getString("has_electronic");
+		            System.out.println(conf_paper_id +"\t" + conf_name+"\t\t" + authors  +"\t" + year_of_publication +"\t\t" + title +"\t" + authors +"\t\t" + title +" "+no_of_hardcopies);
                 } while (rs.next());
             }
 			 displayDialogueAfterSearch();
