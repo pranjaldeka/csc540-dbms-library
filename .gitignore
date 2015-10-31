@@ -1,0 +1,8 @@
+/com/
+.DS_Store
+CSC540_LIBRARY/.classpath
+CSC540_LIBRARY/.settings/
+DBTest/.classpath
+DBTest/.settings/
+*.class
+
