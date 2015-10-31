@@ -25,6 +25,9 @@ public class Student extends User {
 	public Student(String userName){
 		Student.userName = userName;
 	}
+	public Student(){
+		
+	}
 	public  void showMenuItems() {
 		// TODO Auto-generated method stub
 		System.out.println("Please select from the below options: ");
@@ -275,8 +278,8 @@ public class Student extends User {
 	private void updateStudentProfileData(String columnName, String newColumnValue){
         try {
         	CallableStatement cstmt = DBConnection.con.prepareCall("{call user_profile_pkg.update_user_profile_proc(?, ?, ?, ?, ?)}");
-      	  System.out.println(Constant.student + userName+ columnName+newColumnValue);
-        	cstmt.setString(1, Constant.student);
+      	  System.out.println(Constant.kStudent + userName+ columnName+newColumnValue);
+        	cstmt.setString(1, Constant.kStudent);
         	cstmt.setString(2, userName);
         	cstmt.setString(3, columnName);
         	cstmt.setString(4, newColumnValue);

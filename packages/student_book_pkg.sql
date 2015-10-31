@@ -32,7 +32,7 @@ BEGIN
 		      CASE bil.has_electronic 
 		        WHEN '1' THEN 'Hard Copy/Electronic'
 		        ELSE 'Hard Copy'
-		      END
+		      END AS has_electronic
       FROM
 		        books b,
 		        books_in_libraries bil,

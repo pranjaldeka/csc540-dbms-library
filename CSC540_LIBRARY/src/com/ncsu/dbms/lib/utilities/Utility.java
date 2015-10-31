@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
+import oracle.jdbc.Const;
+
 public final class Utility {
 	public static boolean validateDateFormat(String dateToValdate) {
 
@@ -51,5 +53,13 @@ public final class Utility {
 	}
 	public static void badErrorMessage(){
 		System.out.println("Something bad happened!!! Please try again...");
+	}
+	public static String getLibraryId(String id){
+		if(id.equals("1"))
+			return Constant.kHillLibrary;
+		else if(id.equals("2"))
+			return Constant.kHuntLibrary;
+		else
+			return null;
 	}
 }

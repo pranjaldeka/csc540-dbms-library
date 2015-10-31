@@ -8,7 +8,6 @@ public class PrintSQLException {
 	 * 
 	 */
 	public static void printSQLException(SQLException ex) {
-
 	    for (Throwable e : ex) {
 	        if (e instanceof SQLException) {
 	            if (ignoreSQLException(
