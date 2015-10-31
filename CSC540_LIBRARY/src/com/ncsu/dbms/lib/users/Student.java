@@ -6,24 +6,26 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
+import com.ncsu.dbms.lib.console.LibConsole;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
+import com.ncsu.dbms.lib.login.Login;
+import com.ncsu.dbms.lib.resources.Resource;
 import com.ncsu.dbms.lib.utilities.Constant;
-import com.ncsu.dbms.lib.utilities.SearchResource;
 import com.ncsu.dbms.lib.utilities.Utility;
 
 import oracle.jdbc.OracleTypes;
 
 public class Student extends User {
-	public static String userName;
+	public  String userName;
 	public Student(String userName, String firstName, String lastName) {
-		Student.userName = userName;
+		this.userName = userName;
 		System.out.println("*******************Welcome*****************\n");
 		System.out.println("\t\t" + firstName + " " + lastName + "!!!");
 		System.out.println("\n*******************************************");
 		showMenuItems();
 	}
 	public Student(String userName){
-		Student.userName = userName;
+		this.userName = userName;
 	}
 	public Student(){
 		
@@ -49,12 +51,12 @@ public class Student extends User {
 					switch(choice){
 					case 1:
 						//Profile
-						showProfile(Student.userName);
+						showProfile(this.userName);
 						flag=false;
 							break;
 					case 2:
 						//Resources
-						SearchResource sr = new SearchResource();
+						Resource sr = new Resource(this.userName);
 						sr.searchResources();
 						flag = false;
 						flag = false;
@@ -82,6 +84,8 @@ public class Student extends User {
 					case 7:
 						//Log Out
 						System.out.println("Goodbye!!!");
+						// ask for login again
+						
 						flag = false;
 						break;
 					default:
@@ -151,6 +155,7 @@ public class Student extends User {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			PrintSQLException.printSQLException(e);
+			showMenuForModifyProfile();
 			}
        
         //conn.close();
@@ -278,7 +283,6 @@ public class Student extends User {
 	private void updateStudentProfileData(String columnName, String newColumnValue){
         try {
         	CallableStatement cstmt = DBConnection.con.prepareCall("{call user_profile_pkg.update_user_profile_proc(?, ?, ?, ?, ?)}");
-      	  System.out.println(Constant.kStudent + userName+ columnName+newColumnValue);
         	cstmt.setString(1, Constant.kStudent);
         	cstmt.setString(2, userName);
         	cstmt.setString(3, columnName);
@@ -296,8 +300,13 @@ public class Student extends User {
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			PrintSQLException.printSQLException(e);
+			showMenuForModifyProfile();
 			}
 
 	}
+//	private void loginUserWindow(){
+//		LibConsole login = new LibConsole(DBConnection.con);
+//		
+//	}
 
 }

@@ -100,8 +100,7 @@ public class Login {
 		}
 	 catch (SQLException e) {
 
-		PrintSQLException p = new PrintSQLException();
-		p.printSQLException(e);
+		PrintSQLException.printSQLException(e);
 
 	}
 		finally {

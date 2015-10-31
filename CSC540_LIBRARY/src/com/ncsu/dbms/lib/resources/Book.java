@@ -11,15 +11,16 @@ import com.ncsu.dbms.lib.console.LibConsole;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.users.Student;
 import com.ncsu.dbms.lib.utilities.Constant;
-import com.ncsu.dbms.lib.utilities.SearchResource;
 import com.ncsu.dbms.lib.utilities.Utility;
 
 import oracle.jdbc.OracleTypes;
 
 
 public class Book {
-	public Book() {
+	String userName;
+	public Book(String userName) {
 		//showDialogueBox();
+		this.userName = userName;
 	}
 	public  void showDialogueBox(){
 		searchBook("");
@@ -49,7 +50,7 @@ public class Book {
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
                 System.out.println("No Books found with the entered keyword. Please try a different keyword:");
-                SearchResource sr = new SearchResource();
+                Resource sr = new Resource(this.userName);
                 sr.showPublicationMenuItems();
                 return;
             } else {
@@ -131,16 +132,18 @@ public class Book {
 	}
 	private  void checkOutBook(String isbn, String lib) {
 		try{
-	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_out_pkg.check_out_proc(?, ?,?,?,?,?)}");
+	    	/*CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_out_pkg.check_out_proc(?, ?,?,?,?,?)}");
 	    	cstmt.setString(1, Constant.kBook);
 	    	cstmt.setString(2, isbn.toUpperCase());
 	    	cstmt.setString(3, Constant.kStudent);
-	    	cstmt.setString(4, Student.userName);
+	    	cstmt.setString(4, this.userName);
 	    	cstmt.setString(5, Utility.getLibraryId(lib));
 
 	    	cstmt.registerOutParameter(6, java.sql.Types.VARCHAR);
 	    	String outputMessage = DBConnection.returnMessage(cstmt, 6);
-	       	System.out.println(outputMessage);
+	       	System.out.println(outputMessage);*/
+			Resource sr = new Resource(this.userName);
+			sr.checkOutResource(Constant.kBook, isbn, Constant.kStudent, this.userName, Utility.getLibraryId(lib));
 	       	callStudentDialogueBox();
 	       	
 		}
@@ -152,7 +155,7 @@ public class Book {
 
 	}
 	private void callStudentDialogueBox(){
-		Student s = new Student();
+		Student s = new Student(this.userName);
 		s.showMenuItems();
 	}
 }
