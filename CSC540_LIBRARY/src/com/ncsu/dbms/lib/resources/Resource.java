@@ -149,7 +149,7 @@ public class Resource {
 	    	cstmt.setString(1, resourceType);
 	    	cstmt.setString(2, userName);
 	    	cstmt.setString(3, roomNo);
-	    	cstmt.setString(4, library);
+	    	cstmt.setString(4, Utility.getLibraryId(library));
 	    	cstmt.setString(5, startTime);
 	    	cstmt.setString(6, endTime);
 	    	
