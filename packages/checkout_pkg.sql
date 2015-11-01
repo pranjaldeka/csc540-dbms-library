@@ -1,6 +1,7 @@
 SET SERVEROUTPUT ON;
 CREATE OR REPLACE PACKAGE  CHECK_OUT_PKG 
 IS
+
 PROCEDURE CHECK_OUT_PROC(
     
 	ISSUE_TYPE	    	IN 	VARCHAR2,
@@ -8,7 +9,7 @@ PROCEDURE CHECK_OUT_PROC(
 	USER_TYPE           IN  VARCHAR2,
 	USER_ID 			IN  VARCHAR2,
 	LIBRARY_ID 			IN  VARCHAR2,
-  OUTPUT    OUT VARCHAR2
+	OUTPUT    OUT           VARCHAR2
 );
 END CHECK_OUT_PKG;
 /
@@ -52,7 +53,7 @@ BEGIN
   IF invalid = 0
   /*Assign table name and its primary to apppropriate variables*/
    THEN
-			      IF ISSUE_TYPE = 'B' 
+			IF ISSUE_TYPE = 'B' 
             THEN
                 table_name := 'BOOKS';
                 search_parameter := 'ISBN';
