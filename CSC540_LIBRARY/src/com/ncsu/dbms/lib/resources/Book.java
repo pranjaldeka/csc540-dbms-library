@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
-import com.ncsu.dbms.lib.users.Student;
 import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
 
@@ -138,20 +137,17 @@ public class Book {
        		PrintSQLException.printSQLException(e);
 			Utility.badErrorMessage();
 		} 	
-		callStudentDialogueBox();
+		Utility.callUserDialogueBox(userName, userType);
 
 	}
-	private void callStudentDialogueBox(){
-		Student s = new Student(this.userName);
-		s.showMenuItems();
-	}
+
 	
 	public void checkedOutBooks() {
         try {
         	ResultSet rs;
         	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call checked_out_resource_pkg.checked_out_resources_proc (?, ?, ?, ?, ?)}");
 	       	cstmt.setString(1, Constant.kBook);
-	       	cstmt.setString(2, Constant.kStudent);
+	       	cstmt.setString(2, userType);
 	       	cstmt.setString(3, userName);
         	cstmt.registerOutParameter(4, OracleTypes.CURSOR);
 	       	cstmt.registerOutParameter(5, OracleTypes.VARCHAR);
@@ -160,7 +156,7 @@ public class Book {
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
                 Resource sr = new Resource(this.userName, this.userType);
-                System.out.println("Your have not checkout any books recently");
+                System.out.println("\nYour have not checkout any books recently\n");
                 sr.showPublicationMenuItemsCheckedOut();
                 return;
             } else {
@@ -204,8 +200,7 @@ public class Book {
 						break;
 					case 0:
 						System.out.println("Going back to main menu");
-						Student s = new Student(userName);
-						s.showMenuItems();
+						Utility.callUserDialogueBox(userName, userType);
 						flag = false;
 						break;
 					default:
@@ -230,14 +225,12 @@ public class Book {
 	private  void checkInBook(String isbn) {
 		try{
 			Resource sr = new Resource(this.userName, this.userType);
-			sr.checkInResource(Constant.kBook, isbn, Constant.kStudent, this.userName);
-	       	callStudentDialogueBox();
-	       	
+			sr.checkInResource(Constant.kBook, isbn);
 		}
 		catch(SQLException e){
 	       		PrintSQLException.printSQLException(e);
 				Utility.badErrorMessage();
-	       		callStudentDialogueBox();
 	    } 	
+		Utility.callUserDialogueBox(userName, userType);
 	}
 }

@@ -121,21 +121,13 @@ public class Journal {
 
 			Resource sr = new Resource(this.userName, this.userType);
 			sr.checkOutResource(Constant.kJournal, issn, Utility.getLibraryId(lib), return_date);
-	       	callStudentDialogueBox();
 	       	
 		}
        	catch(SQLException e){
        		PrintSQLException.printSQLException(e);
 			Utility.badErrorMessage();
-       		callStudentDialogueBox();
 		} 
+		Utility.callUserDialogueBox(userName, userType);
 
-	}
-
-
-
-	private void callStudentDialogueBox(){
-		Student s = new Student(this.userName);
-		s.showMenuItems();
 	}
 }

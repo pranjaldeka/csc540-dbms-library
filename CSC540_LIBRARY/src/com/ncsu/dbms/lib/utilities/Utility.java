@@ -5,6 +5,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
+import com.ncsu.dbms.lib.users.Faculty;
+import com.ncsu.dbms.lib.users.Student;
+
 import oracle.jdbc.Const;
 
 public final class Utility {
@@ -75,12 +78,12 @@ public final class Utility {
 				String validDateFormat = "yyyy-MM-dd";
 				String validTimeFormat = "HH:mm:ss";
 				do{
-					Utility.setMessage("Please enter date of return in yyyy-MM-dd format:");
+					Utility.setMessage("Please enter date in yyyy-MM-dd format:");
 					enteredDate = Utility.enteredConsoleString();
 					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
 							flagDate = false;
 							do{
-								Utility.setMessage("Please enter time of return in HH:mm:ss format:");
+								Utility.setMessage("Please enter time in HH:mm:ss format:");
 								enteredTime = Utility.enteredConsoleString();
 								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
 									flagTime = false;
@@ -101,5 +104,16 @@ public final class Utility {
 		}
 		while (flag);	
 		return return_date;
+	}
+	
+	public static void callUserDialogueBox(String userName, String userType){
+		if (userType.equals(Constant.kStudent)) {
+			Student student = new Student(userName);
+			student.showMenuItems();
+		}
+		else if (userType.equals(Constant.kFaculty)) {
+			Faculty faculty = new Faculty(userName);
+			faculty.showMenuItems();
+		}
 	}
 }

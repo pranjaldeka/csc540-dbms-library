@@ -4,7 +4,9 @@ import java.sql.CallableStatement;
 import java.sql.SQLException;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
+import com.ncsu.dbms.lib.users.Faculty;
 import com.ncsu.dbms.lib.users.Student;
+import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
 
 public class Resource {
@@ -24,8 +26,14 @@ public class Resource {
 					int choice = Integer.parseInt(Utility.enteredConsoleString());
 					switch(choice){
 					case 0:
-						Student student = new Student(this.userName);
-						student.showMenuItems();
+						if (userType.equals(Constant.kStudent)) {
+							Student student = new Student(this.userName);
+							student.showMenuItems();
+						}
+						else if (userType.equals(Constant.kFaculty)) {
+							Faculty faculty = new Faculty(userName);
+							faculty.showMenuItems();
+						}
 						flag = false;
 						break;
 					case 1:
@@ -192,8 +200,7 @@ public class Resource {
 		} 	
 	}
 		
-	public void checkInResource(String resourceType, String resourceName, String userType,
-			String userName) throws SQLException{
+	public void checkInResource(String resourceType, String resourceName) throws SQLException{
 		try{
 	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_in_pkg.check_in_proc(?, ?,?,?,?)}");
 	    	cstmt.setString(1, resourceType);
@@ -221,8 +228,14 @@ public class Resource {
 					int choice = Integer.parseInt(Utility.enteredConsoleString());
 					switch(choice){
 					case 0:
-						Student student = new Student(this.userName);
-						student.showMenuItems();
+						if (userType.equals(Constant.kStudent)) {
+							Student student = new Student(this.userName);
+							student.showMenuItems();
+						}
+						else if (userType.equals(Constant.kFaculty)) {
+							Faculty faculty = new Faculty(userName);
+							faculty.showMenuItems();
+						}
 						flag = false;
 						break;
 					case 1:
@@ -288,7 +301,7 @@ public class Resource {
 					
 					 default:
 						System.out.println("Invalid choice: Please enter again.");
-						showPublicationMenuItems();
+						showPublicationMenuItemsCheckedOut();
 						flag = false;
 						break;
 					}

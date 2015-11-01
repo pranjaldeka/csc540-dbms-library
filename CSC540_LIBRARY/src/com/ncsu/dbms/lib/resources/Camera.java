@@ -122,8 +122,7 @@ public class Camera {
 							break;
 					case 0:
 						System.out.println("Going back to previous menu");
-//						Student s = new Student();
-//						s.showMenuItems();
+						Utility.callUserDialogueBox(userName, userType);
 						flag = false;
 						break;
 					default:
@@ -195,20 +194,14 @@ public class Camera {
 	
 			Resource sr = new Resource(this.userName, this.userType);
 			sr.checkOutResource(Constant.kCamera, cameraid, Utility.getLibraryId(lib), return_date);
-	       	callStudentDialogueBox();
-	       	
 		}
-	       	catch(SQLException e){
-	       		PrintSQLException.printSQLException(e);
-				Utility.badErrorMessage();
-	       		callStudentDialogueBox();
-			} 	
+       	catch(SQLException e){
+       		PrintSQLException.printSQLException(e);
+			Utility.badErrorMessage();
+		} 
+		Utility.callUserDialogueBox(userName, userType);
 	
 	}
 
-	private void callStudentDialogueBox(){
-		Student s = new Student(this.userName);
-		s.showMenuItems();
-	}
 }
 

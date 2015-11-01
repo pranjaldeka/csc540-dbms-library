@@ -164,11 +164,8 @@ public class Room {
 			Utility.setMessage("Failed to reserve a room. Please try again");
 			displayDialogueAfterSearch();
 		}
-		Student s = new Student(this.userName);
-		s.showMenuItems();
+		Utility.callUserDialogueBox(userName, userType);
 	}
-	
-	
 }
 
        
