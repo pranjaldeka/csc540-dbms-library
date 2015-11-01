@@ -1,8 +1,8 @@
 /*********************************************************************
-checked_out_resources_pkg.sql : displays checked out resources
+checked_out_resource_pkg.sql : displays checked out resources
 **********************************************************************/
 set serveroutput on;
-CREATE OR REPLACE PACKAGE checked_out_resources_pkg AS 
+CREATE OR REPLACE PACKAGE checked_out_resource_pkg AS 
 user_error       EXCEPTION;
 
 PROCEDURE checked_out_resources_proc(
@@ -12,9 +12,9 @@ PROCEDURE checked_out_resources_proc(
 	p_ref			          OUT SYS_REFCURSOR,
 	out_err_msg		          OUT VARCHAR2
 );
-END checked_out_resources_pkg;
+END checked_out_resource_pkg;
 /
-CREATE OR REPLACE PACKAGE BODY checked_out_resources_pkg 
+CREATE OR REPLACE PACKAGE BODY checked_out_resource_pkg 
 IS
 PROCEDURE checked_out_resources_proc(
 	resource_type	    	  in 	varchar2,
@@ -82,7 +82,7 @@ BEGIN
 			  EXECUTE IMMEDIATE sql_statement INTO primary_id;
 			sql_statement := '
 						SELECT 
-							b.*,
+							T1.*,
 							l.name
 						FROM
 							'||table_name||' T1,
@@ -108,5 +108,5 @@ BEGIN
     out_err_msg:='No Books found!!';
 END checked_out_resources_proc;
 
-END checked_out_resources_pkg;
+END checked_out_resource_pkg;
 /
