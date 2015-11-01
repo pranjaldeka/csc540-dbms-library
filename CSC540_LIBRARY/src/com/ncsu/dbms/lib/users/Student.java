@@ -52,17 +52,17 @@ public class Student extends User {
 						//Profile
 						showProfile(this.userName);
 						flag=false;
-							break;
+						break;
 					case 2:
 						//Resources
 						Resource sr = new Resource(this.userName);
 						sr.searchResources();
 						flag = false;
-						flag = false;
 						break;
 					case 3:
 						//Checked-Out Resources
-						System.out.println("Adding a new Student");
+						Resource resource = new Resource(this.userName);
+						resource.checkedOutResources();
 						flag = false;
 						break;
 					case 4:

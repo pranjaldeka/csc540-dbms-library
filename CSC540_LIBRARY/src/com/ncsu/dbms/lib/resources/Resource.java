@@ -186,7 +186,113 @@ public class Resource {
 	    catch(SQLException e){
 	       		throw e;
 		} 	
+	}
 		
+	public void checkInResource(String resourceType, String resourceName, String userType,
+			String userName) throws SQLException{
+		try{
+	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_in_pkg.check_in_proc(?, ?,?,?,?)}");
+	    	cstmt.setString(1, resourceType);
+	    	cstmt.setString(2, resourceName.toUpperCase());
+	    	cstmt.setString(3, userType);
+	    	cstmt.setString(4, userName);
+
+	    	cstmt.registerOutParameter(5, java.sql.Types.VARCHAR);
+	    	String outputMessage = DBConnection.returnMessage(cstmt, 5);
+	       	System.out.println(outputMessage);
+		}
+	       	catch(SQLException e){
+	       		throw e;
+		} 
+		
+	}
+	
+	public void checkedOutResources() {
+		System.out.println("Please enter your choice:");
+		System.out.println("1: Publications\t2: Conference/Study rooms\t3: Cameras\t0: Go back to previous menu.");
+
+		boolean flag = true;
+		try{
+			while(flag){
+					int choice = Integer.parseInt(Utility.enteredConsoleString());
+					switch(choice){
+					case 0:
+						Student student = new Student(this.userName);
+						student.showMenuItems();
+						flag = false;
+						break;
+					case 1:
+						System.out.println("Publications");
+						// Call check in method
+						showPublicationMenuItemsCheckedOut();
+						flag = false;
+						break;
+					case 2:
+						System.out.println("Conference/Study�rooms");
+						Camera.showDialogueBox();
+						flag = false;
+						break;
+					case 3:
+						System.out.println("Cameras");
+					//	Journal.showDialogueBox();
+						flag = false;
+						break;
+					
+					 default:
+						System.out.println("Invalid choice: Please enter again.");
+						checkedOutResources();
+						flag = false;
+						break;
+					}
+				}
+		}
+		catch(Exception e){
+			Utility.badErrorMessage();
+			checkedOutResources();
+		}
+	}
+
+	public void showPublicationMenuItemsCheckedOut() {
+		Utility.setMessage("Please enter a choice:");//books, ebooks,journals and conference
+		System.out.println("1: Books\t2: eBooks\t3: Journals\t4: Conferences\t0: Go back to previous menu.");
+		boolean flag = true;
+		try{
+			while(flag){
+					int choice = Integer.parseInt(Utility.enteredConsoleString());
+					switch(choice){
+					case 0:
+						searchResources();
+						flag = false;
+						break;
+					case 1:
+						System.out.println("Books");
+						// Call check in method
+						Book book = new Book(this.userName);
+						book.checkedOutBooks();
+						flag = false;
+						break;
+					case 2:
+						System.out.println("Conference/Study�rooms");
+						Camera.showDialogueBox();
+						flag = false;
+						break;
+					case 3:
+						System.out.println("Cameras");
+						//Journal.showDialogueBox();
+						flag = false;
+						break;
+					
+					 default:
+						System.out.println("Invalid choice: Please enter again.");
+						showPublicationMenuItems();
+						flag = false;
+						break;
+					}
+				}
+		}
+		catch(Exception e){
+			Utility.badErrorMessage();
+		}
 	}
 		
 }

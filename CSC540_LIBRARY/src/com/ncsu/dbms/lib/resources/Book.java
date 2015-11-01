@@ -49,7 +49,7 @@ public class Book {
 	       	}  
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
-                System.out.println("No Books found with the entered keyword. Please try a different keyword:");
+                System.out.println("No Books found !!");
                 Resource sr = new Resource(this.userName);
                 sr.showPublicationMenuItems();
                 return;
@@ -182,5 +182,100 @@ public class Book {
 	private void callStudentDialogueBox(){
 		Student s = new Student(this.userName);
 		s.showMenuItems();
+	}
+	
+	public void checkedOutBooks() {
+        try {
+        	ResultSet rs;
+        	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call checked_out_resource_pkg.checked_out_resources_proc (?, ?, ?, ?, ?)}");
+	       	cstmt.setString(1, Constant.kBook);
+	       	cstmt.setString(2, Constant.kStudent);
+	       	cstmt.setString(3, userName);
+        	cstmt.registerOutParameter(4, OracleTypes.CURSOR);
+	       	cstmt.registerOutParameter(5, OracleTypes.VARCHAR);
+
+	       	ArrayList<Object> arrayList = DBConnection.returnResultSetAndError(cstmt, 4, 5);  
+	       	rs = (ResultSet)arrayList.get(0);
+            if (!rs.next() ) {
+                Resource sr = new Resource(this.userName);
+                System.out.println("Your have not checkout any books recently");
+                sr.showPublicationMenuItemsCheckedOut();
+                return;
+            } else {
+                System.out.println("ISBN"+"\t" +"Publisher" + "\t" +"Library" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title");
+                System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+                do {
+                	String isbn = rs.getString("isbn");
+		            String title = rs.getString("title");
+		            String authors = rs.getString("authors");
+		            String publisher = rs.getString("publisher");
+		            String edition = rs.getString("edition");
+		            String yearOfPub = rs.getString("year_of_publication");
+		            String library = rs.getString("name");
+		            System.out.println(isbn +"\t" + publisher+"\t\t"  + library + edition +"\t\t" + yearOfPub +"\t" + authors +"\t\t" + title);
+                } while (rs.next());
+            }
+            displayDialogueAfterCheckedOutResource();
+		}catch(SQLException e){
+       		PrintSQLException.printSQLException(e);
+			Utility.badErrorMessage();
+		}
+	}
+	
+	public  void displayDialogueAfterCheckedOutResource(){
+		boolean flag = true;
+		try{
+			System.out.println("\nPlease enter your choice:");
+			System.out.println("1: Return a book.\t0:Go back to previous menu.");
+			while(flag){
+					@SuppressWarnings("resource")
+					Scanner scanner = new Scanner(System.in);
+					String value = scanner.nextLine();
+					int choice = Integer.parseInt(value);
+					switch(choice){
+					case 1:
+						System.out.println("Return a book");
+						// Call check out method
+						checkInBookConsole();
+						flag = false;
+						break;
+					case 0:
+						System.out.println("Going back to main menu");
+						Student s = new Student(userName);
+						s.showMenuItems();
+						flag = false;
+						break;
+					default:
+						System.out.println("Invalid choice: Please enter again.");
+							
+					}
+				}
+		}
+		catch(Exception e){
+			System.out.println("Something bad happened!!! Please try again...");
+			displayDialogueAfterSearch();
+		}
+	}
+	
+	private  void checkInBookConsole() {
+		Utility.setMessage("Please enter the ISBN number of book you want to return");
+		String isbn = Utility.enteredConsoleString();
+		System.out.println(isbn);
+		checkInBook(isbn);
+	}
+	
+	private  void checkInBook(String isbn) {
+		try{
+			Resource sr = new Resource(this.userName);
+			sr.checkInResource(Constant.kBook, isbn, Constant.kStudent, this.userName);
+	       	callStudentDialogueBox();
+	       	
+		}
+		catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+	       		callStudentDialogueBox();
+	    } 	
 	}
 }
