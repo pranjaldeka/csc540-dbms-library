@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
-import com.ncsu.dbms.lib.console.LibConsole;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.users.Student;
 import com.ncsu.dbms.lib.utilities.Constant;
@@ -44,7 +43,8 @@ public class Book {
 	       	if(!arrayList.get(1).equals(Constant.kBlankString))
 	       	{
 	       		System.out.println(arrayList.get(1));
-	       		showDialogueBox();
+	       	    Resource sr = new Resource(this.userName);
+                sr.showPublicationMenuItems();
 	       		return;
 	       	}  
 	       	rs = (ResultSet)arrayList.get(0);
@@ -99,8 +99,8 @@ public class Book {
 							break;
 					case 0:
 						System.out.println("Going back to previous menu");
-//						Student s = new Student();
-//						s.showMenuItems();
+		                Resource sr = new Resource(this.userName);
+		                sr.searchResources();
 						flag = false;
 						break;
 					default:
@@ -115,13 +115,13 @@ public class Book {
 		}
 	}
 	private  void checkOutBookConsole() {
-		Utility.welcomeMessage("Please enter the ISBN number of book you want to check out");
+		Utility.setMessage("Please enter the ISBN number of book you want to check out");
 		String isbn = Utility.enteredConsoleString();
 		String library = null;
 		boolean flag = true;
 		do{
-			Utility.welcomeMessage("Please select the Library:");
-			Utility.welcomeMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
+			Utility.setMessage("Please select the Library:");
+			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
 			 library = Utility.enteredConsoleString();
 			if(library.equals("1") || library.equals("2"))
 				flag=false;
@@ -134,18 +134,17 @@ public class Book {
 		do{
 				String return_date = null;
 				String enteredDate = null;
-				String enteredHour = null;
 				String enteredTime = null;
 				//String validFormat = "yyyy-mm-dd hh:mm:ss";
 				String validDateFormat = "yyyy-MM-dd";
 				String validTimeFormat = "HH:mm:ss";
 				do{
-					Utility.welcomeMessage("Please enter date of return in yyyy-MM-dd format:");
+					Utility.setMessage("Please enter date of return in yyyy-MM-dd format:");
 					enteredDate = Utility.enteredConsoleString();
 					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
 							flagDate = false;
 							do{
-								Utility.welcomeMessage("Please enter time of return in HH:mm:ss format:");
+								Utility.setMessage("Please enter time of return in HH:mm:ss format:");
 								enteredTime = Utility.enteredConsoleString();
 								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
 									flagTime = false;
@@ -168,27 +167,16 @@ public class Book {
 	}
 	
 	private  void checkOutBook(String isbn, String lib, String return_date) {
+		Resource sr = new Resource(this.userName);
 		try{
-	    	/*CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_out_pkg.check_out_proc(?, ?,?,?,?,?)}");
-	    	cstmt.setString(1, Constant.kBook);
-	    	cstmt.setString(2, isbn.toUpperCase());
-	    	cstmt.setString(3, Constant.kStudent);
-	    	cstmt.setString(4, this.userName);
-	    	cstmt.setString(5, Utility.getLibraryId(lib));
-
-	    	cstmt.registerOutParameter(6, java.sql.Types.VARCHAR);
-	    	String outputMessage = DBConnection.returnMessage(cstmt, 6);
-	       	System.out.println(outputMessage);*/
-			Resource sr = new Resource(this.userName);
-			sr.checkOutResource(Constant.kBook, isbn, Constant.kStudent, this.userName, Utility.getLibraryId(lib), return_date);
-	       	callStudentDialogueBox();
-	       	
+			sr.checkOutResource(Constant.kBook, isbn, Constant.kStudent, 
+					this.userName, Utility.getLibraryId(lib), return_date);
 		}
-	       	catch(SQLException e){
-	       		PrintSQLException.printSQLException(e);
-				Utility.badErrorMessage();
-	       		callStudentDialogueBox();
-			} 	
+       	catch(SQLException e){
+       		PrintSQLException.printSQLException(e);
+			Utility.badErrorMessage();
+		} 	
+		callStudentDialogueBox();
 
 	}
 	private void callStudentDialogueBox(){

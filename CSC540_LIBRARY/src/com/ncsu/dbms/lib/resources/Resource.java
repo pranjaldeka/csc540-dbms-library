@@ -15,7 +15,7 @@ public class Resource {
 	}
 	public  void searchResources(){
 		System.out.println("Please enter your choice:");
-		System.out.println("1: Publications\t2: Conference/Study rooms\t3: Cameras\t0: Go back to previous menu.");
+		System.out.println("1: Publications\t2: Conference/Studyï¿½rooms\t3: Cameras\t0: Go back to previous menu.");
 
 		boolean flag = true;
 		try{
@@ -34,8 +34,9 @@ public class Resource {
 						flag = false;
 							break;
 					case 2:
-						System.out.println("Conference/Study rooms");
-						Camera.showDialogueBox();
+						System.out.println("Conference/Studyï¿½rooms");
+						Room room = new Room(userName);
+						room.showDialogueBox();
 						flag = false;
 						break;
 					case 3:
@@ -57,8 +58,9 @@ public class Resource {
 			searchResources();
 		}
 	}
+
 	public void showPublicationMenuItems(){
-		Utility.welcomeMessage("Please enter a choice:");// books,  ebooks, journals and conference
+		Utility.setMessage("Please enter a choice:");//ï¿½books,ï¿½ ebooks,ï¿½journalsï¿½andï¿½conference
 		System.out.println("1: Books\t2: eBooks\t3: Journals\t4: Conferences\t0: Go back to previous menu.");
 		boolean flag = true;
 		try{
@@ -77,7 +79,7 @@ public class Resource {
 						flag = false;
 							break;
 					case 2:
-						System.out.println("Conference/Study rooms");
+						System.out.println("Conference/Studyï¿½rooms");
 						Camera.showDialogueBox();
 						flag = false;
 						break;
@@ -128,6 +130,63 @@ public class Resource {
 	       		throw e;
 				} 	
 
+	}
+	
+	/**
+	 * Reserves a room
+	 * 
+	 * @param resourceType
+	 * @param library
+	 * @param roomNo
+	 * @param startTime
+	 * @param endTime
+	 * @throws SQLException
+	 */
+	public void reserveRoom(String resourceType, String library, String roomNo,
+			String startTime, String endTime) throws SQLException {
+		try{
+	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call user_room_pkg.user_reserves_rooms_proc(?, ?,?,?,?,?,?)}");
+	    	cstmt.setString(1, resourceType);
+	    	cstmt.setString(2, userName);
+	    	cstmt.setString(3, roomNo);
+	    	cstmt.setString(4, library);
+	    	cstmt.setString(5, startTime);
+	    	cstmt.setString(6, endTime);
+	    	
+	    	cstmt.registerOutParameter(7, java.sql.Types.VARCHAR);
+			String outputMessage = DBConnection.returnMessage(cstmt, 7);
+	       	System.out.println(outputMessage);
+		}
+	    catch(SQLException e){
+	       		throw e;
+		} 	
+		
+	}
+	
+	/**
+	 * Checks out a room
+	 * 
+	 * @param resourceType
+	 * @param library
+	 * @param roomNo
+	 * @throws SQLException
+	 */
+	public void checkOutRoom(String resourceType, String library, String roomNo) throws SQLException {
+		try{
+	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call user_room_pkg.user_reserves_rooms_proc(?, ?,?,?,?,?,?)}");
+	    	cstmt.setString(1, resourceType);
+	    	cstmt.setString(2, userName);
+	    	cstmt.setString(3, roomNo);
+	    	cstmt.setString(4, library);
+	    	
+	    	cstmt.registerOutParameter(7, java.sql.Types.VARCHAR);
+			String outputMessage = DBConnection.returnMessage(cstmt, 7);
+	       	System.out.println(outputMessage);
+		}
+	    catch(SQLException e){
+	       		throw e;
+		} 	
+		
 	}
 		
 }

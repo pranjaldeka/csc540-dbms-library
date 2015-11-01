@@ -107,13 +107,13 @@ public class ConferencePaper {
 		}
 	}
 	private void checkOutConfPaperConsole(){
-		Utility.welcomeMessage("Please enter the conf id number of conference paper you want to check out");
+		Utility.setMessage("Please enter the conf id number of conference paper you want to check out");
 		String confId = Utility.enteredConsoleString();
 		String library = null;
 		boolean flag = true;
 		do{
-			Utility.welcomeMessage("Please select the Library:");
-			Utility.welcomeMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
+			Utility.setMessage("Please select the Library:");
+			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
 			 library = Utility.enteredConsoleString();
 			if(library.equals("1") || library.equals("2"))
 				flag=false;
@@ -132,12 +132,12 @@ public class ConferencePaper {
 				String validDateFormat = "yyyy-MM-dd";
 				String validTimeFormat = "HH:mm:ss";
 				do{
-					Utility.welcomeMessage("Please enter date of return in yyyy-MM-dd format:");
+					Utility.setMessage("Please enter date of return in yyyy-MM-dd format:");
 					enteredDate = Utility.enteredConsoleString();
 					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
 							flagDate = false;
 							do{
-								Utility.welcomeMessage("Please enter time of return in HH:mm:ss format:");
+								Utility.setMessage("Please enter time of return in HH:mm:ss format:");
 								enteredTime = Utility.enteredConsoleString();
 								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
 									flagTime = false;

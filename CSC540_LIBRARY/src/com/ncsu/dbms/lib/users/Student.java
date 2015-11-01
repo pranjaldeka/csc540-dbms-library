@@ -34,9 +34,8 @@ public class Student extends User {
 		// TODO Auto-generated method stub
 		System.out.println("Please select from the below options: ");
 		System.out.println("\n1. Profile \t\t 2. Resources");
-		System.out.println("3. Checked-Out Resources   4. Resource Request");
-		System.out.println("5. Notification\t\t  6. Due-Balance");
-		System.out.println("7. Logout");
+		System.out.println("3. Checked-Out Resources \t\t 4. Notification");
+		System.out.println("5. Due-Balance\t\t  6. Logout");
 		selectAnAction();
 	}
 
@@ -67,21 +66,16 @@ public class Student extends User {
 						flag = false;
 						break;
 					case 4:
-						//Resource Request
-						System.out.println("Deleting a new Student");
-						flag = false;
-						break;
-					case 5:
 						//Notifications
 						System.out.println("Adding a new Faculty");
 						flag = false;
 						break;
-					case 6:
+					case 5:
 						//Due-Balances
 						System.out.println("Deleting a new Faculty");
 						flag = false;
 						break;
-					case 7:
+					case 6:
 						//Log Out
 						System.out.println("Goodbye!!!");
 						// ask for login again
