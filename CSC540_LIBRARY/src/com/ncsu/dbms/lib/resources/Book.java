@@ -127,10 +127,47 @@ public class Book {
 				flag=false;
 		}
 		while(flag);
-		System.out.println(isbn + " "+ library);
-		checkOutBook(isbn,library);
+
+		flag = true;
+		boolean flagDate = true;
+		boolean flagTime = true;
+		do{
+				String return_date = null;
+				String enteredDate = null;
+				String enteredHour = null;
+				String enteredTime = null;
+				//String validFormat = "yyyy-mm-dd hh:mm:ss";
+				String validDateFormat = "yyyy-MM-dd";
+				String validTimeFormat = "HH:mm:ss";
+				do{
+					Utility.welcomeMessage("Please enter date of return in yyyy-MM-dd format:");
+					enteredDate = Utility.enteredConsoleString();
+					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
+							flagDate = false;
+							do{
+								Utility.welcomeMessage("Please enter time of return in HH:mm:ss format:");
+								enteredTime = Utility.enteredConsoleString();
+								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
+									flagTime = false;
+									flag = false;
+									return_date = enteredDate + " " + enteredTime;
+									System.out.println(isbn + " "+ library + " " + return_date);
+									checkOutBook(isbn,library,return_date);	
+								}else{
+									System.out.println("Time is invalid. Please try again");
+								}
+							}
+							while(flagTime);
+					}else{
+						System.out.println("Date is invalid. Please try again!");
+					}
+				}
+				while(flagDate);
+		}
+		while (flag);				
 	}
-	private  void checkOutBook(String isbn, String lib) {
+	
+	private  void checkOutBook(String isbn, String lib, String return_date) {
 		try{
 	    	/*CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_out_pkg.check_out_proc(?, ?,?,?,?,?)}");
 	    	cstmt.setString(1, Constant.kBook);
@@ -143,7 +180,7 @@ public class Book {
 	    	String outputMessage = DBConnection.returnMessage(cstmt, 6);
 	       	System.out.println(outputMessage);*/
 			Resource sr = new Resource(this.userName);
-			sr.checkOutResource(Constant.kBook, isbn, Constant.kStudent, this.userName, Utility.getLibraryId(lib));
+			sr.checkOutResource(Constant.kBook, isbn, Constant.kStudent, this.userName, Utility.getLibraryId(lib), return_date);
 	       	callStudentDialogueBox();
 	       	
 		}
