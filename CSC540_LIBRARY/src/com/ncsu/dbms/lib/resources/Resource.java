@@ -110,17 +110,18 @@ public class Resource {
 	}
 	//Generic method for checking out a resource
 	//Call this method to check out Books/ebooks/journals/conference papers
-	public  void checkOutResource(String resourceType, String resourceName, String userType, String userName, String libraryType)throws SQLException {
+	public  void checkOutResource(String resourceType, String resourceName, String userType, String userName, String libraryType, String returnDate)throws SQLException {
 		try{
-	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_out_pkg.check_out_proc(?, ?,?,?,?,?)}");
+	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_out_pkg.check_out_proc(?, ?,?,?,?,?,?)}");
 	    	cstmt.setString(1, resourceType);
 	    	cstmt.setString(2, resourceName.toUpperCase());
 	    	cstmt.setString(3, userType);
 	    	cstmt.setString(4, userName);
 	    	cstmt.setString(5, libraryType);
-
-	    	cstmt.registerOutParameter(6, java.sql.Types.VARCHAR);
-	    	String outputMessage = DBConnection.returnMessage(cstmt, 6);
+	    	cstmt.setString(6, returnDate);
+	    	
+	    	cstmt.registerOutParameter(7, java.sql.Types.VARCHAR);
+			String outputMessage = DBConnection.returnMessage(cstmt, 7);
 	       	System.out.println(outputMessage);
 		}
 	       	catch(SQLException e){

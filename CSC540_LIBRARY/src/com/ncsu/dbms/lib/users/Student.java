@@ -251,7 +251,8 @@ public class Student extends User {
 	}
 	private void dateOfBirthValidation(){
 		String enteredValue = enteredProfileData();
-		if(Utility.validateDateFormat(enteredValue))
+		String validFormat = "MM/dd/yyyy";
+		if(Utility.validateDateFormat(enteredValue, validFormat))
 		{
 			System.out.println("Date is valid");
 			//call save functionality

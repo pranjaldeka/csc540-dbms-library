@@ -8,9 +8,9 @@ import java.util.Scanner;
 import oracle.jdbc.Const;
 
 public final class Utility {
-	public static boolean validateDateFormat(String dateToValdate) {
+	public static boolean validateDateFormat(String dateToValdate, String validFormat) {
 
-	    SimpleDateFormat formatter = new SimpleDateFormat("MM/dd/yyyy");
+	    SimpleDateFormat formatter = new SimpleDateFormat(validFormat);
 	    //To make strict date format validation
 	    formatter.setLenient(false);
 	    Date parsedDate = null;
@@ -18,7 +18,7 @@ public final class Utility {
 	        parsedDate = formatter.parse(dateToValdate);
 	    } catch (ParseException e) {
 	        //Handle exception
-	    	System.out.println("Holy Crap!!");
+	    	System.out.println("Date Exception!!");
 	    }
 	    if(parsedDate==null)return false;
 	    else return true;
