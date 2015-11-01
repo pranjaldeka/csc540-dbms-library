@@ -20,6 +20,11 @@ PROCEDURE fetch_conf_papers_data_proc(
 	p_ref			OUT SYS_REFCURSOR,
 	out_err_msg		OUT VARCHAR2
 );
+
+PROCEDURE fetch_cameras_data_proc(
+	p_ref			OUT SYS_REFCURSOR,
+	out_err_msg		OUT VARCHAR2
+);
 END student_publication_pkg;
 /
 CREATE OR REPLACE PACKAGE BODY student_publication_pkg 
@@ -122,5 +127,32 @@ BEGIN
  WHEN NO_DATA_FOUND THEN
     out_err_msg:='No Conference Paper found!!';
 END fetch_conf_papers_data_proc;
+
+PROCEDURE fetch_cameras_data_proc(
+	p_ref			OUT SYS_REFCURSOR,
+	out_err_msg		OUT VARCHAR2
+)
+IS
+
+BEGIN
+	OPEN p_ref FOR
+		SELECT 
+		      c.*,
+		      l.name,
+		      
+		FROM
+		        cameras c,
+		        cameras_in_libraries cil,
+		        libraries l
+       WHERE
+		       c.camera_id = cil.camera_id AND
+		       cil.library_id = l.library_id;
+	
+  EXCEPTION
+ WHEN NO_DATA_FOUND THEN
+    out_err_msg:='No Camera found!!';
+END fetch_cameras_data_proc;
+
+
 END student_publication_pkg;
 /

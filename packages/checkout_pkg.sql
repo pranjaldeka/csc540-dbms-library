@@ -148,7 +148,7 @@ BEGIN
 					select to_char(sysdate,'HH24MMSS') 
 					INTO time_day from dual;
 				
-					if time_day >= '00000' AND time_day <= '120000'
+					if time_day >= '00000' AND time_day <= '235959'
 					then
 						invalid := 0;
 						
