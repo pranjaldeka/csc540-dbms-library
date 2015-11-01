@@ -9,8 +9,10 @@ import java.util.Scanner;
 import oracle.jdbc.OracleTypes;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
+import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.users.Student;
 import com.ncsu.dbms.lib.utilities.Constant;
+import com.ncsu.dbms.lib.utilities.Utility;
 
 public class Journal {
 	String userName;
@@ -61,11 +63,11 @@ public class Journal {
 			e.printStackTrace();
 		}
 	}
-	public static void displayDialogueAfterSearch(){
+	public  void displayDialogueAfterSearch(){
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Check out Journal.\t0:Go back to previous menu.");
+			System.out.println("1: Check-out a Journal.\t0:Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -73,8 +75,9 @@ public class Journal {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Checking out Journal");
+						System.out.println("Checking out a Journal");
 						// Call check out method
+						checkOutJournalConsole();
 						flag = false;
 							break;
 					case 0:
@@ -94,5 +97,77 @@ public class Journal {
 			displayDialogueAfterSearch();
 		}
 	}
+	private void checkOutJournalConsole(){
+		Utility.setMessage("Please enter the ISSN number of journal you want to check out");
+		String issn = Utility.enteredConsoleString();
+		String library = null;
+		boolean flag = true;
+		do{
+			Utility.setMessage("Please select the Library:");
+			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
+			 library = Utility.enteredConsoleString();
+			if(library.equals("1") || library.equals("2"))
+				flag=false;
+		}
+		while(flag);
+		flag = true;
+		boolean flagDate = true;
+		boolean flagTime = true;
+		do{
+				String return_date = null;
+				String enteredDate = null;
+				String enteredHour = null;
+				String enteredTime = null;
+				//String validFormat = "yyyy-mm-dd hh:mm:ss";
+				String validDateFormat = "yyyy-MM-dd";
+				String validTimeFormat = "HH:mm:ss";
+				do{
+					Utility.setMessage("Please enter date of return in yyyy-MM-dd format:");
+					enteredDate = Utility.enteredConsoleString();
+					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
+							flagDate = false;
+							do{
+								Utility.setMessage("Please enter time of return in HH:mm:ss format:");
+								enteredTime = Utility.enteredConsoleString();
+								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
+									flagTime = false;
+									flag = false;
+									return_date = enteredDate + " " + enteredTime;
+									System.out.println(issn + " "+ library + " " + return_date);
+									checkOutConfPaper(issn,library,return_date);	
+								}else{
+									System.out.println("Time is invalid. Please try again");
+								}
+							}
+							while(flagTime);
+					}else{
+						System.out.println("Date is invalid. Please try again!");
+					}
+				}
+				while(flagDate);
+		}
+		while (flag);	
+	}
+	private  void checkOutConfPaper(String issn, String lib, String return_date) {
+		try{
 
+			Resource sr = new Resource(this.userName);
+			sr.checkOutResource(Constant.kJournal, issn, Constant.kStudent, this.userName, Utility.getLibraryId(lib), return_date);
+	       	callStudentDialogueBox();
+	       	
+		}
+	       	catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+	       		callStudentDialogueBox();
+			} 	
+
+	}
+
+
+
+	private void callStudentDialogueBox(){
+		Student s = new Student(this.userName);
+		s.showMenuItems();
+	}
 }

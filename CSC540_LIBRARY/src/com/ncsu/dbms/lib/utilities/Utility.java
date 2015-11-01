@@ -48,7 +48,7 @@ public final class Utility {
 	  }  
 	  return true;  
 	}
-	public static void welcomeMessage(String message){
+	public static void setMessage(String message){
 		System.out.println(message);
 	}
 	public static void badErrorMessage(){
@@ -61,5 +61,45 @@ public final class Utility {
 			return Constant.kHuntLibrary;
 		else
 			return null;
+	}
+	
+	public static String getTimeInput() {
+		boolean flag = true;
+		boolean flagDate = true;
+		boolean flagTime = true;
+		String return_date = null;
+		do{
+				String enteredDate = null;
+				String enteredTime = null;
+				//String validFormat = "yyyy-mm-dd hh:mm:ss";
+				String validDateFormat = "yyyy-MM-dd";
+				String validTimeFormat = "HH:mm:ss";
+				do{
+					Utility.setMessage("Please enter date of return in yyyy-MM-dd format:");
+					enteredDate = Utility.enteredConsoleString();
+					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
+							flagDate = false;
+							do{
+								Utility.setMessage("Please enter time of return in HH:mm:ss format:");
+								enteredTime = Utility.enteredConsoleString();
+								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
+									flagTime = false;
+									flag = false;
+									return_date = enteredDate + " " + enteredTime;
+									return return_date;
+
+								}else{
+									System.out.println("Time is invalid. Please try again");
+								}
+							}
+							while(flagTime);
+					}else{
+						System.out.println("Date is invalid. Please try again!");
+					}
+				}
+				while(flagDate);
+		}
+		while (flag);	
+		return return_date;
 	}
 }

@@ -11,6 +11,7 @@ PROCEDURE CHECK_OUT_PROC(
 	LIBRARY_ID 			IN  VARCHAR2,
 	duedate				IN	VARCHAR2,
 	OUTPUT    OUT           VARCHAR2
+  
 );
 END CHECK_OUT_PKG;
 /
@@ -40,6 +41,8 @@ valid_duration varchar2(200);
 duedate_timestamp timestamp;
 validdate_timestamp timestamp;
 currentdate_timestamp timestamp;
+day_week varchar2(50);
+time_day varchar2(10);
 BEGIN
   invalid := 0;
   IF USER_TYPE = 'S' 
@@ -71,11 +74,11 @@ BEGIN
             THEN
                 table_name := 'CONFERENCE_PAPERS';
                 search_parameter := 'CONF_PAPER_ID';
-          	/*ELSIF ISSUE_TYPE = 'C' 
+          	ELSIF ISSUE_TYPE = 'C' 
             THEN
                 table_name := 'CAMERAS';
                 search_parameter := 'CAMERA_ID';
-						*/
+						
             ELSE
                 invalid :=1;
             END IF;
@@ -89,37 +92,90 @@ BEGIN
 									(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') into current_datetime
 									 FROM DUAL;
 		  /*check if due date is valid */
-			sql_statement :='
-				SELECT DISTINCT VALID_DURATION 
-				FROM CHECKOUT_VALID_DURATION
-				WHERE USER_TYPE = '''||user_type||''' 
-				AND RESOURCE_TYPE = '''||issue_type||'''
-						';
-            
-        DBMS_OUTPUT.PUT_LINE(sql_statement);
-			EXECUTE IMMEDIATE sql_statement INTO valid_duration;
 			
+      
+      
 			sql_statement :='
 				SELECT to_timestamp('''||duedate||''',''yyyy-mm-dd HH24 mi-ss'') 
 				FROM DUAL';
 			  DBMS_OUTPUT.PUT_LINE(sql_statement);
 			EXECUTE IMMEDIATE sql_statement INTO duedate_timestamp;
 			
-			sql_statement :='
-				SELECT CURRENT_TIMESTAMP + '||valid_duration||'
-				FROM DUAL
-				';
-        DBMS_OUTPUT.PUT_LINE(sql_statement);
-			EXECUTE IMMEDIATE sql_statement INTO validdate_timestamp;
+	
 			
       SELECT CURRENT_TIMESTAMP INTO currentdate_timestamp 
       FROM dual;
       
-		IF duedate_timestamp > validdate_timestamp OR duedate_timestamp < currentdate_timestamp
+		IF ISSUE_TYPE <> 'C'  
         THEN
-          invalid := 1;
+					sql_statement :='
+					SELECT DISTINCT VALID_DURATION 
+					FROM CHECKOUT_VALID_DURATION
+					WHERE USER_TYPE = '''||user_type||''' 
+					AND RESOURCE_TYPE = '''||issue_type||'''
+							';
+				
+					DBMS_OUTPUT.PUT_LINE(sql_statement);
+					EXECUTE IMMEDIATE sql_statement INTO valid_duration;
+		  
+					sql_statement :='
+					SELECT CURRENT_TIMESTAMP + '||valid_duration||'
+					FROM DUAL
+					';
+					DBMS_OUTPUT.PUT_LINE(sql_statement);
+					EXECUTE IMMEDIATE sql_statement INTO validdate_timestamp;
+					/*DBMS_OUTPUT.PUT_LINE(validdate_timestamp);
+            	DBMS_OUTPUT.PUT_LINE(currentdate_timestamp);
+              	DBMS_OUTPUT.PUT_LINE(duedate_timestamp);
+					*/
+          IF duedate_timestamp <= validdate_timestamp AND duedate_timestamp >=currentdate_timestamp
+						THEN
+							invalid := 0;
+						ELSE
+							invalid := 1;						
+						END IF;
+						
+
+  
+		ELSIF issue_type = 'C' 
+		THEN
+				SELECT TO_CHAR(SYSDATE,'D') 
+				INTO day_week
+				from dual;
+				
+				IF day_week = 1
+				THEN
+					select to_char(sysdate,'HH24MMSS') 
+					INTO time_day from dual;
+				
+					if time_day >= '00000' AND time_day <= '235959'
+					then
+						invalid := 0;
+						
+						SELECT to_timestamp(NEXT_DAY(sysdate,'thursday')) + interval '18' hour 
+						INTO validdate_timestamp
+						FROM DUAL;
+            
+						
+						IF duedate_timestamp <= validdate_timestamp AND duedate_timestamp >= currentdate_timestamp
+						THEN
+							invalid := 0;
+						ELSE
+							invalid := 1;						
+						END IF;
+						
+					ELSE
+						invalid := 1;
+					END IF;
+					
+				ELSE 
+				invalid := 1;
+				END IF;
+				
         END IF;
-			IF invalid = 0
+		
+
+		IF invalid = 0
 			
 			THEN
 						
@@ -175,7 +231,7 @@ BEGIN
                   TIMESTAMP'''||duedate||'''
 									)';
 									
-									DBMS_OUTPUT.PUT_LINE(sql_statement);
+									
 									
 									EXECUTE IMMEDIATE sql_statement;
 									
@@ -194,25 +250,25 @@ BEGIN
 							OUTPUT := 'CHECK OUT SUCCESSFUL';
 					
 					ELSE
-					OUTPUT := 'BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER';
+					OUTPUT := 'RESOURCE UNAVAILABLE/ ALREADY ISSUED TO THE USER';
 					END IF;
 			ELSE
 					OUTPUT := 'INVALID RETURN DATE';
 			END IF;
 	ELSE
         OUTPUT := 'INVALID PARAMETERS';
-        /*DBMS_OUTPUT.PUT_LINE('BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
+        /*DBMS_OUTPUT.PUT_LINE('RESOURCE UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
 	END IF;	
 			
 	ELSE
         OUTPUT := 'INVALID PARAMETERS';
-        /*DBMS_OUTPUT.PUT_LINE('BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
+        /*DBMS_OUTPUT.PUT_LINE('RESOURCE UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
   END IF;
   DBMS_OUTPUT.PUT_LINE(avail_flag);
   EXCEPTION
 	WHEN NO_DATA_FOUND THEN
     /*DBMS_OUTPUT.PUT_LINE('Invalid Inputs');*/
-		 OUTPUT := 'BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER';
+		 OUTPUT := 'RESOURCE UNAVAILABLE/ ALREADY ISSUED TO THE USER';
   WHEN OTHERS THEN
 		output :=SQLERRM;   
 END check_out_proc;
