@@ -83,20 +83,27 @@ IS
 		SELECT to_timestamp(start_time,'yyyy-mm-dd HH24 mi-ss') INTO v_start_time FROM DUAL;
 		SELECT to_timestamp(end_time,'yyyy-mm-dd HH24 mi-ss') INTO v_end_time FROM DUAL;
 
-		IF (v_start_time< SYSDATE OR (v_end_time-v_start_time)*24>3) THEN
+    IF (v_start_time< SYSTIMESTAMP OR v_end_time< SYSTIMESTAMP OR v_end_time< v_start_time)THEN
+      			out_msg:='Entered date and time is invalid!!';
+    END IF;
+		IF ( TO_NUMBER(EXTRACT( hour FROM (v_end_time -  v_start_time)))>3) THEN
 			out_msg:='Please enter a duration less than or equal to 3 hours.';
 			raise user_error;
 		END IF;	
 DBMS_OUTPUT.PUT_LINE('3');
 
 		FOR item IN (
-	    	SELECT reserv_start_time AS s_time,reserv_end_time as e_time
-	  		FROM students_reserves_rooms 
+	    	SELECT sr.reserv_start_time AS s_time,sr.reserv_end_time as e_time
+	  		FROM students_reserves_rooms sr
+	  		WHERE sr.room_no = room_no 
+	  			AND sr.library_id = library_id
 	 		UNION
-			SELECT reserv_start_time AS s_time,reserv_end_time as e_time
-	  		FROM faculties_reserves_rooms
+			SELECT fr.reserv_start_time AS s_time,fr.reserv_end_time as e_time
+	  		FROM faculties_reserves_rooms fr
+	  		WHERE fr.room_no = room_no 
+	  			AND fr.library_id = library_id
 	  ) LOOP
-			IF(v_start_time>item.e_time OR v_end_time<item.s_time) THEN
+			IF((item.s_time<= v_start_time AND v_start_time <=item.e_time) OR (item.s_time<=v_end_time AND v_end_time<=item.e_time)) THEN
 				out_msg:='Can not reserve. The entered time interval is already reserved!!';
 				raise user_error;
 			END IF;	
@@ -141,7 +148,7 @@ DBMS_OUTPUT.PUT_LINE(v_id);
 		commit;	
 		EXECUTE IMMEDIATE	sql_stmt;
 		COMMIT;
-		out_msg:= 'Room reservation successful, Room No- ' ;--||room_no|| ' Library: '|| library_id || ' Start time : '||v_start_time|| ' End Time '|| v_end_time;
+		out_msg:= 'Room reservation successful, Room No- ' ||room_no|| ' Library: '|| library_id || ' Start time : '||v_start_time|| ' End Time '|| v_end_time;
 	EXCEPTION
 		WHEN USER_ERROR THEN
 			out_msg:= 'Error: ' || out_msg;
