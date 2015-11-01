@@ -100,7 +100,7 @@ BEGIN
 			EXECUTE IMMEDIATE sql_statement INTO valid_duration;
 			
 			sql_statement :='
-				SELECT to_timestamp('''||duedate||''',''yyyy-mm-dd hh-mi-ss'') 
+				SELECT to_timestamp('''||duedate||''',''yyyy-mm-dd HH24 mi-ss'') 
 				FROM DUAL';
 			  DBMS_OUTPUT.PUT_LINE(sql_statement);
 			EXECUTE IMMEDIATE sql_statement INTO duedate_timestamp;
