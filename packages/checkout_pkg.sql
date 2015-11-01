@@ -4,11 +4,12 @@ IS
 
 PROCEDURE CHECK_OUT_PROC(
     
-	ISSUE_TYPE	    	IN 	VARCHAR2,
-	ISSUE_TYPE_ID		IN 	VARCHAR2,
+	issue_type	    	IN 	VARCHAR2,
+	issue_type_id		IN 	VARCHAR2,
 	USER_TYPE           IN  VARCHAR2,
 	USER_ID 			IN  VARCHAR2,
 	LIBRARY_ID 			IN  VARCHAR2,
+	duedate				IN	VARCHAR2,
 	OUTPUT    OUT           VARCHAR2
 );
 END CHECK_OUT_PKG;
@@ -22,6 +23,7 @@ PROCEDURE CHECK_OUT_PROC(
 	USER_TYPE           IN  VARCHAR2,
 	USER_ID 			IN  VARCHAR2,
 	LIBRARY_ID 			IN  VARCHAR2,
+	duedate				IN	VARCHAR2,
   OUTPUT    OUT  VARCHAR2
 )
 IS
@@ -33,7 +35,11 @@ user_table 			varchar2(100);
 current_datetime 	varchar2(100);
 invalid 			number(2);
 search_parameter 	VARCHAR2(50);
-primary_id varchar(100);
+primary_id varchar2(100);
+valid_duration varchar2(200);
+duedate_timestamp timestamp;
+validdate_timestamp timestamp;
+currentdate_timestamp timestamp;
 BEGIN
   invalid := 0;
   IF USER_TYPE = 'S' 
@@ -78,81 +84,121 @@ BEGIN
 				
         IF  invalid = 0
 			THEN
+			/*current date time*/
+			SELECT TO_CHAR
+									(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') into current_datetime
+									 FROM DUAL;
+		  /*check if due date is valid */
+			sql_statement :='
+				SELECT DISTINCT VALID_DURATION 
+				FROM CHECKOUT_VALID_DURATION
+				WHERE USER_TYPE = '''||user_type||''' 
+				AND RESOURCE_TYPE = '''||issue_type||'''
+						';
+            
+        DBMS_OUTPUT.PUT_LINE(sql_statement);
+			EXECUTE IMMEDIATE sql_statement INTO valid_duration;
+			
+			sql_statement :='
+				SELECT to_timestamp('''||duedate||''',''yyyy-mm-dd hh-mi-ss'') 
+				FROM DUAL';
+			  DBMS_OUTPUT.PUT_LINE(sql_statement);
+			EXECUTE IMMEDIATE sql_statement INTO duedate_timestamp;
+			
+			sql_statement :='
+				SELECT CURRENT_TIMESTAMP + '||valid_duration||'
+				FROM DUAL
+				';
+        DBMS_OUTPUT.PUT_LINE(sql_statement);
+			EXECUTE IMMEDIATE sql_statement INTO validdate_timestamp;
+			
+      SELECT CURRENT_TIMESTAMP INTO currentdate_timestamp 
+      FROM dual;
       
-        /*find student id or facultyid */
-          sql_statement := 
-          '
-          SELECT '||user_id_column||' 
-          FROM '||user_table||'
-          WHERE user_id = '''||user_id||'''';
-          /*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
-          EXECUTE IMMEDIATE sql_statement INTO primary_id;
-			  avail_flag :=0;
-			  sql_statement := 
-					'SELECT 1 
-					FROM SSINGH25.' || table_name || ' T1
-					inner join 
-					SSINGH25.'||table_name||'_in_libraries T2
-					ON T1.'||search_parameter|| '=T2.'||search_parameter|| '
-					WHERE T2.LIBRARY_ID= '''||LIBRARY_ID||''' 
-					and T1.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''
-					and not exists
-					(
-					select 1 
-					from ssingh25.'||user_table||'_CO_'||table_name||' 
-					where '||search_parameter|| '='''||ISSUE_TYPE_ID||'''
-					and '||user_id_column|| '='''||primary_id||'''
-					and return_date is null
-					)
-					and no_of_hardcopies <> 0';
-				
-				/*DBMS_OUTPUT.PUT_LINE(sql_statement);
-        */
-        /*DBMS_OUTPUT.PUT_LINE(avail_flag);*/
-				EXECUTE IMMEDIATE sql_statement INTO avail_flag;
-				
-        IF avail_flag = 1
-				THEN
-				/*
-				#######################CHECKOUT TRANSACTION#######################;
-				*/
-          
-					
-             SELECT TO_CHAR
-						(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') into current_datetime
-						 FROM DUAL;
+		IF duedate_timestamp > validdate_timestamp OR duedate_timestamp < currentdate_timestamp
+        THEN
+          invalid := 1;
+        END IF;
+			IF invalid = 0
+			
+			THEN
+						
+					/*find student id or facultyid */
+					  sql_statement := 
+					  '
+					  SELECT '||user_id_column||' 
+					  FROM '||user_table||'
+					  WHERE user_id = '''||user_id||'''';
+					  /*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
+					  EXECUTE IMMEDIATE sql_statement INTO primary_id;
+						  avail_flag :=0;
+						  sql_statement := 
+								'SELECT 1 
+								FROM SSINGH25.' || table_name || ' T1
+								inner join 
+								SSINGH25.'||table_name||'_in_libraries T2
+								ON T1.'||search_parameter|| '=T2.'||search_parameter|| '
+								WHERE T2.LIBRARY_ID= '''||LIBRARY_ID||''' 
+								and T1.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''
+								and not exists
+								(
+								select 1 
+								from ssingh25.'||user_table||'_CO_'||table_name||' 
+								where '||search_parameter|| '='''||ISSUE_TYPE_ID||'''
+								and '||user_id_column|| '='''||primary_id||'''
+								and return_date is null
+								)
+								and no_of_hardcopies <> 0';
+							
+							/*DBMS_OUTPUT.PUT_LINE(sql_statement);
+					*/
+					/*DBMS_OUTPUT.PUT_LINE(avail_flag);*/
+							EXECUTE IMMEDIATE sql_statement INTO avail_flag;
+							
+					IF avail_flag = 1
+							THEN
+							/*
+							#######################CHECKOUT TRANSACTION#######################;
+							*/
+					  
+								
 						 
-						sql_statement := '
-						INSERT INTO '||user_table||'_CO_'||table_name||'
-						VALUES (
-						'''||primary_id||''',
-						'''||ISSUE_TYPE_ID||''',
-						'''||LIBRARY_ID||''',
-						TIMESTAMP'''||current_datetime||''',
-						NULL
-						)';
-						
-						/*DBMS_OUTPUT.PUT_LINE(sql_statement);
-						*/
+									 
+									sql_statement := '
+									INSERT INTO '||user_table||'_CO_'||table_name||'
+									VALUES (
+									'''||primary_id||''',
+									'''||ISSUE_TYPE_ID||''',
+									'''||LIBRARY_ID||''',
+									TIMESTAMP'''||current_datetime||''',
+									NULL,
+                  TIMESTAMP'''||duedate||'''
+									)';
+									
+									DBMS_OUTPUT.PUT_LINE(sql_statement);
+									
+									EXECUTE IMMEDIATE sql_statement;
+									
+									/*update No. of avaialable hard copies*/
+									
+									sql_statement := 'UPDATE 
+									SSINGH25.'||table_name||'_in_libraries T
+									SET NO_OF_HARDCOPIES =NO_OF_HARDCOPIES-1
+									WHERE T.LIBRARY_ID= '''||LIBRARY_ID||''' 
+									and T.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''';
+									/*DBMS_OUTPUT.PUT_LINE(sql_statement);
+									*/
 						EXECUTE IMMEDIATE sql_statement;
-						
-						/*update No. of avaialable hard copies*/
-						
-						sql_statement := 'UPDATE 
-						SSINGH25.'||table_name||'_in_libraries T
-						SET NO_OF_HARDCOPIES =NO_OF_HARDCOPIES-1
-						WHERE T.LIBRARY_ID= '''||LIBRARY_ID||''' 
-						and T.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''';
-						/*DBMS_OUTPUT.PUT_LINE(sql_statement);
-						*/
-            EXECUTE IMMEDIATE sql_statement;
+								
+								COMMIT;
+							OUTPUT := 'CHECK OUT SUCCESSFUL';
 					
-					COMMIT;
-				OUTPUT := 'CHECK OUT SUCCESSFUL';
-        
-        ELSE
-        OUTPUT := 'BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER';
-		END IF;
+					ELSE
+					OUTPUT := 'BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER';
+					END IF;
+			ELSE
+					OUTPUT := 'INVALID RETURN DATE';
+			END IF;
 	ELSE
         OUTPUT := 'INVALID PARAMETERS';
         /*DBMS_OUTPUT.PUT_LINE('BOOK UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/

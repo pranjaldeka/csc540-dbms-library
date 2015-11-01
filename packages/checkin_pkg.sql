@@ -3,11 +3,10 @@ CREATE OR REPLACE PACKAGE  CHECK_IN_PKG
 IS
 PROCEDURE CHECK_IN_PROC(
     
-	ISSUE_TYPE	    	IN 	VARCHAR2,
-	ISSUE_TYPE_ID		IN 	VARCHAR2,
-	USER_TYPE           IN  VARCHAR2,
-	USER_ID 			IN  VARCHAR2,
-	LIBRARY_ID 			IN  VARCHAR2,
+	issue_type	    	in 	varchar2,
+	issue_type_id		in 	varchar2,
+	user_type           in  varchar2,
+	user_id 			in  varchar2,	
   OUTPUT    OUT VARCHAR2
 );
 END CHECK_IN_PKG;
@@ -20,7 +19,6 @@ PROCEDURE CHECK_IN_PROC(
 	issue_Type_Id		In 	Varchar2,
 	user_Type           In  Varchar2,
 	user_Id 			In  Varchar2,
-	library_Id 			In  Varchar2,
   output    Out  Varchar2
 )
 IS
@@ -33,6 +31,7 @@ current_datetime 	varchar2(100);
 invalid 			number(2);
 search_parameter 	VARCHAR2(50);
 primary_id VARCHAR2(100);
+library_id 	VARCHAR2(50);
 BEGIN
   invalid := 0;
   IF USER_TYPE = 'S' 
@@ -92,19 +91,32 @@ BEGIN
           SELECT TO_CHAR
 						(SYSDATE, 'YYYY-MM-DD HH24:MI:SS') into current_datetime
 						 FROM DUAL;
-						 
+             
+						  /*find library id*/
+            sql_statement := 'SELECT library_id FROM ssingh25.'||user_table||'_CO_'||table_name||' 
+            where '||search_parameter|| '='''||ISSUE_TYPE_ID||'''
+            and '||user_id_column|| '='''||primary_id||'''
+            and return_date is null
+            ';
+            DBMS_OUTPUT.PUT_LINE(sql_statement) ;
+            EXECUTE IMMEDIATE sql_statement INTO library_id ;
+             DBMS_OUTPUT.PUT_LINE(library_id) ;
+
 						sql_statement := 
             'update ssingh25.'||user_table||'_CO_'||table_name||' 
             set return_date=TIMESTAMP'''||current_datetime||'''
             where '||search_parameter|| '='''||ISSUE_TYPE_ID||'''
             and '||user_id_column|| '='''||primary_id||'''
-            and  library_id='''||library_id||'''
-            and return_date is null';
+            and return_date is null
+            ';
 						
-						/*DBMS_OUTPUT.PUT_LINE(sql_statement);
+						/*DBMS_OUTPUT.PUT_LINE(sql_statement) ;
 						*/
-						EXECUTE IMMEDIATE sql_statement;
+						EXECUTE IMMEDIATE sql_statement ;
 						
+           
+						
+            
 						/*update No. of avaialable hard copies*/
 						
 						sql_statement := 'UPDATE 
