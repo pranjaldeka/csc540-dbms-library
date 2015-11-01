@@ -15,9 +15,11 @@ import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
 
 public class Room {
-	String userName;
-	public Room(String userName){
+	private String userName;
+	private String userType;
+	public Room(String userName, String userType){
 		this.userName = userName;
+		this.userType = userType;
 	}
 	
 	public void showDialogueBox(){
@@ -46,10 +48,11 @@ public class Room {
 		}
 		while(flag);
 		
+		
 		try {
         	ResultSet rs;
         	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call USER_ROOM_PKG.user_fetches_rooms_proc(?, ?, ?, ?, ?)}");
-        	cstmt.setString(1, Constant.kStudent);
+        	cstmt.setString(1, userType);
         	cstmt.setString(2, inputCapacity);
         	cstmt.setString(3, Utility.getLibraryId(library));
         	cstmt.registerOutParameter(4, OracleTypes.CURSOR);
@@ -60,14 +63,14 @@ public class Room {
 	       	if(!arrayList.get(1).equals(Constant.kBlankString))
 	       	{
 	       		System.out.println(arrayList.get(1));
-	            Resource sr = new Resource(this.userName);
+	            Resource sr = new Resource(this.userName, this.userType);
                 sr.searchResources();
 	       		return;
 	       	}  
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
                 System.out.println("No Rooms found with the input criteria. Please try again!!\n");
-                Resource sr = new Resource(this.userName);
+                Resource sr = new Resource(this.userName, this.userType);
                 sr.searchResources();
                 return;
             } else {
@@ -110,7 +113,7 @@ public class Room {
 						break;
 					case 0:
 						System.out.println("Going back to previous menu\n");
-		                Resource sr = new Resource(this.userName);
+		                Resource sr = new Resource(this.userName, this.userType);
 		                sr.searchResources();
 						flag = false;
 						break;
@@ -152,9 +155,9 @@ public class Room {
 		Utility.setMessage("Please enter end time ");
 		String endTime = Utility.getTimeInput();
 		
-		Resource resource = new Resource(userName);
+		Resource resource = new Resource(userName, this.userType);
 		try {
-			resource.reserveRoom(Constant.kStudent, library, roomNo, startTime, endTime);
+			resource.reserveRoom(library, roomNo, startTime, endTime);
 		} catch (SQLException e) {
 			PrintSQLException.printSQLException(e);
 			Utility.badErrorMessage();

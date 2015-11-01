@@ -15,10 +15,12 @@ import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
 
 public class Camera {
-	String userName;
-	public Camera(String username) {
+	private String userName;
+	private String userType;
+	public Camera(String username, String userType) {
 		//showDialogueBox();
 		this.userName = username;
+		this.userType = userType;
 	}
 	public void showDialogueBox(){
 		
@@ -56,7 +58,7 @@ public class Camera {
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
                 System.out.println("No cameras found with the entered keyword. Please try a different keyword:");
-                Resource sr = new Resource(this.userName);
+                Resource sr = new Resource(this.userName, this.userType);
                 sr.showPublicationMenuItems();
                 return;
             } else {		
@@ -191,8 +193,8 @@ public class Camera {
 	private  void checkOutCamera(String cameraid, String lib, String return_date) {
 		try{
 	
-			Resource sr = new Resource(this.userName);
-			sr.checkOutResource(Constant.kCamera, cameraid, Constant.kStudent, this.userName, Utility.getLibraryId(lib), return_date);
+			Resource sr = new Resource(this.userName, this.userType);
+			sr.checkOutResource(Constant.kCamera, cameraid, Utility.getLibraryId(lib), return_date);
 	       	callStudentDialogueBox();
 	       	
 		}

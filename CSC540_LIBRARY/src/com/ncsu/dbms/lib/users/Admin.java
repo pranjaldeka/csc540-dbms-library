@@ -2,30 +2,29 @@ package com.ncsu.dbms.lib.users;
 
 import java.util.Scanner;
 
+import com.ncsu.dbms.lib.utilities.Constant;
+
 public class Admin extends User {
 
 	@SuppressWarnings("unused")
 	private String userName;
 	public Admin(String userName, String firstName, String lastName) {
-		// TODO Auto-generated constructor stub
-		this.userName = userName;
-		System.out.println("*******************Welcome*****************\n");
-		System.out.println("\t\t" + firstName + " " + lastName + "!!!");
-		System.out.println("\n*******************************************");
-		showMenuItems();
+		super(userName, firstName, lastName);
 	}
-
-	private void showMenuItems() {
-		// TODO Auto-generated method stub
+	
+	public Admin(String userName){
+		super(userName);
+	}
+	
+	public  void showMenuItems() {
 		System.out.println("Please select from the below options: ");
-		System.out.println("\n1. Add a New Book entry \t\t 2. Delete a Book entry");
-		System.out.println("3. Add a new Student entry \t\t 4. Delete a Student entry");
-		System.out.println("5. Add a new Faculty entry \t\t 6. Delete a Faculty entry");
-		System.out.println("7. Add a new Admin entry   \t\t 8. Delete a Admin entry");
+		System.out.println("\n1. Profile \t\t 2. Resources");
+		System.out.println("3. Checked-Out Resources \t\t 4. Notification");
+		System.out.println("5. Due-Balance\t\t  6. Logout");
 		selectAnAction();
 	}
 
-	private void selectAnAction() {
+	protected void selectAnAction() {
 		boolean flag = true;
 		while(flag){
 				@SuppressWarnings("resource")
@@ -70,9 +69,10 @@ public class Admin extends User {
 						
 				}
 			}
-		
+		}
 	
-		
-	}
+	protected void showProfile(){}
+	
+	protected void modifyProfileDataMenu() {}
 
 }

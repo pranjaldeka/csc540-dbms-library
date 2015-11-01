@@ -15,9 +15,11 @@ import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
 
 public class Journal {
-	String userName;
-	public Journal(String userName){
+	private String userName;
+	private String userType;
+	public Journal(String userName, String userType){
 		this.userName=userName;
+		this.userType = userType;
 		
 	}
 	public void showDialogueBox(){
@@ -42,7 +44,7 @@ public class Journal {
 	       	rs = (ResultSet)arrayList.get(0);
 	       	if (!rs.next() ) {
 	       		System.out.println("No conference papers found with the entered keyword. Please try a different keyword:");
-	       		Resource sr = new Resource(this.userName);
+	       		Resource sr = new Resource(this.userName, this.userType);
 	       		sr.showPublicationMenuItems();
 	       		return;
             } else {
@@ -110,57 +112,23 @@ public class Journal {
 				flag=false;
 		}
 		while(flag);
-		flag = true;
-		boolean flagDate = true;
-		boolean flagTime = true;
-		do{
-				String return_date = null;
-				String enteredDate = null;
-				String enteredHour = null;
-				String enteredTime = null;
-				//String validFormat = "yyyy-mm-dd hh:mm:ss";
-				String validDateFormat = "yyyy-MM-dd";
-				String validTimeFormat = "HH:mm:ss";
-				do{
-					Utility.setMessage("Please enter date of return in yyyy-MM-dd format:");
-					enteredDate = Utility.enteredConsoleString();
-					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
-							flagDate = false;
-							do{
-								Utility.setMessage("Please enter time of return in HH:mm:ss format:");
-								enteredTime = Utility.enteredConsoleString();
-								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
-									flagTime = false;
-									flag = false;
-									return_date = enteredDate + " " + enteredTime;
-									System.out.println(issn + " "+ library + " " + return_date);
-									checkOutConfPaper(issn,library,return_date);	
-								}else{
-									System.out.println("Time is invalid. Please try again");
-								}
-							}
-							while(flagTime);
-					}else{
-						System.out.println("Date is invalid. Please try again!");
-					}
-				}
-				while(flagDate);
-		}
-		while (flag);	
+		String return_date = Utility.getTimeInput();
+		
+		checkOutConfPaper(issn,library,return_date);
 	}
 	private  void checkOutConfPaper(String issn, String lib, String return_date) {
 		try{
 
-			Resource sr = new Resource(this.userName);
-			sr.checkOutResource(Constant.kJournal, issn, Constant.kStudent, this.userName, Utility.getLibraryId(lib), return_date);
+			Resource sr = new Resource(this.userName, this.userType);
+			sr.checkOutResource(Constant.kJournal, issn, Utility.getLibraryId(lib), return_date);
 	       	callStudentDialogueBox();
 	       	
 		}
-	       	catch(SQLException e){
-	       		PrintSQLException.printSQLException(e);
-				Utility.badErrorMessage();
-	       		callStudentDialogueBox();
-			} 	
+       	catch(SQLException e){
+       		PrintSQLException.printSQLException(e);
+			Utility.badErrorMessage();
+       		callStudentDialogueBox();
+		} 
 
 	}
 

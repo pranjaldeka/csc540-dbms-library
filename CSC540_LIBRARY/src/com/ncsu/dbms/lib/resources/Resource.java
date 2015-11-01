@@ -4,14 +4,15 @@ import java.sql.CallableStatement;
 import java.sql.SQLException;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
-import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.users.Student;
 import com.ncsu.dbms.lib.utilities.Utility;
 
 public class Resource {
-	String userName;
-	public Resource(String userName){
+	private String userName;
+	private String userType;
+	public Resource(String userName, String userType){
 		this.userName = userName;
+		this.userType = userType;
 	}
 	public  void searchResources(){
 		System.out.println("Please enter your choice:");
@@ -35,14 +36,14 @@ public class Resource {
 							break;
 					case 2:
 						System.out.println("Conference/Study�rooms");
-						Room room = new Room(userName);
+						Room room = new Room(userName, userType);
 						room.showDialogueBox();
 						flag = false;
 						break;
 					case 3:
 						System.out.println("Cameras");						
 						// Call check out method
-						Camera camera = new Camera(this.userName);
+						Camera camera = new Camera(this.userName, this.userType);
 						camera.showDialogueBox();							
 						flag = false;
 						break;
@@ -76,7 +77,7 @@ public class Resource {
 					case 1:
 						System.out.println("Books");
 						// Call check out method
-						Book book = new Book(this.userName);
+						Book book = new Book(this.userName, this.userType);
 						book.showDialogueBox();
 						flag = false;
 							break;
@@ -87,14 +88,14 @@ public class Resource {
 						break;
 					case 3:
 						System.out.println("Journals");
-						Journal journal=new Journal(this.userName);
+						Journal journal=new Journal(this.userName, this.userType);
 						journal.showDialogueBox();
 						flag = false;
 						break;
 					case 4:
 						System.out.println("Conference Papers");
 						// Call check out method
-						ConferencePaper confPaper = new ConferencePaper(this.userName);
+						ConferencePaper confPaper = new ConferencePaper(this.userName, this.userType);
 						confPaper.showDialogueBox();
 						flag = false;
 							break;
@@ -114,7 +115,7 @@ public class Resource {
 	}
 	//Generic method for checking out a resource
 	//Call this method to check out Books/ebooks/journals/conference papers
-	public  void checkOutResource(String resourceType, String resourceName, String userType, String userName, String libraryType, String returnDate)throws SQLException {
+	public  void checkOutResource(String resourceType, String resourceName, String libraryType, String returnDate)throws SQLException {
 		try{
 	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_out_pkg.check_out_proc(?, ?,?,?,?,?,?)}");
 	    	cstmt.setString(1, resourceType);
@@ -144,11 +145,12 @@ public class Resource {
 	 * @param endTime
 	 * @throws SQLException
 	 */
-	public void reserveRoom(String resourceType, String library, String roomNo,
+	public void reserveRoom(String library, String roomNo,
 			String startTime, String endTime) throws SQLException {
+		System.out.println("UserType" + userType);
 		try{
 	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call user_room_pkg.user_reserves_rooms_proc(?, ?,?,?,?,?,?)}");
-	    	cstmt.setString(1, resourceType);
+	    	cstmt.setString(1, userType);
 	    	cstmt.setString(2, userName);
 	    	cstmt.setString(3, roomNo);
 	    	cstmt.setString(4, Utility.getLibraryId(library));
@@ -269,7 +271,7 @@ public class Resource {
 					case 1:
 						System.out.println("Books");
 						// Call check in method
-						Book book = new Book(this.userName);
+						Book book = new Book(this.userName, this.userType);
 						book.checkedOutBooks();
 						flag = false;
 						break;
