@@ -40,8 +40,10 @@ public class Resource {
 						flag = false;
 						break;
 					case 3:
-						System.out.println("Cameras");
-						//Journal.showDialogueBox();
+						System.out.println("Cameras");						
+						// Call check out method
+						Camera camera = new Camera(this.userName);
+						camera.showDialogueBox();							
 						flag = false;
 						break;
 					
@@ -79,8 +81,8 @@ public class Resource {
 						flag = false;
 							break;
 					case 2:
-						System.out.println("Conference/Study�rooms");
-						Camera.showDialogueBox();
+						//System.out.println("Conference/Study�rooms");
+						//Camera.showDialogueBox();
 						flag = false;
 						break;
 					case 3:
@@ -229,7 +231,7 @@ public class Resource {
 						break;
 					case 2:
 						System.out.println("Conference/Study�rooms");
-						Camera.showDialogueBox();
+						//Camera.showDialogueBox();
 						flag = false;
 						break;
 					case 3:
@@ -272,8 +274,8 @@ public class Resource {
 						flag = false;
 						break;
 					case 2:
-						System.out.println("Conference/Study�rooms");
-						Camera.showDialogueBox();
+						//System.out.println("Conference/Study�rooms");
+						//Camera.showDialogueBox();
 						flag = false;
 						break;
 					case 3:
