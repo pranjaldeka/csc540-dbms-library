@@ -91,7 +91,8 @@ BEGIN
 						WHERE
 							T1.'||search_parameter||'=T2.'||search_parameter||'
 							AND '||user_id_column||' = '''||primary_id||'''
-							AND T2.library_id=l.library_id';
+							AND T2.library_id=l.library_id
+							and return_date is null';
 							
 						DBMS_OUTPUT.PUT_LINE(sql_statement);
 		ELSE
