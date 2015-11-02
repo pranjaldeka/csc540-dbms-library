@@ -16,9 +16,11 @@ import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
 
 public class ConferencePaper {
-	String userName;
-	public ConferencePaper(String userName){
+	private String userName;
+	private String userType;
+	public ConferencePaper(String userName, String userType){
 		this.userName=userName;
+		this.userType = userType;
 	}
 		
 	
@@ -43,7 +45,7 @@ public class ConferencePaper {
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
                 System.out.println("No conference papers found with the entered keyword. Please try a different keyword:");
-                Resource sr = new Resource(this.userName);
+                Resource sr = new Resource(this.userName, this.userType);
                 sr.showPublicationMenuItems();
                 return;
             } else {
@@ -162,23 +164,15 @@ public class ConferencePaper {
 	private  void checkOutConfPaper(String confId, String lib, String return_date) {
 		try{
 
-			Resource sr = new Resource(this.userName);
-			sr.checkOutResource(Constant.kConferencePaper, confId, Constant.kStudent, this.userName, Utility.getLibraryId(lib), return_date);
-	       	callStudentDialogueBox();
+			Resource sr = new Resource(this.userName, this.userType);
+			sr.checkOutResource(Constant.kConferencePaper, confId, Utility.getLibraryId(lib), return_date);
 	       	
 		}
-	       	catch(SQLException e){
-	       		PrintSQLException.printSQLException(e);
-				Utility.badErrorMessage();
-	       		callStudentDialogueBox();
-			} 	
+       	catch(SQLException e){
+       		PrintSQLException.printSQLException(e);
+			Utility.badErrorMessage();
+		}
+		Utility.callUserDialogueBox(userName, userType);
 
-	}
-
-
-
-	private void callStudentDialogueBox(){
-		Student s = new Student(this.userName);
-		s.showMenuItems();
 	}
 }

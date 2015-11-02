@@ -8,7 +8,6 @@ import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
-import com.ncsu.dbms.lib.users.Student;
 import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
 
@@ -16,10 +15,13 @@ import oracle.jdbc.OracleTypes;
 
 
 public class Book {
-	String userName;
-	public Book(String userName) {
-		//showDialogueBox();
+
+	private String userName;
+	private String userType;
+
+	public Book(String userName, String userType) {
 		this.userName = userName;
+		this.userType = userType;
 	}
 	public  void showDialogueBox(){
 		searchBook("");
@@ -28,13 +30,6 @@ public class Book {
 		// Searching a book;
     	
         try {
-        	/*CallableStatement cstmt = DBConnection.con.prepareCall("{call student_book_pkg.fetch_books_data_proc(?, ?)}");
-	       	 ResultSet rs; 
-	       	cstmt.registerOutParameter(1, OracleTypes.CURSOR);
-	       	cstmt.registerOutParameter(2, OracleTypes.VARCHAR);
-	       	cstmt.executeQuery();
-	       	rs = (ResultSet) cstmt.getObject(1);
-	       	String error = cstmt.getString(2); */
         	ResultSet rs;
         	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call STUDENT_PUBLICATION_PKG.fetch_books_data_proc(?, ?)}");
 	       	cstmt.registerOutParameter(1, OracleTypes.CURSOR);
@@ -43,14 +38,14 @@ public class Book {
 	       	if(!arrayList.get(1).equals(Constant.kBlankString))
 	       	{
 	       		System.out.println(arrayList.get(1));
-	       	    Resource sr = new Resource(this.userName);
+	       	    Resource sr = new Resource(this.userName, this.userType);
                 sr.showPublicationMenuItems();
 	       		return;
 	       	}  
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
                 System.out.println("No Books found !!");
-                Resource sr = new Resource(this.userName);
+                Resource sr = new Resource(this.userName, this.userType);
                 sr.showPublicationMenuItems();
                 return;
             } else {
@@ -99,7 +94,7 @@ public class Book {
 							break;
 					case 0:
 						System.out.println("Going back to previous menu");
-		                Resource sr = new Resource(this.userName);
+		                Resource sr = new Resource(this.userName, this.userType);
 		                sr.searchResources();
 						flag = false;
 						break;
@@ -128,68 +123,31 @@ public class Book {
 		}
 		while(flag);
 
-		flag = true;
-		boolean flagDate = true;
-		boolean flagTime = true;
-		do{
-				String return_date = null;
-				String enteredDate = null;
-				String enteredTime = null;
-				//String validFormat = "yyyy-mm-dd hh:mm:ss";
-				String validDateFormat = "yyyy-MM-dd";
-				String validTimeFormat = "HH:mm:ss";
-				do{
-					Utility.setMessage("Please enter date of return in yyyy-MM-dd format:");
-					enteredDate = Utility.enteredConsoleString();
-					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
-							flagDate = false;
-							do{
-								Utility.setMessage("Please enter time of return in HH:mm:ss format:");
-								enteredTime = Utility.enteredConsoleString();
-								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
-									flagTime = false;
-									flag = false;
-									return_date = enteredDate + " " + enteredTime;
-									System.out.println(isbn + " "+ library + " " + return_date);
-									checkOutBook(isbn,library,return_date);	
-								}else{
-									System.out.println("Time is invalid. Please try again");
-								}
-							}
-							while(flagTime);
-					}else{
-						System.out.println("Date is invalid. Please try again!");
-					}
-				}
-				while(flagDate);
-		}
-		while (flag);				
+		String return_date = Utility.getTimeInput();
+		
+		checkOutBook(isbn,library,return_date);	
 	}
 	
 	private  void checkOutBook(String isbn, String lib, String return_date) {
-		Resource sr = new Resource(this.userName);
+		Resource sr = new Resource(this.userName, this.userType);
 		try{
-			sr.checkOutResource(Constant.kBook, isbn, Constant.kStudent, 
-					this.userName, Utility.getLibraryId(lib), return_date);
+			sr.checkOutResource(Constant.kBook, isbn, Utility.getLibraryId(lib), return_date);
 		}
        	catch(SQLException e){
        		PrintSQLException.printSQLException(e);
 			Utility.badErrorMessage();
 		} 	
-		callStudentDialogueBox();
+		Utility.callUserDialogueBox(userName, userType);
 
 	}
-	private void callStudentDialogueBox(){
-		Student s = new Student(this.userName);
-		s.showMenuItems();
-	}
+
 	
 	public void checkedOutBooks() {
         try {
         	ResultSet rs;
         	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call checked_out_resource_pkg.checked_out_resources_proc (?, ?, ?, ?, ?)}");
 	       	cstmt.setString(1, Constant.kBook);
-	       	cstmt.setString(2, Constant.kStudent);
+	       	cstmt.setString(2, userType);
 	       	cstmt.setString(3, userName);
         	cstmt.registerOutParameter(4, OracleTypes.CURSOR);
 	       	cstmt.registerOutParameter(5, OracleTypes.VARCHAR);
@@ -197,8 +155,8 @@ public class Book {
 	       	ArrayList<Object> arrayList = DBConnection.returnResultSetAndError(cstmt, 4, 5);  
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
-                Resource sr = new Resource(this.userName);
-                System.out.println("Your have not checkout any books recently");
+                Resource sr = new Resource(this.userName, this.userType);
+                System.out.println("\nYour have not checkout any books recently\n");
                 sr.showPublicationMenuItemsCheckedOut();
                 return;
             } else {
@@ -242,8 +200,7 @@ public class Book {
 						break;
 					case 0:
 						System.out.println("Going back to main menu");
-						Student s = new Student(userName);
-						s.showMenuItems();
+						Utility.callUserDialogueBox(userName, userType);
 						flag = false;
 						break;
 					default:
@@ -267,15 +224,13 @@ public class Book {
 	
 	private  void checkInBook(String isbn) {
 		try{
-			Resource sr = new Resource(this.userName);
-			sr.checkInResource(Constant.kBook, isbn, Constant.kStudent, this.userName);
-	       	callStudentDialogueBox();
-	       	
+			Resource sr = new Resource(this.userName, this.userType);
+			sr.checkInResource(Constant.kBook, isbn);
 		}
 		catch(SQLException e){
 	       		PrintSQLException.printSQLException(e);
 				Utility.badErrorMessage();
-	       		callStudentDialogueBox();
 	    } 	
+		Utility.callUserDialogueBox(userName, userType);
 	}
 }

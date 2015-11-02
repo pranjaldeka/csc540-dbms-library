@@ -6,9 +6,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
-import com.ncsu.dbms.lib.console.LibConsole;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
-import com.ncsu.dbms.lib.login.Login;
 import com.ncsu.dbms.lib.resources.Resource;
 import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
@@ -16,22 +14,18 @@ import com.ncsu.dbms.lib.utilities.Utility;
 import oracle.jdbc.OracleTypes;
 
 public class Student extends User {
-	public  String userName;
 	public Student(String userName, String firstName, String lastName) {
-		this.userName = userName;
-		System.out.println("*******************Welcome*****************\n");
-		System.out.println("\t\t" + firstName + " " + lastName + "!!!");
-		System.out.println("\n*******************************************");
+		super(userName, firstName, lastName);
+		userType = Constant.kStudent;
 		showMenuItems();
 	}
+
 	public Student(String userName){
-		this.userName = userName;
+		super(userName);
+		userType = Constant.kStudent;
 	}
-	public Student(){
-		
-	}
+
 	public  void showMenuItems() {
-		// TODO Auto-generated method stub
 		System.out.println("Please select from the below options: ");
 		System.out.println("\n1. Profile \t\t 2. Resources");
 		System.out.println("3. Checked-Out Resources \t\t 4. Notification");
@@ -50,29 +44,27 @@ public class Student extends User {
 					switch(choice){
 					case 1:
 						//Profile
-						showProfile(this.userName);
+						showProfile();
 						flag=false;
 						break;
 					case 2:
 						//Resources
-						Resource sr = new Resource(this.userName);
+						Resource sr = new Resource(this.userName, this.userType);
 						sr.searchResources();
 						flag = false;
 						break;
 					case 3:
 						//Checked-Out Resources
-						Resource resource = new Resource(this.userName);
+						Resource resource = new Resource(this.userName, this.userType);
 						resource.checkedOutResources();
 						flag = false;
 						break;
 					case 4:
 						//Notifications
-						System.out.println("Adding a new Faculty");
 						flag = false;
 						break;
 					case 5:
 						//Due-Balances
-						System.out.println("Deleting a new Faculty");
 						flag = false;
 						break;
 					case 6:
@@ -87,18 +79,16 @@ public class Student extends User {
 							
 					}
 				}
-		}
+			}
 			catch(Exception e){
 				System.out.println("Something bad happened!!! Please try again...");
 				showMenuItems();
 
 			}
-		
+		}
 	
-		
-	}
 	
-	public void showProfile(String userId){
+	protected void showProfile(){
 		// Searching a book;
         ResultSet rs;
         try {
@@ -107,7 +97,7 @@ public class Student extends User {
         //	cstmt.registerOutParameter(3, java.sql.Types.VARCHAR);
         	cstmt.registerOutParameter(2, OracleTypes.CURSOR);
         	cstmt.registerOutParameter(3, OracleTypes.VARCHAR);
-        	cstmt.setString(1, userId);
+        	cstmt.setString(1, userName);
         	cstmt.executeQuery();
         	rs = (ResultSet) cstmt.getObject(2);
         	String error = cstmt.getString(3);
@@ -138,7 +128,7 @@ public class Student extends User {
 		            String department = rs.getString("name");
 
 		            System.out.println(studentid +"\t" + userid +"\t\t" +
-		            firstName +"\t\t" + lastName +"\t" + sex +"\t\t" + phone +
+		            firstName +"\t\t" + lastName +"\t" + sex +"\t\t" + phone + "\t\t" + 
 		            altPhone +"\t\t" + dob +"\t" + address +"\t\t" + nationality +
 		            degree +"\t\t" + department);
 
@@ -155,41 +145,8 @@ public class Student extends User {
         //conn.close();
 
 	}
-	private void showMenuForModifyProfile(){
-		boolean flag = true;
-		try{
-			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Modify Profile.\t0:Go back to previous menu.");
-			while(flag){
-					@SuppressWarnings("resource")
-					Scanner scanner = new Scanner(System.in);
-					String value = scanner.nextLine();
-					int choice = Integer.parseInt(value);
-					switch(choice){
-					case 1:
-						System.out.println("Modifying Profile");
-						// Call Modify profile method method
-						modifyProfileDataMenu();
-						
-						flag = false;
-							break;
-					case 0:
-						System.out.println("Going back to previous menu");
-						showMenuItems();
-						flag = false;
-						break;
-					default:
-						System.out.println("Invalid choice: Please enter again.");
-							
-					}
-				}
-		}
-		catch(Exception e){
-			System.out.println("Something bad happened!!! Please try again...");
-			showMenuItems();
-		}
-	}
-	private void modifyProfileDataMenu() {
+	
+	protected void modifyProfileDataMenu() {
 		// TODO Auto-generated method stub
 		System.out.println("Please select the field, you want to modify: ");
         System.out.println("1. User ID" +"\t\t" + "2. First Name"+"\t\t" 
@@ -299,9 +256,6 @@ public class Student extends User {
 			}
 
 	}
-//	private void loginUserWindow(){
-//		LibConsole login = new LibConsole(DBConnection.con);
-//		
-//	}
+	
 
 }
