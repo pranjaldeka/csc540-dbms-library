@@ -48,22 +48,22 @@ BEGIN
 					  EXECUTE IMMEDIATE sql_statement INTO primary_id;
 			  sql_statement := 
 			  '
-			    select b.title as name,due_start_date,due_in_dollars from patron_dues  pd ,books b
+			    select b.title as name,''book'' as type ,due_start_date,due_in_dollars from patron_dues  pd ,books b
 				where b.isbn=resource_id
 				and resource_type=''B''
 				and patron_id = '''||primary_id||'''
 				union all
-				select b.title as name,due_start_date,due_in_dollars from patron_dues  pd ,journals b
+				select b.title as name,''journal'' as type ,due_start_date,due_in_dollars from patron_dues  pd ,journals b
 				where b.issn=resource_id
 				and resource_type=''J''
 				and patron_id = '''||primary_id||'''
 				union all
-				select b.title as name,due_start_date,due_in_dollars from patron_dues  pd ,conference_papers b
+				select b.title as name,''conference paper'' as type ,due_start_date,due_in_dollars from patron_dues  pd ,conference_papers b
 				where b.conf_paper_id=resource_id
 				and resource_type=''P''
 				and patron_id = '''||primary_id||'''
 				union all
-				select b.model as name,due_start_date,due_in_dollars from patron_dues  pd ,cameras b
+				select b.model as name,''camera'' as type ,due_start_date,due_in_dollars from patron_dues  pd ,cameras b
 				where b.camera_id=resource_id
 				and resource_type=''C''
 				and patron_id = '''||primary_id||'''
