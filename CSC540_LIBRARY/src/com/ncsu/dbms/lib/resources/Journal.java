@@ -73,13 +73,11 @@ public class Journal {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Checking out a Journal");
 						// Call check out method
 						checkOutJournalConsole();
 						flag = false;
 							break;
 					case 0:
-						System.out.println("Going back to previous menu");
 						Utility.callUserDialogueBox(userName, userType);
 						flag = false;
 						break;

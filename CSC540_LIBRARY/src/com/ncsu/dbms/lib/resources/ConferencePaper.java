@@ -191,11 +191,11 @@ public class ConferencePaper {
 					case 1:
 						System.out.println("Return a conference paper");
 						// Call check out method
-						checkIncheckInConferencePaperConsole();
+						checkInConferencePaperConsole();
 						flag = false;
 						break;
 					case 0:
-						System.out.println("Going back to main menu");
+						System.out.println("Going back to main menu\n");
 						Utility.callUserDialogueBox(userName, userType);
 						flag = false;
 						break;
@@ -211,7 +211,7 @@ public class ConferencePaper {
 		}
 	}
 	
-	private  void checkIncheckInConferencePaperConsole() {
+	private  void checkInConferencePaperConsole() {
 		Utility.setMessage("Please enter the conference paper id of the conference paper you want to return");
 		String confId = Utility.enteredConsoleString();
 		checkInConferencePaper(confId);

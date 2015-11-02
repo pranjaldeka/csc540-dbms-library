@@ -129,18 +129,7 @@ public class Room {
 	}
 
 	private void reserveRoomConsole() {
-		String library = null;
-		boolean flag = true;
-		do{
-			Utility.setMessage("Please select the Library:");
-			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
-			 library = Utility.enteredConsoleString();
-			if(library.equals("1") || library.equals("2"))
-				flag=false;
-			else
-				System.out.println("Oops..Invalid entry !! Please try again");
-		}
-		while(flag);
+		String library = Utility.getLibraryInput();
 	
 		String roomNo = null;
 
@@ -178,7 +167,6 @@ public class Room {
 	 */
 	public void reserveRoom(String library, String roomNo,
 			String startTime, String endTime) throws SQLException {
-		System.out.println("UserType" + userType);
 		try{
 	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call user_room_pkg.user_reserves_rooms_proc(?, ?,?,?,?,?,?)}");
 	    	cstmt.setString(1, userType);
@@ -216,8 +204,10 @@ public class Room {
                 sr.showPublicationMenuItemsCheckedOut();
                 return;
             } else {
-            	 System.out.println("Booking Id" + "\t\t" + "Library"+"\t\t" +"Room No" +"\t\t" +"Start Time"+"\t\t\t" +"End Time" +"\t\t" + "Is Checked Out");
-                 System.out.println("----------------------------------------------------------------------------------------------------------");
+            	 System.out.println("Booking Id" + "\t\t" + "Library"+"\t\t" +"Room No" +"\t\t" +"Start Time"+"\t\t\t" 
+                       +"End Time" +"\t\t" + "Is Checked Out");
+                 System.out.println("--------------------------------------------------------------------"
+                 		+ "---------------------------------------------------");
 
                  do {
                 	String bookingId = rs.getString("room_booking_id");
@@ -226,7 +216,8 @@ public class Room {
  		            String reserveStartTime = rs.getString("reserv_start_time");
  		            String reserveEndTime = rs.getString("reserv_end_time");
  		            String isCheckedOut = rs.getString("is_checked_out");
- 		            System.out.println(bookingId + "\t" + libraryName +"\t" + roomNo+"\t\t" + reserveStartTime  +"\t\t" + reserveEndTime + "\t\t" + isCheckedOut);
+ 		            System.out.println(bookingId + "\t\t\t" + libraryName +"\t" + roomNo+"\t\t" + Utility.prettyPrintDateTime(reserveStartTime)
+ 		            		+"\t\t\t" + Utility.prettyPrintDateTime(reserveEndTime) + "\t\t" + isCheckedOut);
                  } while (rs.next());
             }
             displayDialogueAfterReservedOrCheckout();

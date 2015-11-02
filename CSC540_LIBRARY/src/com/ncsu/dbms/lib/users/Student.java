@@ -34,6 +34,7 @@ public class Student extends User {
 	}
 
 	public  void selectAnAction() {
+		Resource resource = new Resource(this.userName, this.userType);
 		try{
 			boolean flag = true;
 			while(flag){
@@ -49,13 +50,11 @@ public class Student extends User {
 						break;
 					case 2:
 						//Resources
-						Resource sr = new Resource(this.userName, this.userType);
-						sr.searchResources();
+						resource.searchResources();
 						flag = false;
 						break;
 					case 3:
 						//Checked-Out Resources
-						Resource resource = new Resource(this.userName, this.userType);
 						resource.checkedOutResources();
 						flag = false;
 						break;
@@ -65,6 +64,7 @@ public class Student extends User {
 						break;
 					case 5:
 						//Due-Balances
+						resource.showDues();
 						flag = false;
 						break;
 					case 6:
@@ -92,15 +92,15 @@ public class Student extends User {
 		// Searching a book;
         ResultSet rs;
         try {
-        	CallableStatement cstmt = DBConnection.con.prepareCall("{call user_profile_pkg.fetch_profile_data_proc(?, ?, ?)}");
+        	CallableStatement cstmt = DBConnection.con.prepareCall("{call user_profile_pkg.fetch_profile_data_proc(?, ?, ?, ?)}");
       	  
-        //	cstmt.registerOutParameter(3, java.sql.Types.VARCHAR);
-        	cstmt.registerOutParameter(2, OracleTypes.CURSOR);
-        	cstmt.registerOutParameter(3, OracleTypes.VARCHAR);
         	cstmt.setString(1, userName);
+        	cstmt.setString(2, userType);
+        	cstmt.registerOutParameter(3, OracleTypes.CURSOR);
+        	cstmt.registerOutParameter(4, OracleTypes.VARCHAR);
         	cstmt.executeQuery();
-        	rs = (ResultSet) cstmt.getObject(2);
-        	String error = cstmt.getString(3);
+        	rs = (ResultSet) cstmt.getObject(3);
+        	String error = cstmt.getString(4);
         	if(error != null)
         	{
         		System.out.println(error);
@@ -110,11 +110,12 @@ public class Student extends User {
                 System.out.println("Not a valid user id.");
                 return;
             } else {
-                System.out.println("Student ID"+"\t" +"User ID" +"\t" + "First Name"+"\t  " +"Last Name" +"\t" + "Phone No." +"\t\t\t" + "Alt. Phone No." +"\t\t" + "Date Of Birth"+"\t\t" + "Address"+"\t\t" + "Nationality"+"\t\t" + "Degree"+"\t\t\t" + "Department");
+                System.out.println("User ID" +"\t\t" + "First Name"+"\t\t" +"Last Name" +"\t" + "Sex" + "\t" 
+                              + "Phone No." +"\t" + "Alt. Phone No." +"\t\t" + "Date Of Birth"+"\t\t" 
+                		      + "Address"+"\t\t\t\t" + "Nationality"+"\t\t" + "Degree"+"\t\t\t" + "Department");
                 System.out.println("-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
                 do {
-                	String studentid = rs.getString("student_id");
 		            String userid = rs.getString("user_id");
 		            String firstName = rs.getString("first_name");
 		            String lastName = rs.getString("last_name");
@@ -127,9 +128,9 @@ public class Student extends User {
 		            String degree = rs.getString("degree");
 		            String department = rs.getString("name");
 
-		            System.out.println(studentid +"\t" + userid +"\t\t" +
-		            firstName +"\t\t" + lastName +"\t" + sex +"\t\t" + phone + "\t\t" + 
-		            altPhone +"\t\t" + dob +"\t" + address +"\t\t" + nationality +
+		            System.out.println(userid +"\t\t" +
+		            firstName +"\t\t" + lastName +"\t\t" + sex +"\t" + phone + "\t\t" + 
+		            altPhone +"\t\t\t" + dob +"\t" + address +"\t\t" + nationality + "\t\t" + 
 		            degree +"\t\t" + department);
 
 

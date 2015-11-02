@@ -88,13 +88,11 @@ public class Book {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Checking out a book");
 						// Call check out method
 						checkOutBookConsole();
 						flag = false;
 							break;
 					case 0:
-						System.out.println("Going back to previous menu");
 		                Resource sr = new Resource(this.userName, this.userType);
 		                sr.searchResources();
 						flag = false;

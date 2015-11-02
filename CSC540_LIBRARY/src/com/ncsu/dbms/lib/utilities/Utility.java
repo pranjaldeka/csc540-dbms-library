@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.regex.Pattern;
+
 import com.ncsu.dbms.lib.users.Faculty;
 import com.ncsu.dbms.lib.users.Student;
 
@@ -154,5 +156,11 @@ public final class Utility {
 			isHardCopy = false;
 		}
 		return isHardCopy;
+	}
+	
+	public static String prettyPrintDateTime(String dateTime) {
+		String[] parts = dateTime.split(Pattern.quote("."));
+		String formattedDateTime = parts[0] + " " + parts[1] + ":" + parts[2] + ":" + parts[3].replaceAll("\\s","");
+		return formattedDateTime;
 	}
 }

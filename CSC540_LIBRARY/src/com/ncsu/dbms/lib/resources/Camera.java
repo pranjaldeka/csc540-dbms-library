@@ -71,7 +71,7 @@ public class Camera {
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Check-out a Camera.\t0:Go back to previous menu.");
+			System.out.println("1: Reserve a Camera.\t0:Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -79,9 +79,9 @@ public class Camera {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Checking out a Camera");
+						System.out.println("Reserve a Camera");
 						// Call check out method
-						checkOutCameraConsole();
+						reserveCameraConsole();
 						flag = false;
 							break;
 					case 0:
@@ -101,19 +101,61 @@ public class Camera {
 		}
 	}
 	
+	private void reserveCameraConsole() {
+		Utility.setMessage("Please enter the Camera ID of camera you want to reserve");
+		String cameraId = Utility.enteredConsoleString();
+		String library = Utility.getLibraryInput();
+		
+		Utility.setMessage("Please enter date and time when you want to reserve");
+		String reserveTime = Utility.getTimeInput();
+		
+		reserveCamera(library, cameraId, reserveTime);
+	}
+
+	private void reserveCamera(String library, String cameraId,
+			String reserveTime) {
+	}
+	
+	public void reservedOrCheckoutCameras() {
+	}
+	
+	private  void displayDialogueAfterReservedOrCheckout(){
+		boolean flag = true;
+		try{
+			System.out.println("\nPlease enter your choice:");
+			System.out.println("1: Check out a camera.\t0:Go back to previous menu.");
+			while(flag){
+					@SuppressWarnings("resource")
+					Scanner scanner = new Scanner(System.in);
+					String value = scanner.nextLine();
+					int choice = Integer.parseInt(value);
+					switch(choice){
+					case 1:
+						// Call check out method
+						checkOutCameraConsole();
+						flag = false;
+						break;
+					case 0:
+						System.out.println("Going back to main menu");
+						Utility.callUserDialogueBox(userName, userType);
+						flag = false;
+						break;
+					default:
+						System.out.println("Invalid choice: Please enter again.");
+							
+					}
+				}
+		}
+		catch(Exception e){
+			System.out.println("Something bad happened!!! Please try again...");
+			displayDialogueAfterReservedOrCheckout();
+		}
+	}
+
 	private void checkOutCameraConsole(){
 		Utility.setMessage("Please enter the Camera ID of camera you want to check out");
 		String cameraid = Utility.enteredConsoleString();
-		String library = null;
-		boolean flag = true;
-		do{
-			Utility.setMessage("Please select the Library:");
-			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
-			 library = Utility.enteredConsoleString();
-			if(library.equals("1") || library.equals("2"))
-				flag=false;
-		}
-		while(flag);
+		String library = Utility.getLibraryInput();
 		
 		Utility.setMessage("Please enter return date and time");
 		String return_date = Utility.getTimeInput();

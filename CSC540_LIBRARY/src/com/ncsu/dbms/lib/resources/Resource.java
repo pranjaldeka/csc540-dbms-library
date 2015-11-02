@@ -1,9 +1,15 @@
 package com.ncsu.dbms.lib.resources;
 
 import java.sql.CallableStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+
+import oracle.jdbc.OracleTypes;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
+import com.ncsu.dbms.lib.exception.PrintSQLException;
+import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
 
 public class Resource {
@@ -15,7 +21,7 @@ public class Resource {
 	}
 	public  void searchResources(){
 		System.out.println("Please enter your choice:");
-		System.out.println("1: Publications\t2: Conference/Study rooms\t3: Cameras\t0: Go back to previous menu.");
+		System.out.println("1: Publications\t\t2: Conference/Study rooms\t3: Cameras\t0: Go back to previous menu.");
 
 		boolean flag = true;
 		try{
@@ -148,7 +154,7 @@ public class Resource {
 	
 	public void checkedOutResources() {
 		System.out.println("Please enter your choice:");
-		System.out.println("1: Publications\t2: Conference/Study rooms\t3: Cameras\t0: Go back to previous menu.");
+		System.out.println("1: Publications\t\t2: Conference/Study rooms\t3: Cameras\t0: Go back to previous menu.");
 
 		boolean flag = true;
 		try{
@@ -172,7 +178,8 @@ public class Resource {
 						break;
 					case 3:
 						System.out.println("Cameras");
-					//	Journal.showDialogueBox();
+					    Camera camera = new Camera(userName, userType);
+					    camera.reservedOrCheckoutCameras();
 						flag = false;
 						break;
 					
@@ -233,6 +240,46 @@ public class Resource {
 		catch(Exception e){
 			Utility.badErrorMessage();
 		}
+	}
+	public void showDues() {
+		try {
+        	ResultSet rs;
+        	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call show_dues_pkg.show_dues_proc(?, ?, ?, ?)}");
+           	cstmt.setString(1, userType);
+	       	cstmt.setString(2, userName);
+        	cstmt.registerOutParameter(3, OracleTypes.CURSOR);
+	       	cstmt.registerOutParameter(4, OracleTypes.VARCHAR);
+	       	ArrayList<Object> arrayList = DBConnection.returnResultSetAndError(cstmt, 3, 4);
+	       	if(!arrayList.get(1).equals(Constant.kBlankString))
+	       	{
+	       		System.out.println(arrayList.get(1));
+	       	    Resource sr = new Resource(this.userName, this.userType);
+                sr.showPublicationMenuItems();
+	       		return;
+	       	}  
+	       	rs = (ResultSet)arrayList.get(0);
+            if (!rs.next() ) {
+                System.out.println("\nYou don't have any due !!\n");
+                Resource sr = new Resource(this.userName, this.userType);
+                sr.showPublicationMenuItems();
+                return;
+            } else {
+                System.out.println("Resource Type"+"\t" +"Name" +"\t" +"Expected due date"+"\t" +"Total Dues (USD)");
+                System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+                do {
+                	String resourceType = rs.getString("type");
+		            String name = rs.getString("name");
+		            String expectedDueDate = rs.getString("due_start_date");
+		            String totalDues = rs.getString("due_in_dollars");
+		            System.out.println(resourceType +"\t" + name+"\t\t" + expectedDueDate  +"\t" + totalDues);
+                } while (rs.next());
+            }
+		}catch(SQLException e){
+       		PrintSQLException.printSQLException(e);
+			Utility.badErrorMessage();
+		}
+		Utility.callUserDialogueBox(userName, userType);
 	}
 		
 }

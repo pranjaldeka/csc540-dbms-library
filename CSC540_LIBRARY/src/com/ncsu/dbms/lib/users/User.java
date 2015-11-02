@@ -2,6 +2,8 @@ package com.ncsu.dbms.lib.users;
 
 import java.util.Scanner;
 
+import com.ncsu.dbms.lib.resources.Resource;
+
 
 public abstract class User {
 	
@@ -46,7 +48,6 @@ public abstract class User {
 						System.out.println("Modifying Profile");
 						// Call Modify profile method method
 						modifyProfileDataMenu();
-						
 						flag = false;
 							break;
 					case 0:
@@ -65,6 +66,7 @@ public abstract class User {
 			showMenuItems();
 		}
 	}
+
 	
 	protected abstract void modifyProfileDataMenu();
 
