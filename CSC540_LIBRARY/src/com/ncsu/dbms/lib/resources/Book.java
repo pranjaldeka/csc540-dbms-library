@@ -23,10 +23,8 @@ public class Book {
 		this.userName = userName;
 		this.userType = userType;
 	}
-	public  void showDialogueBox(){
-		searchBook("");
-	}
-	private  void searchBook(String queryString) {
+
+	public  void showBooks() {
 		// Searching a book;
     	
         try {
@@ -123,6 +121,7 @@ public class Book {
 		}
 		while(flag);
 
+		Utility.setMessage("Please enter return date and time");
 		String return_date = Utility.getTimeInput();
 		
 		checkOutBook(isbn,library,return_date);	
@@ -156,7 +155,7 @@ public class Book {
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
                 Resource sr = new Resource(this.userName, this.userType);
-                System.out.println("\nYour have not checkout any books recently\n");
+                System.out.println("\nYour have not checked out any books recently\n");
                 sr.showPublicationMenuItemsCheckedOut();
                 return;
             } else {
@@ -181,7 +180,7 @@ public class Book {
 		}
 	}
 	
-	public  void displayDialogueAfterCheckedOutResource(){
+	private  void displayDialogueAfterCheckedOutResource(){
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
@@ -211,14 +210,13 @@ public class Book {
 		}
 		catch(Exception e){
 			System.out.println("Something bad happened!!! Please try again...");
-			displayDialogueAfterSearch();
+			displayDialogueAfterCheckedOutResource();
 		}
 	}
 	
 	private  void checkInBookConsole() {
 		Utility.setMessage("Please enter the ISBN number of book you want to return");
 		String isbn = Utility.enteredConsoleString();
-		System.out.println(isbn);
 		checkInBook(isbn);
 	}
 	
