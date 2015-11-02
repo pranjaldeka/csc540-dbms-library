@@ -20,7 +20,7 @@ IS
 		 'S', 
 		 'B', 
 		 isbn,
-		 due_date + interval '1' DAY,
+		 due_date ,
 		 NULL,
 		 (trunc(coalesce(return_date,sysdate))- trunc(due_date)) * 2
 	 FROM
@@ -45,7 +45,7 @@ IS
 		 'S', 
 		 'J', 
 		 issn,
-		 due_date + interval '1' DAY,
+		 due_date ,
 		 NULL,
 		 (trunc(coalesce(return_date,sysdate))- trunc(due_date)) * 2
 	 FROM
@@ -72,7 +72,7 @@ IS
 		 'S', 
 		 'P', 
 		 CONF_PAPER_ID,
-		 due_date + interval '1' DAY,
+		 due_date ,
 		 NULL,
 		 (trunc(coalesce(return_date,sysdate))- trunc(due_date)) * 2
 	 FROM
@@ -99,7 +99,7 @@ IS
 		 'S', 
 		 'C', 
 		 camera_id,
-		 due_date + interval '1' DAY,
+		 due_date ,
 		 NULL,
 		 extract (day from (coalesce(return_date,sysdate)-due_date)) * 24 + (extract (hour from (coalesce(return_date,sysdate)-due_date)))
 	 FROM
@@ -126,7 +126,7 @@ IS
 		 'S', 
 		 'B', 
 		 isbn,
-		 due_date + interval '1' DAY,
+		 due_date ,
 		 NULL,
 		 (trunc(coalesce(return_date,sysdate))- trunc(due_date)) * 2
 	 FROM
@@ -151,7 +151,7 @@ IS
 		 'S', 
 		 'J', 
 		 issn,
-		 due_date + interval '1' DAY,
+		 due_date ,
 		 NULL,
 		 (trunc(coalesce(return_date,sysdate))- trunc(due_date)) * 2
 	 FROM
@@ -178,7 +178,7 @@ IS
 		 'S', 
 		 'P', 
 		 CONF_PAPER_ID,
-		 due_date + interval '1' DAY,
+		 due_date ,
 		 NULL,
 		 (trunc(coalesce(return_date,sysdate))- trunc(due_date)) * 2
 	 FROM
@@ -205,7 +205,7 @@ IS
 		 'S', 
 		 'C', 
 		 camera_id,
-		 due_date + interval '1' DAY,
+		 due_date ,
 		 NULL,
 		 extract (day from (coalesce(return_date,sysdate)-due_date)) * 24 + (extract (hour from (coalesce(return_date,sysdate)-due_date)))
 	 FROM
@@ -225,8 +225,9 @@ IS
 
 				);
 		
-		
-				
+		/* reflects the fine when a day for that fine is over */
+		DELETE FROM patron_dues
+		WHERE due_in_dollars = 0;		
 
 END calculate_dues_proc;
 
