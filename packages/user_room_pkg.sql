@@ -30,6 +30,12 @@ PROCEDURE user_checksout_rooms_proc(
 	start_time	VARCHAR2,
 	out_msg		OUT VARCHAR2
 );
+PROCEDURE user_reserved_rooms_proc(
+	in_user_type 		VARCHAR2,
+	in_userid    		VARCHAR2,
+	pref				OUT SYS_REFCURSOR,
+	out_msg				OUT VARCHAR2
+);
 END user_room_pkg;
 /
 CREATE OR REPLACE PACKAGE BODY user_room_pkg 
@@ -241,8 +247,6 @@ IS
       ' AND library_id = ' || ''''||library_id ||''''||
       ' AND reserv_start_time = ' || ''''||v_start_time ||'''';
 
-		insert into sud_dummy values(1,sql_stmt);
-		COMMIT;	
 		EXECUTE IMMEDIATE sql_stmt INTO v_end_time ;
 		COMMIT;	
 			
@@ -270,8 +274,6 @@ IS
       ' AND library_id = ' || ''''||library_id ||''''||
       ' AND reserv_start_time = ' || ''''||v_start_time ||'''';
 
-		insert into sud_dummy values(1,sql_stmt);
-		COMMIT;	
 		EXECUTE IMMEDIATE sql_stmt;
 		COMMIT;	
 	out_msg:='Check out successful!!';
@@ -282,5 +284,67 @@ IS
 		WHEN OTHERS THEN
 			out_msg:=sql_step || SQLERRM;
 	END user_checksout_rooms_proc;
+
+	PROCEDURE user_reserved_rooms_proc(
+	in_user_type 		VARCHAR2,
+	in_userid    		VARCHAR2,
+	pref				OUT SYS_REFCURSOR,
+	out_msg				OUT VARCHAR2
+	)
+	IS
+	sql_stmt 		VARCHAR2(32000):='';
+	v_id			VARCHAR2(50);
+	sql_step		VARCHAR2(32000):='';
+	v_count			NUMBER(2);
+	BEGIN
+	sql_step:='Checking whether user has booked any room or not';
+			sql_stmt:= 'SELECT '||
+					' r.room_no, '||
+					' r.student_id, ' ||
+					' r.reserv_start_time, '||
+					' r.reserv_end_time, '||
+					' CASE r.is_checked_out '||
+	   				' WHEN ''0''' ||
+	    			' THEN ''NO''' ||
+	    			' ELSE ''YES''' ||
+	  				' END AS is_checked_out,' ||
+	  				' l.name FROM' ;
+			IF in_user_type='S' THEN
+				BEGIN
+
+					SELECT student_id INTO v_id FROM students WHERE user_id=in_userid;
+
+				EXCEPTION
+					WHEN NO_DATA_FOUND THEN
+					out_msg:='The user does not exists!!';
+				END;
+			
+				sql_stmt:=sql_stmt || ' students_reserves_rooms r ,libraries l ' ||
+					' WHERE student_id = ' ||
+					''''||v_id||'''';
+
+			ELSIF in_user_type='F' THEN
+				BEGIN
+					SELECT faculty_id INTO v_id FROM faculties WHERE user_id=in_userid;
+				EXCEPTION
+					WHEN NO_DATA_FOUND THEN
+					out_msg:='The user does not exists!!';
+				END;
+				sql_stmt:=sql_stmt || ' faculties_reserves_rooms r, libraries l' ||
+					' WHERE faculty_id = ' ||
+					''''||v_id||'''';
+		END IF;
+	  sql_stmt:= sql_stmt ||
+		' AND r.library_id = l.library_id ';
+		insert into sud_dummy values(1,sql_stmt);
+		COMMIT;	
+	OPEN pref FOR sql_stmt;
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+		out_msg:='You have not booked any room!!';
+	WHEN OTHERS THEN
+			out_msg:=sql_step || SQLERRM;
+END user_reserved_rooms_proc;
+
 END user_room_pkg;
 /
