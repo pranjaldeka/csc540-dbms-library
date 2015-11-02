@@ -224,11 +224,11 @@ IS
 					and due_start_date = due_date + interval '1' DAY
 
 				);
-		
+		commit;
 		/* reflects the fine when a day for that fine is over */
 		DELETE FROM patron_dues
 		WHERE due_in_dollars = 0;		
-
+ commit;
 END calculate_dues_proc;
 
 END calculate_dues_pkg;

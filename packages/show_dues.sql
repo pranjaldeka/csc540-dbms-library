@@ -75,6 +75,8 @@ BEGIN
  EXCEPTION
  WHEN NO_DATA_FOUND THEN
     out_err_msg:='No Dues found!!';
+ WHEN OTHERS THEN
+		output :=SQLERRM;
 END show_dues_proc;
 
 END show_dues_pkg;
