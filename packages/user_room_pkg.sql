@@ -23,12 +23,16 @@ PROCEDURE user_reserves_rooms_proc(
 		out_msg		OUT VARCHAR2
 );
 PROCEDURE user_checksout_rooms_proc(
-	user_type VARCHAR2,
-	userid    VARCHAR2,
-	room_no		VARCHAR2,
-	library_id	VARCHAR2,
-	start_time	VARCHAR2,
-	out_msg		OUT VARCHAR2
+		user_type VARCHAR2,
+		userid    VARCHAR2,
+		in_booking_id	VARCHAR2,
+		out_msg		OUT VARCHAR2
+);
+PROCEDURE user_reserved_rooms_proc(
+	in_user_type 		VARCHAR2,
+	in_userid    		VARCHAR2,
+	pref				OUT SYS_REFCURSOR,
+	out_msg				OUT VARCHAR2
 );
 END user_room_pkg;
 /
@@ -61,9 +65,6 @@ IS
 	  	IF user_type ='S' THEN
 	  		sql_stmt:=sql_stmt || ' AND r.room_type = ''S''';
 	  	END IF;  
-	  	insert into sud_dummy values(2,sql_stmt);commit;			
-
-		
 		OPEN pref FOR sql_stmt;
 
 	  EXCEPTION
@@ -89,6 +90,7 @@ IS
 	v_id			VARCHAR2(50);
 	sql_step		VARCHAR2(32000):='';
 	v_count			NUMBER(2);
+	booking_id		VARCHAR2(500);
 	BEGIN
 		sql_step:= 'Converting the start date and end date to TIMESTAMP';
 			SELECT to_timestamp(start_time,'yyyy-mm-dd HH24 mi-ss') INTO v_start_time FROM DUAL;
@@ -116,7 +118,6 @@ IS
 			END IF;
 			DBMS_OUTPUT.PUT_LINE(v_count);
 			IF v_count = 0 THEN
-				DBMS_OUTPUT.PUT_LINE('1111');
 				out_msg:='The room is not available for you!!';
 				RAISE USER_ERROR; 
 			END IF;	
@@ -139,7 +140,8 @@ IS
 				raise user_error;
 			END IF;	
 		END LOOP;
-
+		sql_step:='creating booking_id';
+			SELECT ROOM_BOOKING_ID_FUNC INTO booking_id FROM DUAL;
 	    sql_step:= 'Inserting data into tables.';
 
 		sql_stmt:= 'INSERT INTO';
@@ -165,6 +167,7 @@ IS
 		END IF;
 			sql_stmt:=sql_stmt ||'
 			VALUES (
+			'''||booking_id||''',
 			'''||v_id||''',
 			'''||in_room_no||''',
 			'''||in_library_id||''',
@@ -172,10 +175,12 @@ IS
 	          TIMESTAMP'''||end_time||''',
     		  ''0''
 			)';
-
+		delete from sud_dummy;
+		insert into sud_dummy values(3,sql_stmt);
+			COMMIT;
 		EXECUTE IMMEDIATE	sql_stmt;
-		COMMIT;
-		out_msg:= 'Room reservation successful, Room No- ' ||in_room_no|| ' Library: '|| in_library_id || ' Start time : '||v_start_time|| ' End Time '|| v_end_time;
+		COMMIT; 
+		out_msg:= 'Room reservation successful, Room No- ' ||in_room_no|| ' Library: '|| in_library_id || ' Start time : '||v_start_time|| ' End Time '|| v_end_time || ' and booking id :' || booking_id;
 	EXCEPTION
 		WHEN USER_ERROR THEN
 			out_msg:= 'Error: ' || out_msg;
@@ -185,9 +190,7 @@ IS
 	PROCEDURE user_checksout_rooms_proc(
 		user_type VARCHAR2,
 		userid    VARCHAR2,
-		room_no		VARCHAR2,
-		library_id	VARCHAR2,
-		start_time	VARCHAR2,
+		in_booking_id	VARCHAR2,
 		out_msg		OUT VARCHAR2
 	)
 	IS
@@ -195,25 +198,22 @@ IS
 	v_start_time 	TIMESTAMP;
 	v_end_time 		TIMESTAMP;
 	v_id			VARCHAR2(50);
-	v_id_value		VARCHAR2(50);
 	sql_step		VARCHAR2(32000):='';
-
+	v_count			NUMBER(10);
 	BEGIN
-		sql_step:='converting start_time to TIMESTAMP.';	
-		BEGIN
-			SELECT to_timestamp(start_time,'yyyy-mm-dd HH24 mi-ss') INTO v_start_time FROM DUAL;
-		EXCEPTION
-					WHEN NO_DATA_FOUND THEN
-					out_msg:='No room is currently booked for you!!';
-		END;			
-		sql_step:='extracting reserve end time from table.';	
+		sql_step:='Checking reservation exists or not.';	
+				
 		sql_stmt:= sql_stmt ||'
 		SELECT
-			 reserv_end_time  '||
+			 reserv_start_time,reserv_end_time  '||
 		'FROM ';
 		IF user_type='S' THEN
 				BEGIN
-
+					SELECT COUNT(1) INTO v_count FROM students_reserves_rooms WHERE ROOM_BOOKING_ID = in_booking_id;
+					IF v_count=0 THEN
+						out_msg:='No room is currently booked for you!!';			
+						RAISE user_error;
+					END IF;	
 					SELECT student_id INTO v_id FROM students WHERE user_id=userid;
 
 				EXCEPTION
@@ -227,6 +227,11 @@ IS
 
 			ELSIF user_type='F' THEN
 				BEGIN
+					SELECT COUNT(1) INTO v_count FROM faculties_reserves_rooms WHERE ROOM_BOOKING_ID = in_booking_id;
+					IF v_count=0 THEN
+						out_msg:='No room is currently booked for you!!';			
+						RAISE user_error;
+					END IF;	
 					SELECT faculty_id INTO v_id FROM faculties WHERE user_id=userid;
 				EXCEPTION
 					WHEN NO_DATA_FOUND THEN
@@ -237,13 +242,9 @@ IS
 					''''||v_id||'''';
 		END IF;
 		sql_stmt:= sql_stmt ||
-      ' AND room_no = ' || ''''||room_no ||''''||
-      ' AND library_id = ' || ''''||library_id ||''''||
-      ' AND reserv_start_time = ' || ''''||v_start_time ||'''';
+      ' AND ROOM_BOOKING_ID = ' || ''''||in_booking_id ||'''';
 
-		insert into sud_dummy values(1,sql_stmt);
-		COMMIT;	
-		EXECUTE IMMEDIATE sql_stmt INTO v_end_time ;
+		EXECUTE IMMEDIATE sql_stmt INTO v_start_time,v_end_time ;
 		COMMIT;	
 			
 		sql_step:='validating whether checking out within 1 hour or not.';
@@ -266,12 +267,8 @@ IS
 					''''||v_id||'''';
 		END IF;
 		sql_stmt:= sql_stmt ||
-      ' AND room_no = ' || ''''||room_no ||''''||
-      ' AND library_id = ' || ''''||library_id ||''''||
-      ' AND reserv_start_time = ' || ''''||v_start_time ||'''';
+      ' AND ROOM_BOOKING_ID = ' || ''''||in_booking_id ||'''';
 
-		insert into sud_dummy values(1,sql_stmt);
-		COMMIT;	
 		EXECUTE IMMEDIATE sql_stmt;
 		COMMIT;	
 	out_msg:='Check out successful!!';
@@ -282,5 +279,67 @@ IS
 		WHEN OTHERS THEN
 			out_msg:=sql_step || SQLERRM;
 	END user_checksout_rooms_proc;
+
+	PROCEDURE user_reserved_rooms_proc(
+	in_user_type 		VARCHAR2,
+	in_userid    		VARCHAR2,
+	pref				OUT SYS_REFCURSOR,
+	out_msg				OUT VARCHAR2
+	)
+	IS
+	sql_stmt 		VARCHAR2(32000):='';
+	v_id			VARCHAR2(50);
+	sql_step		VARCHAR2(32000):='';
+	v_count			NUMBER(2);
+	BEGIN
+	sql_step:='Checking whether user has booked any room or not';
+			sql_stmt:= 'SELECT '||
+					' r.room_booking_id, '||
+					' r.room_no, '||
+					' r.reserv_start_time, '||
+					' r.reserv_end_time, '||
+					' CASE r.is_checked_out '||
+	   				' WHEN ''0''' ||
+	    			' THEN ''NO''' ||
+	    			' ELSE ''YES''' ||
+	  				' END AS is_checked_out,' ||
+	  				' l.name FROM' ;
+			IF in_user_type='S' THEN
+				BEGIN
+
+					SELECT student_id INTO v_id FROM students WHERE user_id=in_userid;
+
+				EXCEPTION
+					WHEN NO_DATA_FOUND THEN
+					out_msg:='The user does not exists!!';
+				END;
+			
+				sql_stmt:=sql_stmt || ' students_reserves_rooms r ,libraries l ' ||
+					' WHERE student_id = ' ||
+					''''||v_id||'''';
+
+			ELSIF in_user_type='F' THEN
+				BEGIN
+					SELECT faculty_id INTO v_id FROM faculties WHERE user_id=in_userid;
+				EXCEPTION
+					WHEN NO_DATA_FOUND THEN
+					out_msg:='The user does not exists!!';
+				END;
+				sql_stmt:=sql_stmt || ' faculties_reserves_rooms r, libraries l' ||
+					' WHERE faculty_id = ' ||
+					''''||v_id||'''';
+		END IF;
+	  sql_stmt:= sql_stmt ||
+		' AND r.library_id = l.library_id ';
+		insert into sud_dummy values(1,sql_stmt);
+		COMMIT;	
+	OPEN pref FOR sql_stmt;
+EXCEPTION
+	WHEN NO_DATA_FOUND THEN
+		out_msg:='You have not booked any room!!';
+	WHEN OTHERS THEN
+			out_msg:=sql_step || SQLERRM;
+END user_reserved_rooms_proc;
+
 END user_room_pkg;
 /

@@ -28,30 +28,19 @@ public class Login {
 	
 	private void validateLogin() throws InvalidCredentialException{
 		
+		String username = null;
+		String password = null;
 		System.out.println("Enter user id:");
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
-		String username = scanner.nextLine();
+		username = scanner.nextLine();
 		System.out.println("Enter password:");
-		String password = scanner.nextLine();
+		password = scanner.nextLine();
 		
 		//System.out.println("Username is " + username + " and password is " + password);
 		try {
 		validateUserLogin(username, password);
 		
-		
-		/*String query = "Select * from ssingh25.admin where admin_id = "+ username + " and password = " + password;
-		
-		ResultSet rs;
-		
-			rs = dbConn.executeQuery(query);
-			if(rs.next()){
-					System.out.println("Hello " + rs.getString(2) + " " + rs.getString(3) + " !!!");
-			}
-			else
-				//System.out.println("Invalid credential!!!");
-				throw new InvalidCredentialException ();
-				*/
 		} 
 		catch(InvalidCredentialException e){
 			throw e;
@@ -66,7 +55,8 @@ public class Login {
 		}
 	}
 
-	private void validateUserLogin(String userName, String password) throws InvalidCredentialException, SQLException{
+	private void validateUserLogin(String userName, String password)
+			throws InvalidCredentialException, SQLException{
 		CallableStatement callStmt = null;
 		String validateCall = "{call user_profile_pkg.validate_user_proc(?,?,?,?,?)}";
 		try{

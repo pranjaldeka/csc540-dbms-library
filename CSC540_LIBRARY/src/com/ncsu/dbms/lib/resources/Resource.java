@@ -60,7 +60,7 @@ public class Resource {
 
 	public void showPublicationMenuItems(){
 		Utility.setMessage("Please enter a choice:");
-		System.out.println("1: Books\t2: eBooks\t3: Journals\t4: Conferences Papers\t0: Go back to previous menu.");
+		System.out.println("1: Books\t2: Journals\t3: Conferences Papers\t0: Go back to previous menu.");
 		boolean flag = true;
 		try{
 			while(flag){
@@ -76,17 +76,14 @@ public class Resource {
 						Book book = new Book(this.userName, this.userType);
 						book.showBooks();
 						flag = false;
-							break;
-					case 2:
-						flag = false;
 						break;
-					case 3:
+					case 2:
 						System.out.println("Journals");
 						Journal journal=new Journal(this.userName, this.userType);
 						journal.showJournals();
 						flag = false;
 						break;
-					case 4:
+					case 3:
 						System.out.println("Conference Papers");
 						// Call check out method
 						ConferencePaper confPaper = new ConferencePaper(this.userName, this.userType);
@@ -195,7 +192,7 @@ public class Resource {
 
 	public void showPublicationMenuItemsCheckedOut() {
 		Utility.setMessage("Please enter a choice:");//books, ebooks,journals and conference
-		System.out.println("1: Books\t2: eBooks\t3: Journals\t4: Conference Papers\t0: Go back to previous menu.");
+		System.out.println("1: Books\t2: Journals\t3: Conference Papers\t0: Go back to previous menu.");
 		boolean flag = true;
 		try{
 			while(flag){
@@ -213,17 +210,12 @@ public class Resource {
 						flag = false;
 						break;
 					case 2:
-						//System.out.println("Conference/Study�rooms");
-						//Camera.showDialogueBox();
-						flag = false;
-						break;
-					case 3:
 						System.out.println("Journals");
 						Journal journal = new Journal(userName, userType);
 						journal.checkedOutJournals();
 						flag = false;
 						break;
-					case 4:
+					case 3:
 						System.out.println("Journals");
 						ConferencePaper conferencePaper = new ConferencePaper(userName, userType);
 						conferencePaper.checkedOutConferencePapers();
