@@ -6,7 +6,7 @@ CREATE OR REPLACE PACKAGE user_profile_pkg AS
 user_error       EXCEPTION;
 PROCEDURE validate_user_proc(
 	user_name 		IN 	VARCHAR2,
-	user_password 	IN 	VARCHAR2,
+	user_pass 	IN 	VARCHAR2,
 	user_type		OUT	VARCHAR2,
 	first_name		OUT VARCHAR2,
 	last_name		OUT VARCHAR2	
@@ -30,7 +30,7 @@ CREATE OR REPLACE PACKAGE BODY user_profile_pkg
 IS
 PROCEDURE validate_user_proc(
 	user_name 		IN 	VARCHAR2,
-	user_password 	IN 	VARCHAR2,
+	user_pass 	IN 	VARCHAR2,
 	user_type		OUT	VARCHAR2,
 	first_name		OUT VARCHAR2,
 	last_name		OUT VARCHAR2		
@@ -45,7 +45,7 @@ BEGIN
 		user_view 
 	WHERE
 		user_id = user_name AND
-		user_password = user_password
+		user_password = user_pass
 	GROUP BY
 	first_name,last_name,user_type;
 EXCEPTION
@@ -157,4 +157,3 @@ END update_user_profile_proc;
 
 END user_profile_pkg;
 /
-
