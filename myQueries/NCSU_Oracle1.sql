@@ -1,254 +1,96 @@
-/*********************************************************************
-user_room_pkg.sql : Display all available rooms to the user
-**********************************************************************/
-set serveroutput on;
+SELECT r.room_no,
+  r.capacity,
+  r.floor_no,
+  CASE r.room_type
+    WHEN 'C'
+    THEN 'Conference'
+    ELSE 'Study'
+  END AS room_type ,
+  r.library_id ,
+  l.name
+FROM rooms r,
+  libraries l
+WHERE r.library_id                = l.library_id
+AND (r.ROOM_NO,r.library_id) NOT IN
+  ( SELECT room_no,library_id FROM students_reserves_rooms
+  UNION
+  SELECT room_no, library_id FROM faculties_reserves_rooms
+  );
+SELECT r.room_no,
+  r.capacity,
+  r.floor_no,
+  CASE r.room_type
+    WHEN 'C'
+    THEN 'Conference'
+    ELSE 'Study'
+  END AS room_type,
+  l.name
+FROM rooms r,
+  libraries l
+WHERE r.library_id = l.library_id
+AND NOT EXISTS
+  (SELECT 1
+  FROM students_reserves_rooms sr
+  WHERE r.room_no  = sr.room_no
+  AND r.library_id = sr.library_id
+  )
+AND NOT EXISTS
+  (SELECT 1
+  FROM faculties_reserves_rooms fr
+  WHERE r.room_no  = fr.room_no
+  AND r.library_id = fr.library_id
+  );
+DESC students_reserves_rooms; 
 
-CREATE OR REPLACE PACKAGE user_room_pkg AS 
-user_error	EXCEPTION;
-PROCEDURE user_fetches_rooms_proc(
-	user_type 		VARCHAR2,
-	room_size		VARCHAR2,
-	library 		VARCHAR2,
-	pref			OUT SYS_REFCURSOR,
-	out_msg			OUT VARCHAR2
-);
+create table sud_dummy(id number, val clob);
 
-PROCEDURE user_reserves_rooms_proc(
-	user_type VARCHAR2,
-	userid    VARCHAR2,
-	room_no		VARCHAR2,
-	library_id	VARCHAR2,
-	start_time	VARCHAR2,
-	end_time	VARCHAR2,
-	out_msg		OUT VARCHAR2
-);
-PROCEDURE user_checksout_rooms_proc(
-	user_type VARCHAR2,
-	userid    VARCHAR2,
-	room_no		VARCHAR2,
-	library_id	VARCHAR2,
-	start_time	VARCHAR2,
-	out_msg		OUT VARCHAR2
-);
-END user_room_pkg;
-/
-CREATE OR REPLACE PACKAGE BODY user_room_pkg 
-IS
-	PROCEDURE user_fetches_rooms_proc(
-		user_type 		VARCHAR2,
-		room_size		VARCHAR2,
-		library 		VARCHAR2,
-		pref		OUT SYS_REFCURSOR,
-		out_msg		OUT VARCHAR2
-	)
-	IS
-	sql_stmt VARCHAR2(32000);
-	BEGIN
-		sql_stmt:= 'SELECT '||
-					' r.room_no, '||
-					' r.capacity, ' ||
-					' r.floor_no, '||
-					' CASE r.room_type '||
-	   				' WHEN ''C''' ||
-	    			' THEN ''Conference''' ||
-	    			' ELSE ''Study''' ||
-	  				' END AS room_type,' ||
-	  				' l.name ' ||
-	  				' FROM rooms r, libraries l ' ||
-	  				' WHERE r.library_id = l.library_id '||
-	  				' AND r.capacity>=' || 'TO_NUMBER(' ||room_size||', ''99'')'||
-	  				' AND r.library_id = ' || ''''||library ||'''';
-	  	IF user_type ='S' THEN
-	  		sql_stmt:=sql_stmt || ' AND r.room_type = ''S''';
-	  	END IF;  
-	  	insert into sud_dummy values(2,sql_stmt);commit;			
+declare
+out_message varchar2(20000);
+begin
+user_room_pkg.user_reserves_rooms_proc('S','sud','R2','LIB2',' 2015-12-01 05:00:00',' 2015-12-01 06:00:00',out_message);
+    dbms_output.put_line(OUT_MESSAGE );
+ END;
+ /
+ 
+ declare
+out_message varchar2(20000);
+begin
+user_room_pkg.user_checksout_rooms_proc('S','sud','RB2',out_message);
+    dbms_output.put_line(OUT_MESSAGE );
+ END;
+ /
+ 
+ SELECT * FROM ROOMS;
+SELECT * FROM students_reserves_rooms;
+TRUNCATE TABLE students_reserves_rooms;
+ desc rooms;
 
-		
-		OPEN pref FOR sql_stmt;
+SELECT r.room_no,
+  r.capacity,
+  r.floor_no,
+  CASE r.room_type
+    WHEN 'C'
+    THEN 'Conference'
+    ELSE 'Study'
+  END AS room_type,
+  l.name
+FROM rooms r,
+  libraries l
+WHERE r.library_id = l.library_id
+AND r.capacity    >=TO_NUMBER('2', '99')
+AND r.library_id   = LIB1
+AND r.room_type    = 'S';
+desc students_co_books;
+select * from sud_dummy;
+truncate table sud_dummy;
+select * from rooms;
+select * from students;
+INSERT INTO students_reserves_rooms VALUES('S','R1','LIB2',
+TO_TIMESTAMP('2015-11-01 05:00:00', 'yyyy-mm-dd HH24 mi-ss'),
+TO_TIMESTAMP('2015-11-01 05:00:00', 'yyyy-mm-dd HH24 mi-ss'),
+'0');
 
-	  EXCEPTION
-	 WHEN NO_DATA_FOUND THEN
-	    out_msg:='No Rooms available at this moment!!';
-	 WHEN OTHERS THEN
-	 	   out_msg:=SQLERRM;
-	END user_fetches_rooms_proc;
+		SELECT ROOM_BOOKING_ID_FUNC  FROM DUAL;
+ 
 
-	PROCEDURE user_reserves_rooms_proc(
-		user_type VARCHAR2,
-		userid    VARCHAR2,
-		room_no		VARCHAR2,
-		library_id	VARCHAR2,
-		start_time	VARCHAR2,
-		end_time	VARCHAR2,
-		out_msg		OUT VARCHAR2
-	)
-	IS
-	sql_stmt 		VARCHAR2(32000);
-	v_start_time 	TIMESTAMP;
-	v_end_time 		TIMESTAMP;
-	v_id			VARCHAR2(50);
-	BEGIN
-		SELECT to_timestamp(start_time,'yyyy-mm-dd HH24 mi-ss') INTO v_start_time FROM DUAL;
-		SELECT to_timestamp(end_time,'yyyy-mm-dd HH24 mi-ss') INTO v_end_time FROM DUAL;
-
-    IF (v_start_time< SYSTIMESTAMP OR v_end_time< SYSTIMESTAMP OR v_end_time< v_start_time)THEN
-      			out_msg:='Entered date and time is invalid!!';
-    END IF;
-		IF ( TO_NUMBER(EXTRACT( hour FROM (v_end_time -  v_start_time)))>3) THEN
-			out_msg:='Please enter a duration less than or equal to 3 hours.';
-			raise user_error;
-		END IF;	
-
-		FOR item IN (
-	    	SELECT sr.reserv_start_time AS s_time,sr.reserv_end_time as e_time
-	  		FROM students_reserves_rooms sr
-	  		WHERE sr.room_no = room_no 
-	  			AND sr.library_id = library_id
-	 		UNION
-			SELECT fr.reserv_start_time AS s_time,fr.reserv_end_time as e_time
-	  		FROM faculties_reserves_rooms fr
-	  		WHERE fr.room_no = room_no 
-	  			AND fr.library_id = library_id
-	  ) LOOP
-			IF((item.s_time<= v_start_time AND v_start_time <=item.e_time) OR (item.s_time<=v_end_time AND v_end_time<=item.e_time)) THEN
-				out_msg:='Can not reserve. The entered time interval is already reserved!!';
-				raise user_error;
-			END IF;	
-		END LOOP;
-
-		sql_stmt:= 'INSERT INTO';
-		IF user_type='S' THEN
-			BEGIN
-
-				SELECT student_id INTO v_id FROM students WHERE user_id=userid;
-
-			EXCEPTION
-				WHEN NO_DATA_FOUND THEN
-				out_msg:='The user does not exists!!';
-			END;
-		
-			sql_stmt:=sql_stmt || ' students_reserves_rooms';
-		ELSIF user_type='F' THEN
-			BEGIN
-				SELECT faculty_id INTO v_id FROM faculties WHERE user_id=userid;
-			EXCEPTION
-				WHEN NO_DATA_FOUND THEN
-				out_msg:='The user does not exists!!';
-			END;
-			sql_stmt:=sql_stmt || ' faculties_reserves_rooms';
-		END IF;
-			sql_stmt:=sql_stmt ||'
-			VALUES (
-			'''||v_id||''',
-			'''||room_no||''',
-			'''||library_id||''',
-	          TIMESTAMP'''||start_time||''',
-	          TIMESTAMP'''||end_time||''',
-    		  ''0''
-			)';
-
-		EXECUTE IMMEDIATE	sql_stmt;
-		COMMIT;
-		out_msg:= 'Room reservation successful, Room No- ' ||room_no|| ' Library: '|| library_id || ' Start time : '||v_start_time|| ' End Time '|| v_end_time;
-	EXCEPTION
-		WHEN USER_ERROR THEN
-			out_msg:= 'Error: ' || out_msg;
-		WHEN OTHERS THEN
-			out_msg:=SQLERRM;
-	END user_reserves_rooms_proc;
-	PROCEDURE user_checksout_rooms_proc(
-		user_type VARCHAR2,
-		userid    VARCHAR2,
-		room_no		VARCHAR2,
-		library_id	VARCHAR2,
-		start_time	VARCHAR2,
-		out_msg		OUT VARCHAR2
-	)
-	IS
-	sql_stmt 		VARCHAR2(32000):='';
-	v_start_time 	TIMESTAMP;
-	v_end_time 		TIMESTAMP;
-	v_id			VARCHAR2(50);
-	v_id_value		VARCHAR2(50);
-	sql_step		VARCHAR2(32000):='';
-
-	BEGIN
-		sql_step:='converting start_time to TIMESTAMP.';	
-			SELECT to_timestamp(start_time,'yyyy-mm-dd HH24 mi-ss') INTO v_start_time FROM DUAL;
-		sql_step:='extracting reserve end time from table.';	
-		sql_stmt:= sql_stmt ||'
-		SELECT
-			 reserv_end_time INTO v_end_time '||
-		'FROM ';
-		IF user_type='S' THEN
-				BEGIN
-
-					SELECT student_id INTO v_id FROM students WHERE user_id=userid;
-
-				EXCEPTION
-					WHEN NO_DATA_FOUND THEN
-					out_msg:='The user does not exists!!';
-				END;
-			
-				sql_stmt:=sql_stmt || ' students_reserves_rooms ' ||
-					' WHERE student_id = ' ||
-					'''v_id''';
-
-			ELSIF user_type='F' THEN
-				BEGIN
-					SELECT faculty_id INTO v_id FROM faculties WHERE user_id=userid;
-				EXCEPTION
-					WHEN NO_DATA_FOUND THEN
-					out_msg:='The user does not exists!!';
-				END;
-				sql_stmt:=sql_stmt || ' faculties_reserves_rooms' ||
-					' WHERE faculty_id = ' ||
-					'''v_id''';
-		END IF;
-		sql_stmt:= sql_stmt ||
-      ' AND room_no = ' || ''''||room_no ||'''||
-      ' AND library_id = ' || ''''||library_id ||'''||
-      ' AND reserv_start_time = ' || ''''||v_start_time ||'''';
-
-		insert into sud_dummy values(1,sql_stmt);
-		COMMIT;	
-		EXECUTE IMMEDIATE sql_stmt;
-		COMMIT;	
-			
-		sql_step:='validating whether checking out within 1 hour or not.';
-
-		IF SYSTIMESTAMP<v_start_time OR SYSTIMESTAMP>(v_start_time+ INTERVAL '1' HOUR) OR v_end_time<SYSTIMESTAMP THEN
-			out_msg:='You did not check out within our hour!!';
-			RAISE USER_ERROR;
-		END IF;
-		sql_step:='Updating the table';
-		sql_stmt:='UPDATE TABLE ';
-		IF user_type='S' THEN
-				sql_stmt:=sql_stmt || ' students_reserves_rooms ' ||
-					' SET is_checked_out = ''1'' ||
-					' WHERE student_id = ' ||
-					'''v_id''';
-
-			ELSIF user_type='F' THEN
-				sql_stmt:=sql_stmt || ' faculties_reserves_rooms' ||
-					' WHERE student_id = ' ||
-					'''v_id''';
-		END IF;
-      ' AND room_no = ' || ''''||room_no ||'''||
-      ' AND library_id = ' || ''''||library_id ||'''||
-      ' AND reserv_start_time = ' || ''''||v_start_time ||'''';
-
-		truncate table sud_dummy;
-		insert into sud_dummy values(1,sql_stmt);
-		COMMIT;	
-		EXECUTE IMMEDIATE sql_stmt;
-		COMMIT;	
-
-	EXCEPTION
-		WHEN USER_ERROR THEN
-			out_msg:= 'Error: ' || out_msg;
-		WHEN OTHERS THEN
-			out_msg:=sql_step || SQLERRM;
-	END user_checksout_rooms_proc;
-END user_room_pkg;
-/
+INSERT INTO students_reserves_rooms VALUES('S','R1','LIB1',timestamp'01-NOV-15 06.00.00.000000 AM',TIMESTAMP'01-NOV-15 05.00.00.000000 AM','0')
