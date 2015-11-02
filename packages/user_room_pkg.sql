@@ -348,13 +348,15 @@ sql_stmt VARCHAR2(20000):='';
 BEGIN
 	sql_stmt:=' DELETE '||
 	'FROM students_reserves_rooms '||
-	'WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>1 '||
+	'WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>=1 '||
 	'AND IS_CHECKED_OUT = ''0''';
+	insert into sud_dummy values(21,sql_stmt);
+		commit;
 	EXECUTE IMMEDIATE sql_stmt;
 	COMMIT;
 	sql_stmt:= ' DELETE '||
 	'FROM faculties_reserves_rooms  '||
-	'WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>1 '||
+	'WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>=1 '||
 	'AND IS_CHECKED_OUT = ''0''';
 	EXECUTE IMMEDIATE sql_stmt;
 	COMMIT;
