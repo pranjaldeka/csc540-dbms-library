@@ -95,33 +95,36 @@ public class Journal {
 		}
 	}
 	private void checkOutJournalConsole(){
+		boolean isHardCopy = Utility.getDeliveryType();
 		Utility.setMessage("Please enter the ISSN number of journal you want to check out");
 		String issn = Utility.enteredConsoleString();
 		String library = null;
-		boolean flag = true;
-		do{
-			Utility.setMessage("Please select the Library:");
-			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
-			 library = Utility.enteredConsoleString();
-			if(library.equals("1") || library.equals("2"))
-				flag=false;
-		}
-		while(flag);
-		Utility.setMessage("Please enter return date and time");
-		String return_date = Utility.getTimeInput();
-		
-		checkOutJournal(issn,library,return_date);
-	}
-	private  void checkOutJournal(String issn, String lib, String return_date) {
-		try{
+		String return_date = null;
+		if (isHardCopy) {
+			library = Utility.getLibraryInput();
 
-			Resource sr = new Resource(this.userName, this.userType);
-			sr.checkOutResource(Constant.kJournal, issn, Utility.getLibraryId(lib), return_date);
-	       	
+			Utility.setMessage("Please enter return date and time");
+			return_date = Utility.getTimeInput();
 		}
-       	catch(SQLException e){
-       		PrintSQLException.printSQLException(e);
-			Utility.badErrorMessage();
+
+		
+		checkOutJournal(issn,library,return_date, isHardCopy);
+	}
+	private  void checkOutJournal(String issn, String lib, String return_date, boolean isHardCopy) {
+		if (!isHardCopy) {
+			Utility.setMessage("Not implemented yet..");
+		}
+		else {
+			try{
+
+				Resource sr = new Resource(this.userName, this.userType);
+				sr.checkOutResource(Constant.kJournal, issn, Utility.getLibraryId(lib), return_date);
+		       	
+			}
+	       	catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+			}
 		} 
 		Utility.callUserDialogueBox(userName, userType);
 

@@ -77,7 +77,10 @@ public class Book {
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Check-out a book.\t0:Go back to previous menu.");
+			System.out.println("1: Check-out a book.\t 0:Go back to previous menu.");
+			if (userType.equals(Constant.kFaculty)) {
+				Utility.setMessage("2: Reserve a book\t");
+			}
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -96,6 +99,14 @@ public class Book {
 		                sr.searchResources();
 						flag = false;
 						break;
+					case 2:
+						if (userType.equals(Constant.kFaculty)) {
+							reserveBookConsole();
+						}
+						else {
+							Utility.setMessage("Invalid choice: Please enter again.");
+						}
+						break;
 					default:
 						System.out.println("Invalid choice: Please enter again.");
 							
@@ -107,35 +118,50 @@ public class Book {
 			displayDialogueAfterSearch();
 		}
 	}
+	private void reserveBookConsole() {
+		Utility.setMessage("Please enter the ISBN number of book you want to check out");
+		String isbn = Utility.enteredConsoleString();
+		String library = Utility.getLibraryInput();
+		Utility.setMessage("Please enter reservation end date and time");
+		String reserve_end_date = Utility.getTimeInput();
+		reserveBook(isbn,library,reserve_end_date);
+	}
+
+	private void reserveBook(String isbn, String library,
+			String reserve_end_date) {
+	}
+
 	private  void checkOutBookConsole() {
+		boolean isHardCopy = Utility.getDeliveryType();
 		Utility.setMessage("Please enter the ISBN number of book you want to check out");
 		String isbn = Utility.enteredConsoleString();
 		String library = null;
-		boolean flag = true;
-		do{
-			Utility.setMessage("Please select the Library:");
-			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
-			 library = Utility.enteredConsoleString();
-			if(library.equals("1") || library.equals("2"))
-				flag=false;
-		}
-		while(flag);
+		String return_date = null;
+		if (isHardCopy) {
+			library = Utility.getLibraryInput();
 
-		Utility.setMessage("Please enter return date and time");
-		String return_date = Utility.getTimeInput();
+			Utility.setMessage("Please enter return date and time");
+			return_date = Utility.getTimeInput();
+		}
 		
-		checkOutBook(isbn,library,return_date);	
+		
+		checkOutBook(isbn,library,return_date, isHardCopy);	
 	}
 	
-	private  void checkOutBook(String isbn, String lib, String return_date) {
-		Resource sr = new Resource(this.userName, this.userType);
-		try{
-			sr.checkOutResource(Constant.kBook, isbn, Utility.getLibraryId(lib), return_date);
+	private  void checkOutBook(String isbn, String lib, String return_date, boolean isHardCopy) {
+		if (!isHardCopy) {
+			Utility.setMessage("Not implemented yet..");
 		}
-       	catch(SQLException e){
-       		PrintSQLException.printSQLException(e);
-			Utility.badErrorMessage();
-		} 	
+		else {
+			Resource sr = new Resource(this.userName, this.userType);
+			try{
+				sr.checkOutResource(Constant.kBook, isbn, Utility.getLibraryId(lib), return_date);
+			}
+	       	catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+			} 
+		}	
 		Utility.callUserDialogueBox(userName, userType);
 
 	}

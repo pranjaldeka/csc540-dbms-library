@@ -216,16 +216,17 @@ public class Room {
                 sr.showPublicationMenuItemsCheckedOut();
                 return;
             } else {
-            	 System.out.println("Library"+"\t\t" +"Room No" +"\t\t" +"Start Time"+"\t\t\t" +"End Time" +"\t\t" + "Is Checked Out");
+            	 System.out.println("Booking Id" + "\t\t" + "Library"+"\t\t" +"Room No" +"\t\t" +"Start Time"+"\t\t\t" +"End Time" +"\t\t" + "Is Checked Out");
                  System.out.println("----------------------------------------------------------------------------------------------------------");
 
                  do {
+                	String bookingId = rs.getString("room_booking_id");
                  	String libraryName = rs.getString("name");
  		            String roomNo = rs.getString("room_no");
  		            String reserveStartTime = rs.getString("reserv_start_time");
  		            String reserveEndTime = rs.getString("reserv_end_time");
  		            String isCheckedOut = rs.getString("is_checked_out");
- 		            System.out.println(libraryName +"\t" + roomNo+"\t\t" + reserveStartTime  +"\t\t" + reserveEndTime + "\t\t" + isCheckedOut);
+ 		            System.out.println(bookingId + "\t" + libraryName +"\t" + roomNo+"\t\t" + reserveStartTime  +"\t\t" + reserveEndTime + "\t\t" + isCheckedOut);
                  } while (rs.next());
             }
             displayDialogueAfterReservedOrCheckout();
@@ -269,36 +270,23 @@ public class Room {
 	}
 	
 	private  void checkOutRoomConsole() {
-		String library;
-		boolean flag = true;
-		do{
-			Utility.setMessage("Please select the Library:");
-			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
-			 library = Utility.enteredConsoleString();
-			if(library.equals("1") || library.equals("2"))
-				flag=false;
-			else
-				System.out.println("Oops..Invalid entry !! Please try again");
-		}
-		while(flag);
-	
-		String roomNo = null;
+		String bookingId = null;
 
-		Utility.setMessage("Please enter room no ");
-		roomNo = Utility.enteredConsoleString();
-		checkOutRoom(library, roomNo);
+		Utility.setMessage("Please enter booking id");
+		bookingId = Utility.enteredConsoleString();
+
+		checkOutRoom(bookingId);
 	}
 	
-	private  void checkOutRoom(String library, String roomNo) {
+	private  void checkOutRoom(String bookingId) {
 		try{
-			CallableStatement cstmt = DBConnection.returnCallableStatememt("{call user_room_pkg.user_checksout_rooms_proc(?, ?,?,?,?,?,?)}");
+			CallableStatement cstmt = DBConnection.returnCallableStatememt("{call user_room_pkg.user_checksout_rooms_proc(?, ?,?,?)}");
 	    	cstmt.setString(1, userType);
 	    	cstmt.setString(2, userName);
-	    	cstmt.setString(3, roomNo);
-	    	cstmt.setString(4, Utility.getLibraryId(library));
+	    	cstmt.setString(3, bookingId);
 	    	
-	    	cstmt.registerOutParameter(7, java.sql.Types.VARCHAR);
-			String outputMessage = DBConnection.returnMessage(cstmt, 7);
+	    	cstmt.registerOutParameter(4, java.sql.Types.VARCHAR);
+			String outputMessage = DBConnection.returnMessage(cstmt, 4);
 	       	System.out.println(outputMessage);
 		}
 		catch(SQLException e){

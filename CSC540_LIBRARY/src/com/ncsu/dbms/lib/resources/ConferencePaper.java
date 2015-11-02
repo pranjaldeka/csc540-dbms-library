@@ -104,35 +104,36 @@ public class ConferencePaper {
 		}
 	}
 	private void checkOutConfPaperConsole(){
+		boolean isHardCopy = Utility.getDeliveryType();
 		Utility.setMessage("Please enter the conf id number of conference paper you want to check out");
 		String confId = Utility.enteredConsoleString();
 		String library = null;
-		boolean flag = true;
-		do{
-			Utility.setMessage("Please select the Library:");
-			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
-			 library = Utility.enteredConsoleString();
-			if(library.equals("1") || library.equals("2"))
-				flag=false;
+		String return_date = null;
+		if (isHardCopy) {
+			library = Utility.getLibraryInput();
+
+			Utility.setMessage("Please enter return date and time");
+			return_date = Utility.getTimeInput();
 		}
-		while(flag);
 
-		Utility.setMessage("Please enter return date and time");
-		String return_date = Utility.getTimeInput();
-
-		checkOutConfPaper(confId,library,return_date);	
+		checkOutConfPaper(confId,library,return_date, isHardCopy);	
 		
 	}
-	private  void checkOutConfPaper(String confId, String lib, String return_date) {
-		try{
-
-			Resource sr = new Resource(this.userName, this.userType);
-			sr.checkOutResource(Constant.kConferencePaper, confId, Utility.getLibraryId(lib), return_date);
-	       	
+	private  void checkOutConfPaper(String confId, String lib, String return_date, boolean isHardCopy) {
+		if (!isHardCopy) {
+			Utility.setMessage("Not implemented yet..");
 		}
-       	catch(SQLException e){
-       		PrintSQLException.printSQLException(e);
-			Utility.badErrorMessage();
+		else {
+			try{
+
+				Resource sr = new Resource(this.userName, this.userType);
+				sr.checkOutResource(Constant.kConferencePaper, confId, Utility.getLibraryId(lib), return_date);
+		       	
+			}
+	       	catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+			}
 		}
 		Utility.callUserDialogueBox(userName, userType);
 

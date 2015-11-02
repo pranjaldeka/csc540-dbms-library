@@ -4,11 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
-
 import com.ncsu.dbms.lib.users.Faculty;
 import com.ncsu.dbms.lib.users.Student;
-
-import oracle.jdbc.Const;
 
 public final class Utility {
 	public static boolean validateDateFormat(String dateToValdate, String validFormat) {
@@ -106,6 +103,21 @@ public final class Utility {
 		return return_date;
 	}
 	
+	public static String getLibraryInput() {
+		String library = null;
+		boolean flag = true;
+		do{
+			Utility.setMessage("Please select the Library:");
+			Utility.setMessage("1. D.H. Hill \t\t 2. J.B. Hunt");
+			 library = Utility.enteredConsoleString();
+			if(library.equals("1") || library.equals("2"))
+				flag=false;
+			else
+				setMessage("Invalid input !! Please try again ");
+		}
+		while(flag);
+		return library;
+	}
 	public static void callUserDialogueBox(String userName, String userType){
 		if (userType.equals(Constant.kStudent)) {
 			Student student = new Student(userName);
@@ -115,5 +127,30 @@ public final class Utility {
 			Faculty faculty = new Faculty(userName);
 			faculty.showMenuItems();
 		}
+	}
+
+	/**
+	 * Method to identify if user wants hard copy or electronic copy
+	 * @return
+	 */
+	public static boolean getDeliveryType() {
+		
+		boolean isHardCopy = true;
+		boolean flag = true;
+		String deliveryType = null;
+		setMessage("Do you want hard copy or electronic copy?");
+		do{
+			Utility.setMessage("1. Hard Copy \t\t 2. Electronic copy");
+			deliveryType = Utility.enteredConsoleString();
+			if(deliveryType.equals("1") || deliveryType.equals("2"))
+				flag=false;
+			else
+				setMessage("Invalid input !! Please try again ");
+		}
+		while(flag);
+		if (deliveryType.equals("2")) {
+			isHardCopy = false;
+		}
+		return isHardCopy;
 	}
 }
