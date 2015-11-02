@@ -54,7 +54,7 @@ BEGIN
             THEN
                 table_name := 'BOOKS';
                 search_parameter := 'ISBN';
-						ELSIF resource_type = 'J' 
+			ELSIF resource_type = 'J' 
             THEN
                 table_name := 'JOURNALS';
                 search_parameter := 'ISSN';
@@ -62,11 +62,11 @@ BEGIN
             THEN
                 table_name := 'CONFERENCE_PAPERS';
                 search_parameter := 'CONF_PAPER_ID';
-          	/*ELSIF resource_type = 'C' 
+          	ELSIF resource_type = 'C' 
             THEN
                 table_name := 'CAMERAS';
                 search_parameter := 'CAMERA_ID';
-						*/
+						
             ELSE
                 invalid :=1;
             END IF;

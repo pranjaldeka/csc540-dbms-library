@@ -24,9 +24,9 @@ IS
 		    PATRON_DUES
 	WHERE	
 			due_end_date is null
-
+			AND patron_type = 'S'
 	GROUP BY patron_id,patron_type,trunc(sysdate)
-	HAVING MAX(TRUNC(SYSDATE) - TRUNC (due_start_Date) > 90
+	HAVING MAX(TRUNC(SYSDATE) - TRUNC (due_start_Date)) > 90;
 			
 	
 				
