@@ -80,8 +80,10 @@ public final class Utility {
 					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
 							flagDate = false;
 							do{
-								Utility.setMessage("Please enter time in HH:mm:ss format:");
+								Utility.setMessage("Please enter time in HH:mm format:");
 								enteredTime = Utility.enteredConsoleString();
+								//append :00 to make it compatible with HH:mm:ss format
+								enteredTime = enteredTime + ":00";
 								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
 									flagTime = false;
 									flag = false;

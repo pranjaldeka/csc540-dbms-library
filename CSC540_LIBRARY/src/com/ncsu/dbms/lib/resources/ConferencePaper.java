@@ -45,7 +45,7 @@ public class ConferencePaper {
                 sr.showPublicationMenuItems();
                 return;
             } else {
-                System.out.println("Conf paper id"+"\t" +"Conf Name" +"\t" +"Authors"+"\t" +"Publication Year" +"\t" + "Title"+"\t  " +"Year_Of_Pub" +"No. Of Hard Copies");
+                System.out.println("Conf paper id"+"\t" +"Conf Name" +"\t" +"Authors"+"\t" +"\t" + "Title"+"\t  " +"Publication Year" + "\t" + "Number of hardcopies");
                 System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------");
 
                 do {
@@ -54,10 +54,10 @@ public class ConferencePaper {
 		            String authors = rs.getString("authors");
 		            String year_of_publication = rs.getString("year_of_publication");
 		            String title = rs.getString("title");
-		            String no_of_hardcopies = rs.getString("no_of_hardcopies");
 		            String library = rs.getString("name");
+		            String no_of_hardcopies = rs.getString("no_of_hardcopies");
 		            String type = rs.getString("has_electronic");
-		            System.out.println(conf_paper_id +"\t" + conf_name+"\t\t" + authors  +"\t" + year_of_publication +"\t\t" + title +"\t" + authors +"\t\t" + title +" "+no_of_hardcopies);
+		            System.out.println(conf_paper_id +"\t" + conf_name+"\t\t" + authors  +"\t\t" + title +"\t" + authors +"\t\t" + title +"\t\t" + year_of_publication + "\t\t" + no_of_hardcopies);
                 } while (rs.next());
             }
 			 displayDialogueAfterSearch();
@@ -158,20 +158,17 @@ public class ConferencePaper {
 	                sr.showPublicationMenuItemsCheckedOut();
 	                return;
 	            } else {
-	            	 System.out.println("Conf paper id"+"\t" +"Conf Name" +"\t" +"Authors"+"\t" +"Publication Year" +"\t" + "Title"+"\t  " +"Year_Of_Pub" +"No. Of Hard Copies");
-	                 System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------");
+	            	System.out.println("Conf paper id"+"\t" +"Conf Name" +"\t" +"Authors"+"\t"  +"\t" + "Title"+"\t  " +"Publication Year");
+	                System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------");
 
-	                 do {
-	                 	String conf_paper_id = rs.getString("conf_paper_id");
-	 		            String conf_name = rs.getString("conf_name");
-	 		            String authors = rs.getString("authors");
-	 		            String year_of_publication = rs.getString("year_of_publication");
-	 		            String title = rs.getString("title");
-	 		            String no_of_hardcopies = rs.getString("no_of_hardcopies");
-	 		            String library = rs.getString("name");
-	 		            String type = rs.getString("has_electronic");
-	 		            System.out.println(conf_paper_id +"\t" + conf_name+"\t\t" + authors  +"\t" + year_of_publication +"\t\t" + title +"\t" + authors +"\t\t" + title +" "+no_of_hardcopies);
-	                 } while (rs.next());
+	                do {
+	                	String conf_paper_id = rs.getString("conf_paper_id");
+			            String conf_name = rs.getString("conf_name");
+			            String authors = rs.getString("authors");
+			            String year_of_publication = rs.getString("year_of_publication");
+			            String title = rs.getString("title");
+			            System.out.println(conf_paper_id +"\t" + conf_name+"\t\t" + authors  +"\t\t" + title +"\t" + authors +"\t\t" + title +"\t\t" + year_of_publication);
+	                } while (rs.next());
 	            }
 	            displayDialogueAfterCheckedOutResource();
 			}catch(SQLException e){
