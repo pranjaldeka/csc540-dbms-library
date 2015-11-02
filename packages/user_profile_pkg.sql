@@ -14,6 +14,7 @@ PROCEDURE validate_user_proc(
 
 PROCEDURE fetch_profile_data_proc(
 	user_name 		IN 	VARCHAR2,
+  user_type       in 	varchar2,
 	p_ref			OUT SYS_REFCURSOR,
 	out_err_msg		OUT VARCHAR2
   );
@@ -56,13 +57,16 @@ END validate_user_proc;
 
 PROCEDURE fetch_profile_data_proc(
 	user_name 		IN 	VARCHAR2,
+	user_type       in 	varchar2,
 	p_ref			OUT SYS_REFCURSOR,
 	out_err_msg		OUT VARCHAR2
 )
 IS
 
 BEGIN
-	OPEN p_ref FOR
+	 IF USER_TYPE = 'S' 
+	 THEN
+		OPEN p_ref FOR
 		SELECT 
 			s.student_id  ,       
 			s.user_id      ,      
@@ -82,11 +86,32 @@ BEGIN
 			s.dept_id = d.dept_id AND
 			s.degree_type_id = dt.degree_type_id AND
 			s.user_id = user_name ;
+      
+	 ELSIF USER_TYPE = 'F'
+    THEN
+		OPEN p_ref FOR
+		SELECT 
+			s.faculty_id  ,       
+			s.user_id      ,      
+			s.first_name    ,     
+			s.last_name      ,    
+			s.category             ,             
+			s.nationality    ,           
+			d.name
+		FROM 
+			faculties s, departments d
+		WHERE
+			s.dept_id = d.dept_id AND
+			s.user_id = user_name ;
+	END IF;
+	
 	
   EXCEPTION
  WHEN NO_DATA_FOUND THEN
     out_err_msg:='User Data not found!!';
+    
 END fetch_profile_data_proc;
+
 PROCEDURE update_user_profile_proc(
 	user_type	IN 	VARCHAR2,
 	user_id 	IN 	VARCHAR2,
