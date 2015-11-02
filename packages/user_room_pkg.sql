@@ -34,6 +34,7 @@ PROCEDURE user_reserved_rooms_proc(
 	pref				OUT SYS_REFCURSOR,
 	out_msg				OUT VARCHAR2
 );
+PROCEDURE del_unchkd_room_proc;
 END user_room_pkg;
 /
 CREATE OR REPLACE PACKAGE BODY user_room_pkg 
@@ -340,6 +341,25 @@ EXCEPTION
 	WHEN OTHERS THEN
 			out_msg:=sql_step || SQLERRM;
 END user_reserved_rooms_proc;
+
+PROCEDURE del_unchkd_room_proc
+IS
+sql_stmt VARCHAR2(20000):='';
+BEGIN
+	sql_stmt:=' DELETE '||
+	'FROM students_reserves_rooms '||
+	'WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>1 '||
+	'AND IS_CHECKED_OUT = ''0''';
+	EXECUTE IMMEDIATE sql_stmt;
+	COMMIT;
+	sql_stmt:= ' DELETE '||
+	'FROM faculties_reserves_rooms  '||
+	'WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>1 '||
+	'AND IS_CHECKED_OUT = ''0''';
+	EXECUTE IMMEDIATE sql_stmt;
+	COMMIT;
+
+END del_unchkd_room_proc;
 
 END user_room_pkg;
 /
