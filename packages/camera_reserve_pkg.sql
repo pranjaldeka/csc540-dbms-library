@@ -6,10 +6,10 @@ PROCEDURE camera_reserve_proc(
 	camera_id	    				IN 	VARCHAR2,
 	user_id		                    IN 	VARCHAR2,
 	user_type                       IN  VARCHAR2,
-	reservation_timestamp 			IN  VARCHAR2,
+	reservation_date 			    IN  VARCHAR2,
 	library_id						IN	VARCHAR2,
-	insert_flag						IN	NUMBER,
-    output   						 OUT VARCHAR2
+	insert_flag						IN	VARCHAR2,
+  output   						 OUT VARCHAR2
 );
 END camera_reserve_pkg;
 /
@@ -18,22 +18,24 @@ IS
 PROCEDURE camera_reserve_proc(
     
 	camera_id	    				IN 	VARCHAR2,
-	user_id		                    IN 	VARCHAR2,
-	user_type                       IN  VARCHAR2,
-	reservation_timestamp 			IN  VARCHAR2,
-	library_id						IN	VARCHAR2,
-	insert_FLAG							IN	NUMBER,
-    output   						 OUT VARCHAR2
+	user_id		             IN 	VARCHAR2,
+	user_type              IN  VARCHAR2,
+	reservation_date 			IN  VARCHAR2,
+	library_id						IN	VARCHAR2,	
+  insert_flag						IN	VARCHAR2,
+  output   						 OUT VARCHAR2
 )
 IS
 
 sql_statement		varchar2(32000);
 user_id_column 		varchar2(100);
 user_table 			varchar2(100);
-waiting_list 		number(2);
-already_co_flag 	number(2);
+reservation_timestamp timestamp;
+already_co_flag 	VARCHAR2(2);
 primary_id VARCHAR2(100);
 day_week varchar2(50);
+no_reservation VARCHAR2(100);
+no_available VARCHAR2(100);
 BEGIN
 
   IF USER_TYPE = 'S' 
@@ -47,11 +49,31 @@ BEGIN
 
   END IF;
   
+  
   /* check if reservation day is friday */
-		SELECT TO_CHAR(SYSDATE,'D') 
-		INTO day_week
-		from dual;
+		BEGIN
+			sql_statement := 
+			'
+			SELECT TO_CHAR(timestamp '''||reservation_date||''',''D'') 
+			from dual
+			';
+			EXECUTE IMMEDIATE sql_statement INTO day_week;
+			EXCEPTION
+					WHEN NO_DATA_FOUND THEN
+						day_week := 0;
+						 OUTPUT := 'Reservation day should be friday !';
+		END;
 		
+    
+			sql_statement := 
+			'
+			SELECT timestamp '''||reservation_date||'''
+			from dual
+			';
+			EXECUTE IMMEDIATE sql_statement INTO reservation_timestamp;
+		
+    
+    
 		IF day_week = 6
 		THEN
 
@@ -68,69 +90,118 @@ BEGIN
           
           EXECUTE IMMEDIATE sql_statement INTO primary_id;
                    
-         
-			IF insert_flag = 0
-			THEN
-					 -- check if user has already reserved
+         DBMS_OUTPUT.put_line('userid assigned');
+		
+		 -- check if user has already reserved
           BEGIN
-					sql_statement := ' 		SELECT 0
-											FROM CAMERAS_RESERVATION
-											WHERE camera_id = '''||camera_id||'''
-											AND TRUNC(RESERVATION_TIMESTAMP) ='''||TRUNC(reservation_timestamp)||'''
-											AND patron_id = '''||primary_id||'''
-											AND patron_type = '||user_type;
-					
+					sql_statement := 
+                      'SELECT 0 FROM DUAL
+                      WHERE NOT EXISTS
+                      (
+                        SELECT 1
+                        FROM CAMERAS_RESERVATION
+                        WHERE camera_id = '''||camera_id||'''
+                        AND RESERVATION_TIMESTAMP ='''||reservation_timestamp||'''
+                        AND patron_id = '''||primary_id||'''
+                        AND patron_type = '''||user_type||'''
+                      )';
+				   DBMS_OUTPUT.put_line(sql_statement);	
 					EXECUTE IMMEDIATE sql_statement INTO already_co_flag ;	
+                             
+         DBMS_OUTPUT.put_line(sql_statement);
 					
 					EXCEPTION
 					WHEN NO_DATA_FOUND THEN
 						already_co_flag := 1;
 						OUTPUT := 'already reserved by the user !';					
           END;
-					/*find waiting list*/
-					IF already_co_flag = 0
-					THEN
-							sql_statement := '      SELECT COUNT(1) + 1
-													FROM CAMERAS_RESERVATION
-													WHERE camera_id = '''||camera_id||'''
-													AND TRUNC(RESERVATION_TIMESTAMP) ='''||TRUNC(reservation_timestamp)||'''
-													AND library_id ='''||library_id||'''
-													';
-													
-							 EXECUTE IMMEDIATE sql_statement INTO waiting_list ;	
-					  
 					
-							
-						OUTPUT := 'waiting list - '||waiting_list;
+			IF already_co_flag = 0 
+			THEN
+			
+			IF insert_flag = 1
+			THEN
+			
+				sql_statement := '
+									INSERT INTO CAMERAS_RESERVATION
+									VALUES (
+									'''||camera_id||''',
+									'''||primary_id||''',
+									'''||user_type||''',
+									'''||library_id||''',
+									TIMESTAMP'''||reservation_date||''',
+									1
+									
+									)';
+				DBMS_OUTPUT.put_line(sql_statement);						
+				EXECUTE IMMEDIATE sql_statement;
 				
-			
-					END IF;
+				OUTPUT := 'reservation successful';
 			ELSE
-					sql_statement := '
-											INSERT INTO CAMERAS_RESERVATION
-											VALUES (
-											'''||camera_id||''',
-											'''||primary_id||''',
-											'''||user_type||''',
-											'''||library_id||''',
-											TIMESTAMP'''||reservation_timestamp||''',
-											1,
-											
-											)';
-								
-											
-											
-					EXECUTE IMMEDIATE sql_statement;
-					
-					OUTPUT := 'reservation successful';
-						
-											
 			
+			
+					/*find waiting list*/
+					sql_statement := 
+                      '
+                        SELECT COUNT(1)
+                        FROM CAMERAS_RESERVATION
+                        WHERE camera_id = '''||camera_id||'''
+                        AND RESERVATION_TIMESTAMP ='''||reservation_timestamp||'''
+                        AND library_id = '''||library_id||'''
+                        AND ACTIVE_flag= 1
+                      ';
+					  
+					DBMS_OUTPUT.put_line(sql_statement);	
+					EXECUTE IMMEDIATE sql_statement INTO no_reservation ;	
+					
+          BEGIN
+              sql_statement := 
+                          '
+                            SELECT no_of_hardcopies
+                            FROM CAMERAS_IN_LIBRARIES 
+                            WHERE camera_id = '''||camera_id||'''
+                            AND library_id = '''||library_id||'''
+                          ';
+                
+              DBMS_OUTPUT.put_line(sql_statement);	
+              EXECUTE IMMEDIATE sql_statement INTO no_available ;	
+              
+              DBMS_OUTPUT.put_line('here');	
+              EXCEPTION
+              WHEN NO_DATA_FOUND THEN
+              OUTPUT := 'Camera not avaialable in library';
+              no_available:=-1;
+              WHEN OTHERS THEN
+              output := 'Camera not avaialable in library';
+              
+          END;
+                                
+			IF no_available <> -1
+              THEN
+              IF no_reservation >= no_available 
+              THEN
+             
+				OUTPUT := 'waiting list - '||to_char(to_number(no_reservation) - to_number(no_available) + 1);
+				DBMS_OUTPUT.put_line(output);
+              ELSE 
+				OUTPUT := 'available - '||to_char(to_number(no_available) - to_number(no_reservation) + 1);
+              END IF;
+            ELSE
+			OUTPUT := 'Camera not avaialable in library';
+			
+			 END IF;
+		END IF;			
+			
+				
+			ELSE
+
+			OUTPUT := 'User already reserved the camera on this date!';						
+
 			END IF;
 			
 		ELSE
 		
-		 OUTPUT := 'reservation unsuccessful!';
+		 OUTPUT := 'Reservation day should be friday !';
 		 
 		END IF;
 			
@@ -146,3 +217,5 @@ END camera_reserve_proc;
 END camera_reserve_pkg;
 /
 show errors
+
+
