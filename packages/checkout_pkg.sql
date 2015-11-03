@@ -2,8 +2,7 @@ SET SERVEROUTPUT ON;
 CREATE OR REPLACE PACKAGE  CHECK_OUT_PKG 
 IS
 
-PROCEDURE CHECK_OUT_PROC(
-    
+PROCEDURE CHECK_OUT_PROC(    
 	issue_type	    	IN 	VARCHAR2,
 	issue_type_id		IN 	VARCHAR2,
 	USER_TYPE           IN  VARCHAR2,
@@ -13,10 +12,12 @@ PROCEDURE CHECK_OUT_PROC(
 	OUTPUT    OUT           VARCHAR2
   
 );
+
 END CHECK_OUT_PKG;
 /
 CREATE OR REPLACE PACKAGE BODY CHECK_OUT_PKG 
 IS
+
 PROCEDURE CHECK_OUT_PROC(
     
 	ISSUE_TYPE	    	IN 	VARCHAR2,
@@ -28,7 +29,12 @@ PROCEDURE CHECK_OUT_PROC(
   OUTPUT    OUT  VARCHAR2
 )
 IS
-avail_flag 			number(2);
+
+no_of_hard_copies	number(2);
+already_in_resource_q_flag number(2);
+user_priority		number(2);
+max_priority		number(10);
+max_faculty_priority number(10);
 already_co_flag		number(2);
 resource_exists_in_lib_flag number(2);
 chk_user_in_q_flag	number(2);
@@ -146,7 +152,7 @@ BEGIN
 				INTO day_week
 				from dual;
 				
-				IF day_week = 1
+				IF day_week = 2
 				THEN
 					select to_char(sysdate,'HH24MMSS') 
 					INTO time_day from dual;
@@ -190,7 +196,6 @@ BEGIN
 					  WHERE user_id = '''||user_id||'''';
 					  /*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
 					  EXECUTE IMMEDIATE sql_statement INTO primary_id;
-						  avail_flag :=0;
 						  already_co_flag := 0;
 						  resource_exists_in_lib_flag := 0;
 						  sql_statement := 
@@ -220,8 +225,9 @@ BEGIN
 							EXCEPTION
 								WHEN NO_DATA_FOUND THEN
 									already_co_flag := 0;
-									/*DBMS_OUTPUT.PUT_LINE(already_co_flag);*/
+									DBMS_OUTPUT.PUT_LINE(already_co_flag);
 								WHEN OTHERS THEN
+									DBMS_OUTPUT.PUT_LINE('Hii');
 									output :=SQLERRM;
 							END;
 							IF already_co_flag = 1
@@ -229,9 +235,10 @@ BEGIN
 								OUTPUT := 'RESOURCE ALREADY ISSUED TO THE USER';
 								
 							ELSE
-							BEGIN
+							
+								no_of_hard_copies := 0;
 								sql_statement := 
-								'SELECT 1 
+								'SELECT T2.no_of_hardcopies 
 								FROM SSINGH25.' || table_name || ' T1
 								inner join 
 								SSINGH25.'||table_name||'_in_libraries T2
@@ -239,97 +246,244 @@ BEGIN
 								WHERE T2.LIBRARY_ID= '''||LIBRARY_ID||''' 
 								and T1.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''
 									and T2.no_of_hardcopies > 0';
-									
-								EXECUTE IMMEDIATE sql_statement INTO avail_flag;
-							EXCEPTION
+								BEGIN	
+								EXECUTE IMMEDIATE sql_statement INTO no_of_hard_copies;
+								EXCEPTION
 								WHEN NO_DATA_FOUND THEN
-									avail_flag := 0;
-									/*DBMS_OUTPUT.PUT_LINE(avail_flag);*/
+									no_of_hard_copies := 0;
+									DBMS_OUTPUT.PUT_LINE(no_of_hard_copies || 'Hiiiiii');
 								WHEN OTHERS THEN
+									DBMS_OUTPUT.PUT_LINE(no_of_hard_copies || 'Hellllllo');
 									output :=SQLERRM;
-							END;
+								END;
 								/*DBMS_OUTPUT.PUT_LINE(avail_flag);*/
-								IF avail_flag = 1
+								IF no_of_hard_copies > 0
 								THEN
-								/*
-								#######################CHECKOUT TRANSACTION#######################;
-								*/
-						  
-									
-							 
-										 
-										sql_statement := '
-										INSERT INTO '||user_table||'_CO_'||table_name||'
-										VALUES (
-										'''||primary_id||''',
-										'''||ISSUE_TYPE_ID||''',
-										'''||LIBRARY_ID||''',
-										TIMESTAMP'''||current_datetime||''',
-										NULL,
-					  TIMESTAMP'''||duedate||'''
-										)';
-										
-										
-										
-										EXECUTE IMMEDIATE sql_statement;
-										
-										/*update No. of avaialable hard copies*/
-										
-										sql_statement := 'UPDATE 
-										SSINGH25.'||table_name||'_in_libraries T
-										SET NO_OF_HARDCOPIES =NO_OF_HARDCOPIES-1
-										WHERE T.LIBRARY_ID= '''||LIBRARY_ID||''' 
-										and T.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''';
-										/*DBMS_OUTPUT.PUT_LINE(sql_statement);
-										*/
-										EXECUTE IMMEDIATE sql_statement;
-									
-									COMMIT;
-								OUTPUT := 'CHECK OUT SUCCESSFUL';
-								
-								ELSE
-									chk_user_in_q_flag := 0;
-									OUTPUT := 'Sorry! All hard copies have been checked out.';
-									BEGIN
-									/* Checking if user already exists in queue table */
+									/* chk if user already exists in RESOURCE_QUEUE and has the priority to checkout*/
+									/* if yes, delete from queue - also reduce priority of others*/
+									/* Eitherways call checkout transaction */
+									user_priority := 0;
 									sql_statement := '
-										select 1 
-										from SSINGH25.RESOURCES_QUEUE
-										where 
-										RESOURCE_ID = '''||ISSUE_TYPE_ID||'''
-										and PATRON_ID = '''||primary_id||'''
+											select MIN(PRIORITY) 
+											from SSINGH25.RESOURCES_QUEUE
+											where 
+											RESOURCE_ID = '''||ISSUE_TYPE_ID||'''
+											and PATRON_ID = '''||primary_id||'''
+											and LIBRARY_ID = '''||LIBRARY_ID||'''
 									';
-									/*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
-									EXECUTE IMMEDIATE sql_statement into chk_user_in_q_flag;
+									BEGIN
+									EXECUTE IMMEDIATE sql_statement into user_priority;
 									EXCEPTION
 										WHEN NO_DATA_FOUND THEN
-											chk_user_in_q_flag := 0;
+											user_priority := 0;
 										WHEN OTHERS THEN
 											output :=SQLERRM;
 									END;
-									/*DBMS_OUTPUT.PUT_LINE(chk_user_in_q_flag);*/
-									IF chk_user_in_q_flag = 0
+									IF user_priority > 0 and user_priority <= no_of_hard_copies
 									THEN
-																			
-										/* insert into resources queue*/									
+										/* delete from queue */
 										sql_statement := '
-											INSERT INTO SSINGH25.RESOURCES_QUEUE
-											VALUES (
-											'''||ISSUE_TYPE_ID||''',
-											'''||primary_id||''',
-											'''||USER_TYPE||''',
-											TIMESTAMP'''||current_datetime||'''
-											)';
-																			
-										EXECUTE IMMEDIATE sql_statement;		
+											delete from SSINGH25.RESOURCES_QUEUE
+											where 
+											RESOURCE_ID = '''||ISSUE_TYPE_ID||'''
+											and PATRON_ID = '''||primary_id||'''
+											and PRIORITY = '''||user_priority||'''
+											and LIBRARY_ID = '''||LIBRARY_ID||'''
+										';
+										EXECUTE IMMEDIATE sql_statement;
 										COMMIT;
 
-										OUTPUT := 'Successfully added to Waiting Queue!';
-									ELSE
+										/* update other records whose priority < user_priority */
+										sql_statement := '
+											update SSINGH25.RESOURCES_QUEUE
+											set PRIORITY = PRIORITY - 1
+											where RESOURCE_ID = '''||ISSUE_TYPE_ID||''' 
+											and LIBRARY_ID = '''||LIBRARY_ID||'''
+											and '||user_priority||' < PRIORITY
+										';
+										EXECUTE IMMEDIATE sql_statement;
+										COMMIT;
+									end if;							
+									/*
+									#######################CALL CHECKOUT TRANSACTION#######################;
+									*/	
+									--checkout_pkg.CHECK_OUT_TRANSACTION_PROC (user_table, table_name, primary_id, ISSUE_TYPE_ID, LIBRARY_ID, current_datetime, duedate);	
+
+									BEGIN
+								sql_statement := '
+											INSERT INTO '||user_table||'_CO_'||table_name||'
+											VALUES (
+											'''||primary_id||''',
+											'''||ISSUE_TYPE_ID||''',
+											'''||LIBRARY_ID||''',
+											TIMESTAMP'''||current_datetime||''',
+											NULL,
+											TIMESTAMP'''||duedate||'''
+											)';
+								
+											
+											
+											EXECUTE IMMEDIATE sql_statement;
+											
+											/*update No. of avaialable hard copies*/
+											
+											sql_statement := 'UPDATE 
+											SSINGH25.'||table_name||'_in_libraries T
+											SET NO_OF_HARDCOPIES =NO_OF_HARDCOPIES-1
+											WHERE T.LIBRARY_ID= '''||LIBRARY_ID||''' 
+											and T.'||search_parameter|| '='''||ISSUE_TYPE_ID||'''';
+											/*DBMS_OUTPUT.PUT_LINE(sql_statement);
+											*/
+											EXECUTE IMMEDIATE sql_statement;
+										
+										COMMIT;
+									OUTPUT := 'CHECK OUT SUCCESSFUL';
+
+									EXCEPTION
+										 WHEN NO_DATA_FOUND THEN
+											OUTPUT:='Error during checkout';
+										 WHEN OTHERS THEN
+											   OUTPUT:=SQLERRM;
+									END;
+									
+								
+								ELSE
+									/* put him in queue bcz he is eligible to checkout but no hard copies left*/
+																		
+									/*but first check if he is already in resources_queue for that particular resource
+									irrespective of library*/
+									begin
+										already_in_resource_q_flag := 0;
+										sql_statement := '
+											select 1 
+											from RESOURCES_QUEUE
+											where RESOURCE_ID = '''||ISSUE_TYPE_ID||'''
+											and PATRON_ID = '''||primary_id||'''
+										';
+										EXECUTE IMMEDIATE sql_statement INTO already_in_resource_q_flag;
+										exception
+											WHEN NO_DATA_FOUND THEN
+												already_in_resource_q_flag := 0; 
+											WHEN OTHERS THEN
+												output :=SQLERRM;
+									end;
+									if already_in_resource_q_flag = 1
+									then
 										OUTPUT := 'You are already in Waiting Queue';
-									END IF;									
+									else
+										/* CHK if faculty or student
+									    give him suitable priority */
+										/* first check if the queue is empty - insert - set priority = max_priority + 1 */
+										max_priority := 0;
+										sql_statement := '
+												select NVL(MAX(PRIORITY), 0) 
+												from SSINGH25.RESOURCES_QUEUE
+												where RESOURCE_ID = '''||ISSUE_TYPE_ID||''' 
+												and LIBRARY_ID = '''||LIBRARY_ID||''' 
+										';
+										BEGIN
+
+											DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || max_priority);
+											EXECUTE IMMEDIATE sql_statement into max_priority;
+											DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || max_priority);
+											EXCEPTION
+												WHEN NO_DATA_FOUND THEN
+													max_priority := 0;
+													DBMS_OUTPUT.PUT_LINE(max_priority || 'sud');
+												WHEN OTHERS THEN
+													DBMS_OUTPUT.PUT_LINE(max_priority || 'dev');
+													output :=SQLERRM;
+										END;														
+										
+										if (max_priority = 0 OR USER_TYPE = 'S')
+										then
+										begin
+										/* insert */
+											max_priority:= max_priority+1;
+											DBMS_OUTPUT.PUT_LINE('at here ' ||max_priority);
+
+											sql_statement := '
+												INSERT INTO RESOURCES_QUEUE
+												VALUES (
+												'''||ISSUE_TYPE_ID||''',
+												'''||primary_id||''',										
+												'''||USER_TYPE||''',											
+												'||max_priority||',
+												'''||LIBRARY_ID||'''
+												)';	
+											DBMS_OUTPUT.PUT_LINE(sql_statement);
+											EXECUTE IMMEDIATE sql_statement;
+											commit;
+											exception
+											WHEN NO_DATA_FOUND THEN
+												max_priority := 0;
+												DBMS_OUTPUT.PUT_LINE(max_priority || 'sud2');
+											WHEN OTHERS THEN
+												DBMS_OUTPUT.PUT_LINE(max_priority || 'dev2');
+												output :=SQLERRM;
+											
+										end;
+										OUTPUT := 'Successfully added to Waiting Queue!';
+										
+									elsif USER_TYPE = 'F'
+									THEN 
+											/* Check max(priority) of faculty and increment priorities of others*/
+											/*If he is the first faculty but already there are students*/
+											max_faculty_priority := 0;
+											
+											sql_statement := '
+												select NVL(MAX(PRIORITY), 0) 
+												from SSINGH25.RESOURCES_QUEUE
+												where PATRON_TYPE = ''F''
+												and RESOURCE_ID = '''||ISSUE_TYPE_ID||''' 
+												and LIBRARY_ID = '''||LIBRARY_ID||''' 
+											';
+											DBMS_OUTPUT.PUT_LINE('atttttt here ' ||max_faculty_priority);
+											BEGIN
+												EXECUTE IMMEDIATE sql_statement into max_faculty_priority;
+												DBMS_OUTPUT.PUT_LINE('atttttt here ' ||max_faculty_priority);
+												EXCEPTION
+													WHEN NO_DATA_FOUND THEN
+														max_faculty_priority := 0;
+													WHEN OTHERS THEN
+														output :=SQLERRM;
+											END;
+											
+											/*shift priorities of others by one*/
+											sql_statement := '
+												update SSINGH25.RESOURCES_QUEUE
+												set PRIORITY = PRIORITY + 1
+												where PRIORITY > '||max_faculty_priority||'
+												and RESOURCE_ID = '''||ISSUE_TYPE_ID||''' 
+												and LIBRARY_ID = '''||LIBRARY_ID||''' 
+											';
+											DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || max_faculty_priority);
+											EXECUTE IMMEDIATE sql_statement;
+											COMMIT;										
+											
+											/* insert */
+											max_faculty_priority:= max_faculty_priority+1;
+											/*DBMS_OUTPUT.PUT_LINE('at here ' ||max_priority);*/
+
+											sql_statement := '
+												INSERT INTO RESOURCES_QUEUE
+												VALUES (
+												'''||ISSUE_TYPE_ID||''',
+												'''||primary_id||''',										
+												'''||USER_TYPE||''',											
+												'||max_faculty_priority||',
+												'''||LIBRARY_ID||'''										
+												)';	
+											DBMS_OUTPUT.PUT_LINE(sql_statement);
+											EXECUTE IMMEDIATE sql_statement;
+											commit;									
+										
+											OUTPUT := 'Successfully added to Waiting Queue!';
+										
+									end if;		
+																		
 								END IF;
-							
+							END IF;
 							END IF;
 						ELSE
 							OUTPUT := 'RESOURCE IS NOT IN ANY LIBRARY';
@@ -338,10 +492,10 @@ BEGIN
 			ELSE
 					OUTPUT := 'INVALID RETURN DATE OR TIME';
 			END IF;
-	ELSE
-        OUTPUT := 'INVALID PARAMETERS';
-        /*DBMS_OUTPUT.PUT_LINE('RESOURCE UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
-	END IF;	
+						  ELSE
+							OUTPUT := 'INVALID PARAMETERS';
+							/*DBMS_OUTPUT.PUT_LINE('RESOURCE UNAVAILABLE/ ALREADY ISSUED TO THE USER');*/
+						  END IF;	
 			
 	ELSE
         OUTPUT := 'INVALID PARAMETERS';
