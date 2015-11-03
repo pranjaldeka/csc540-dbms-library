@@ -79,7 +79,6 @@ public class Login {
 				studentWelcomeMenu(userName, firstName, lastName);
 			}
 			else if(user_type.equals("F")) {// call faculty welcome window
-				System.out.println("Hello " + callStmt.getString(4) + " " + callStmt.getString(5) + " !!!");
 				facultyWelcomeMenu(userName,firstName,lastName);
 			}
 

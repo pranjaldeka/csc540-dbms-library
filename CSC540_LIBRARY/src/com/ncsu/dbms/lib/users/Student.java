@@ -168,14 +168,14 @@ public class Student extends User {
 		}
 		else if(enteredValue==1){
 			//user_id
-			updateStudentProfileData("user_id", enteredProfileData());
+			updateProfileData("user_id", enteredProfileData());
 		}
 		else if(enteredValue==2){
 			//first_name
-			updateStudentProfileData("first_name", enteredProfileData());
+			updateProfileData("first_name", enteredProfileData());
 		}else if(enteredValue==3){
 			//last_name
-			updateStudentProfileData("last_name", enteredProfileData());
+			updateProfileData("last_name", enteredProfileData());
 		}else if(enteredValue==4){
 			//Phone_no
 			phoneNumberValidation("phone_number");
@@ -184,17 +184,17 @@ public class Student extends User {
 			phoneNumberValidation("alt_phone_number");
 		}else if(enteredValue==7){
 			//Address
-			updateStudentProfileData("address", enteredProfileData());
+			updateProfileData("address", enteredProfileData());
 		}else if(enteredValue==8){
 			//Nationality
-			updateStudentProfileData("nationality", enteredProfileData());
+			updateProfileData("nationality", enteredProfileData());
 		}else if(enteredValue==9){
 			//Password
-			updateStudentProfileData("password", enteredProfileData());
+			updateProfileData("password", enteredProfileData());
 		}
 		else if(enteredValue==10){
 			//sex
-			updateStudentProfileData("sex", enteredProfileData());
+			updateProfileData("sex", enteredProfileData());
 		}
 		else if(enteredValue==0){
 			showMenuItems();
@@ -209,9 +209,8 @@ public class Student extends User {
 		String validFormat = "MM/dd/yyyy";
 		if(Utility.validateDateFormat(enteredValue, validFormat))
 		{
-			System.out.println("Date is valid");
 			//call save functionality
-			updateStudentProfileData("dob", enteredValue);
+			updateProfileData("dob", enteredValue);
 		}else{
 			System.out.println("Date format is invalid.");
 			dateOfBirthValidation();
@@ -222,43 +221,17 @@ public class Student extends User {
 		String valueEntered = enteredProfileData();
 		if(Utility.isNumeric(valueEntered))
 		{
-			System.out.println("Number is valid");
 			if(type.equals("phone_number")){
-				updateStudentProfileData("phone_number", valueEntered);
+				updateProfileData("phone_number", valueEntered);
 			}
 			else if(type.equals("alt_phone_number")){
-				updateStudentProfileData("alt_phone_number", valueEntered);
+				updateProfileData("alt_phone_number", valueEntered);
 			}
 		}else{
 			System.out.println("Phone number is invalid!!");
 			phoneNumberValidation(type);
 			
 		}
-	}
-	
-	private void updateStudentProfileData(String columnName, String newColumnValue){
-        try {
-        	CallableStatement cstmt = DBConnection.con.prepareCall("{call user_profile_pkg.update_user_profile_proc(?, ?, ?, ?, ?)}");
-        	cstmt.setString(1, Constant.kStudent);
-        	cstmt.setString(2, userName);
-        	cstmt.setString(3, columnName);
-        	cstmt.setString(4, newColumnValue);
-        	cstmt.registerOutParameter(5, OracleTypes.VARCHAR);
-        	cstmt.executeQuery();
-        	String error = cstmt.getString(5);
-        	if(error != null)
-        	{
-        		System.out.println(error);
-        		showMenuForModifyProfile();
-        	}else
-        		System.out.println("Update Successful!!!");
-        	showMenuForModifyProfile();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			PrintSQLException.printSQLException(e);
-			showMenuForModifyProfile();
-			}
-
 	}
 	
 

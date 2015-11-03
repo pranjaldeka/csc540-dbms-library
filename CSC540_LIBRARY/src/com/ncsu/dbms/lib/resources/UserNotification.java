@@ -38,10 +38,11 @@ public class UserNotification {
 	       	}  
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
+            	System.out.println("\n"+ "You do not have any notification!!\n");
     			Utility.callUserDialogueBox(this.userName, this.userType);
                 return;
             } else {
-            	System.out.println("\n"+ "You have following notifications!!");
+            	System.out.println("\n"+ "You have the following notifications!!\n");
                 do {
                 	String resourceType = rs.getString("R");
 		            String resourceName = rs.getString("resource_name");
