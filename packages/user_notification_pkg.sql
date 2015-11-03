@@ -32,7 +32,7 @@ IS
 		IF in_user_type='S' THEN
 			BEGIN
 
-				SELECT student_id INTO v_id FROM students WHERE user_id=in_user_type;
+				SELECT student_id INTO v_id FROM students WHERE user_id=in_user_id;
 
 			EXCEPTION
 				WHEN NO_DATA_FOUND THEN
@@ -47,8 +47,8 @@ IS
 						  TO_CHAR(reserv_end_time, 'DD-MON-YYYY HH24:MI')   AS due_date,
 						  ' Which was reserved on '	|| TO_CHAR(reserv_start_time, 'DD-MON-YYYY HH24:MI') AS checkout_time
 						FROM students_reserves_rooms
-						WHERE reserv_start_time >= SYSTIMESTAMP
-						OR reserv_end_time      >= SYSTIMESTAMP
+						WHERE 
+						SYSTIMESTAMP BETWEEN reserv_start_time AND reserv_end_time
 						AND student_id = v_id
 
 						UNION
@@ -103,7 +103,7 @@ IS
 
 		ELSIF in_user_type='F' THEN
 			BEGIN
-				SELECT faculty_id INTO v_id FROM faculties WHERE user_id=in_user_type;
+				SELECT faculty_id INTO v_id FROM faculties WHERE user_id=in_user_id;
 			EXCEPTION
 				WHEN NO_DATA_FOUND THEN
 				out_msg:='The user does not exists!!';
@@ -117,8 +117,8 @@ IS
 					  TO_CHAR(reserv_end_time, 'DD-MON-YYYY HH24:MI')   AS due_date,
 					  TO_CHAR(reserv_start_time, 'DD-MON-YYYY HH24:MI') AS checkout_time
 					FROM FACULTIES_RESERVES_ROOMS
-					WHERE reserv_start_time >= SYSTIMESTAMP
-					OR reserv_end_time      >= SYSTIMESTAMP
+					WHERE 
+					SYSTIMESTAMP BETWEEN reserv_start_time AND reserv_end_time
 					AND faculty_id = v_id
 
 					UNION

@@ -10,6 +10,7 @@ import oracle.jdbc.OracleTypes;
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.resources.Resource;
+import com.ncsu.dbms.lib.resources.UserNotification;
 import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
 
@@ -54,6 +55,8 @@ public class Faculty extends User {
 						break;
 					case 4:
 						//Notifications
+						UserNotification un = new UserNotification(this.userName, this.userType);
+						un.showNotification();
 						flag = false;
 						break;
 					case 5:
