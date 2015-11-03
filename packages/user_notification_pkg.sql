@@ -5,6 +5,11 @@ set serveroutput on;
 
 CREATE OR REPLACE PACKAGE user_notification_pkg AS 
 user_error	EXCEPTION;
+/*********************************************************************
+show_notification_proc : This procedure collects all plausible
+						 notifications and displays it to user
+**********************************************************************/
+
 PROCEDURE show_notification_proc(
 	in_user_type 		VARCHAR2,
 	in_user_id			VARCHAR2,
@@ -17,6 +22,10 @@ END user_notification_pkg;
 /
 CREATE OR REPLACE PACKAGE BODY user_notification_pkg 
 IS
+/*********************************************************************
+show_notification_proc : This procedure collects all plausible
+						 notifications and displays it to user
+**********************************************************************/
 	PROCEDURE show_notification_proc(
 		in_user_type 		VARCHAR2,
 		in_user_id			VARCHAR2,
@@ -179,3 +188,4 @@ IS
 
 END user_notification_pkg;
 /
+SHOW ERRORS
