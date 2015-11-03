@@ -47,7 +47,7 @@ public class Book {
                 sr.showPublicationMenuItems();
                 return;
             } else {
-                System.out.println("ISBN"+"\t" +"Publisher" +"\t" +"Type"+"\t" +"Library" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title"+"No. Of Hard Copies");
+                System.out.println("ISBN"+"\t" +"Publisher" +"\t" +"Type"+"\t" +"Library" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title\t"+"No. Of Hard Copies");
                 System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------");
 
                 do {
