@@ -45,7 +45,7 @@ IS
 						  room_no
 						  || ' needs to be vacated by '                     AS resource_name,
 						  TO_CHAR(reserv_end_time, 'DD-MON-YYYY HH24:MI')   AS due_date,
-						  ' Which was reseerved on '	|| TO_CHAR(reserv_start_time, 'DD-MON-YYYY HH24:MI') AS checkout_time
+						  ' Which was reserved on '	|| TO_CHAR(reserv_start_time, 'DD-MON-YYYY HH24:MI') AS checkout_time
 						FROM students_reserves_rooms
 						WHERE reserv_start_time >= SYSTIMESTAMP
 						OR reserv_end_time      >= SYSTIMESTAMP
