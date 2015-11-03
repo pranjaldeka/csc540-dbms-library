@@ -123,7 +123,7 @@ user_reserves_rooms_proc : This procedure reserves a room for a user.
 	v_end_time 		TIMESTAMP;
 	v_id			VARCHAR2(50);
 	sql_step		VARCHAR2(32000):='';
-	v_count			NUMBER(2);
+	v_count			NUMBER(2):=0;
 	booking_id		VARCHAR2(500);
 	BEGIN
 		sql_step:= 'Converting the start date and end date to TIMESTAMP';
@@ -150,7 +150,6 @@ user_reserves_rooms_proc : This procedure reserves a room for a user.
 				 AND r.library_id = in_library_id
 				 AND r.room_type  = 'S';
 			END IF;
-			DBMS_OUTPUT.PUT_LINE(v_count);
 			IF v_count = 0 THEN
 				out_msg:='The room is not available for you!!';
 				RAISE USER_ERROR; 
@@ -211,9 +210,6 @@ user_reserves_rooms_proc : This procedure reserves a room for a user.
 	          TIMESTAMP'''||end_time||''',
     		  ''0''
 			)';
-		delete from sud_dummy;
-		insert into sud_dummy values(3,sql_stmt);
-			COMMIT;
 		EXECUTE IMMEDIATE	sql_stmt;
 		COMMIT; 
 		out_msg:= 'Room reservation successful, Room No- ' ||in_room_no|| ' Library: '|| in_library_id || ' Start time : '||v_start_time|| ' End Time '|| v_end_time || ' and booking id :' || booking_id;
@@ -240,7 +236,7 @@ user_checksout_rooms_proc : This procedure checks out a reserved room
 	v_end_time 		TIMESTAMP;
 	v_id			VARCHAR2(50);
 	sql_step		VARCHAR2(32000):='';
-	v_count			NUMBER(10);
+	v_count			NUMBER(10):=0;
 	BEGIN
 		sql_step:='Checking reservation exists or not.';	
 				
@@ -282,6 +278,7 @@ user_checksout_rooms_proc : This procedure checks out a reserved room
 					' WHERE faculty_id = ' ||
 					''''||v_id||'''';
 		END IF;
+		v_count:=0;
 		sql_stmt:= sql_stmt ||
       ' AND ROOM_BOOKING_ID = ' || ''''||in_booking_id ||'''';
 
@@ -335,7 +332,7 @@ user_reserved_rooms_proc : This procedure displays all reserved rooms
 	sql_stmt 		VARCHAR2(32000):='';
 	v_id			VARCHAR2(50);
 	sql_step		VARCHAR2(32000):='';
-	v_count			NUMBER(2);
+	v_count			NUMBER(2):=0;
 	BEGIN
 	sql_step:='Checking whether user has booked any room or not';
 			sql_stmt:= 'SELECT '||
@@ -345,6 +342,8 @@ user_reserved_rooms_proc : This procedure displays all reserved rooms
 					' r.reserv_end_time, '||
 					' CASE r.is_checked_out '||
 	   				' WHEN ''0''' ||
+	    			' THEN ''NO''' ||
+	    			' WHEN ''2''' ||
 	    			' THEN ''NO''' ||
 	    			' ELSE ''YES''' ||
 	  				' END AS is_checked_out,' ||
@@ -376,8 +375,6 @@ user_reserved_rooms_proc : This procedure displays all reserved rooms
 		END IF;
 	  sql_stmt:= sql_stmt ||
 		' AND r.library_id = l.library_id ';
-		insert into sud_dummy values(1,sql_stmt);
-		COMMIT;	
 	OPEN pref FOR sql_stmt;
 EXCEPTION
 	WHEN NO_DATA_FOUND THEN
@@ -402,8 +399,6 @@ BEGIN
 	' SET is_checked_out = ''2'''||
 	' WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>=1 '||
 	'AND is_checked_out = ''0''';
-	insert into sud_dummy values(21,sql_stmt);
-		commit;		
 	EXECUTE IMMEDIATE sql_stmt;
 	COMMIT;
 	sql_stmt:= ' UPDATE '||
