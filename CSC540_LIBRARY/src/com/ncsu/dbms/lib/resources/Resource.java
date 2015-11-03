@@ -126,14 +126,40 @@ public class Resource {
 			String outputMessage = DBConnection.returnMessage(cstmt, 7);
 	       	System.out.println(outputMessage);
 		}
-	       	catch(SQLException e){
-	       		throw e;
-				} 	
+		catch(SQLException e){
+       		throw e;
+		} 	
 
 	}
+
+
+	/**
+	 * Checks out an electronic resource
+	 * 
+	 * @param resourceType
+	 * @param resourceName
+	 * @param libraryType
+	 * @throws SQLException
+	 */
+	public void checkOutElectronicResource(String resourceType, String resourceName,
+			String libraryType) throws SQLException{
+		try{
+	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_out_electronic_pkg.check_out_proc(?, ?,?,?,?,?)}");
+	    	cstmt.setString(1, resourceType);
+	    	cstmt.setString(2, resourceName.toUpperCase());
+	    	cstmt.setString(3, userType);
+	    	cstmt.setString(4, userName);
+	    	cstmt.setString(5, libraryType);
+	    	
+	    	cstmt.registerOutParameter(6, java.sql.Types.VARCHAR);
+			String outputMessage = DBConnection.returnMessage(cstmt, 6);
+	       	System.out.println(outputMessage);
+		}
+		catch(SQLException e){
+       		throw e;
+		} 
+	}
 	
-	
-		
 	public void checkInResource(String resourceType, String resourceName) throws SQLException{
 		try{
 	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call check_in_pkg.check_in_proc(?, ?,?,?,?)}");
@@ -279,5 +305,7 @@ public class Resource {
 		}
 		Utility.callUserDialogueBox(userName, userType);
 	}
+
+
 		
 }

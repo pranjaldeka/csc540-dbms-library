@@ -134,10 +134,9 @@ public class Book {
 		Utility.setMessage("Please enter the ISBN number of book you want to check out");
 		String isbn = Utility.enteredConsoleString();
 		String library = null;
+		library = Utility.getLibraryInput();
 		String return_date = null;
 		if (isHardCopy) {
-			library = Utility.getLibraryInput();
-
 			Utility.setMessage("Please enter return date and time");
 			return_date = Utility.getTimeInput();
 		}
@@ -147,11 +146,17 @@ public class Book {
 	}
 	
 	private  void checkOutBook(String isbn, String lib, String return_date, boolean isHardCopy) {
+		Resource sr = new Resource(this.userName, this.userType);
 		if (!isHardCopy) {
-			Utility.setMessage("Not implemented yet..");
+			try{
+				sr.checkOutElectronicResource(Constant.kBook, isbn, Utility.getLibraryId(lib));
+			}
+	       	catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+			}
 		}
 		else {
-			Resource sr = new Resource(this.userName, this.userType);
 			try{
 				sr.checkOutResource(Constant.kBook, isbn, Utility.getLibraryId(lib), return_date);
 			}

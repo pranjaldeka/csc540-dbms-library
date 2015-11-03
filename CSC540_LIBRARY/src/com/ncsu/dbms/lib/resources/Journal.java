@@ -97,10 +97,9 @@ public class Journal {
 		Utility.setMessage("Please enter the ISSN number of journal you want to check out");
 		String issn = Utility.enteredConsoleString();
 		String library = null;
+		library = Utility.getLibraryInput();
 		String return_date = null;
 		if (isHardCopy) {
-			library = Utility.getLibraryInput();
-
 			Utility.setMessage("Please enter return date and time");
 			return_date = Utility.getTimeInput();
 		}
@@ -109,15 +108,19 @@ public class Journal {
 		checkOutJournal(issn,library,return_date, isHardCopy);
 	}
 	private  void checkOutJournal(String issn, String lib, String return_date, boolean isHardCopy) {
+		Resource sr = new Resource(this.userName, this.userType);
 		if (!isHardCopy) {
-			Utility.setMessage("Not implemented yet..");
+			try{
+				sr.checkOutElectronicResource(Constant.kJournal, issn, Utility.getLibraryId(lib));
+			}
+	       	catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+			}
 		}
 		else {
 			try{
-
-				Resource sr = new Resource(this.userName, this.userType);
 				sr.checkOutResource(Constant.kJournal, issn, Utility.getLibraryId(lib), return_date);
-		       	
 			}
 	       	catch(SQLException e){
 	       		PrintSQLException.printSQLException(e);
