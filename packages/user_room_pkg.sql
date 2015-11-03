@@ -156,7 +156,7 @@ IS
 				out_msg:='The user does not exists!!';
 			END;
 		
-			sql_stmt:=sql_stmt || ' students_reserves_rooms';
+			sql_stmt:=sql_stmt || ' students_reserves_rooms ';
 		ELSIF user_type='F' THEN
 			BEGIN
 				SELECT faculty_id INTO v_id FROM faculties WHERE user_id=userid;
@@ -164,7 +164,7 @@ IS
 				WHEN NO_DATA_FOUND THEN
 				out_msg:='The user does not exists!!';
 			END;
-			sql_stmt:=sql_stmt || ' faculties_reserves_rooms';
+			sql_stmt:=sql_stmt || ' faculties_reserves_rooms ';
 		END IF;
 			sql_stmt:=sql_stmt ||'
 			VALUES (
@@ -346,18 +346,20 @@ PROCEDURE del_unchkd_room_proc
 IS
 sql_stmt VARCHAR2(20000):='';
 BEGIN
-	sql_stmt:=' DELETE '||
-	'FROM students_reserves_rooms '||
-	'WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>=1 '||
-	'AND IS_CHECKED_OUT = ''0''';
+	sql_stmt:=' UPDATE '||
+	' students_reserves_rooms '||
+	' SET is_checked_out = ''2'''||
+	' WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>=1 '||
+	'AND is_checked_out = ''0''';
 	insert into sud_dummy values(21,sql_stmt);
-		commit;
+		commit;		
 	EXECUTE IMMEDIATE sql_stmt;
 	COMMIT;
-	sql_stmt:= ' DELETE '||
-	'FROM faculties_reserves_rooms  '||
+	sql_stmt:= ' UPDATE '||
+	' faculties_reserves_rooms  '||
+	' SET is_checked_out = ''2'''||
 	'WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>=1 '||
-	'AND IS_CHECKED_OUT = ''0''';
+	'AND is_checked_out = ''0''';
 	EXECUTE IMMEDIATE sql_stmt;
 	COMMIT;
 
