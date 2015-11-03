@@ -1,4 +1,10 @@
-/* Room reservation scheduler */
+/********************************************************************************************************
+ Room reservation scheduler : This scheduler is called every half an hour and
+						updates the is_checked_out flag of 
+						students_reserves_rooms/faculties_reserves_rooms
+						to 2, if a user does not check out a room 1 hour
+						after reservation start time.
+ ********************************************************************************************************/
 
 BEGIN
 DBMS_SCHEDULER.CREATE_JOB (
