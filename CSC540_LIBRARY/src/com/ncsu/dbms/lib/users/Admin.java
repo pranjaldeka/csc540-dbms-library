@@ -2,7 +2,6 @@ package com.ncsu.dbms.lib.users;
 
 import java.util.Scanner;
 
-import com.ncsu.dbms.lib.utilities.Constant;
 
 public class Admin extends User {
 

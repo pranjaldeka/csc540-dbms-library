@@ -169,7 +169,6 @@ public class Room {
 			String startTime, String endTime) throws SQLException {
 		try{
 	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call user_room_pkg.user_reserves_rooms_proc(?, ?,?,?,?,?,?)}");
-	    	System.out.println(userType + userName + roomNo + Utility.getLibraryId(library) + startTime + endTime);
 	    	cstmt.setString(1, userType);
 	    	cstmt.setString(2, userName);
 	    	cstmt.setString(3, roomNo.toUpperCase());

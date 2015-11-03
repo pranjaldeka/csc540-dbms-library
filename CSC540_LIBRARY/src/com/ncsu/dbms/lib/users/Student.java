@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
+import com.ncsu.dbms.lib.console.LibConsole;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.resources.Resource;
 import com.ncsu.dbms.lib.resources.UserNotification;
@@ -72,9 +73,8 @@ public class Student extends User {
 						break;
 					case 6:
 						//Log Out
-						System.out.println("Goodbye!!!");
 						// ask for login again
-						
+						LogOut();
 						flag = false;
 						break;
 					default:
@@ -91,6 +91,11 @@ public class Student extends User {
 		}
 	
 	
+	private void LogOut() {
+		LibConsole lib = new LibConsole();
+		lib.logout();
+	}
+
 	protected void showProfile(){
 		// Searching a book;
         ResultSet rs;

@@ -344,7 +344,7 @@ user_reserved_rooms_proc : This procedure displays all reserved rooms
 	   				' WHEN ''0''' ||
 	    			' THEN ''NO''' ||
 	    			' WHEN ''2''' ||
-	    			' THEN ''NO''' ||
+	    			' THEN ''NO/Cancelled''' ||
 	    			' ELSE ''YES''' ||
 	  				' END AS is_checked_out,' ||
 	  				' l.name FROM' ;

@@ -13,6 +13,7 @@ import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
+@SuppressWarnings("unused")
 
 public class ConferencePaper {
 	private String userName;

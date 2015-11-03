@@ -10,6 +10,7 @@ import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.users.Admin;
 import com.ncsu.dbms.lib.users.Faculty;
 import com.ncsu.dbms.lib.users.Student;
+@SuppressWarnings("unused")
 
 public class Login {
 
@@ -60,7 +61,7 @@ public class Login {
 		CallableStatement callStmt = null;
 		String validateCall = "{call user_profile_pkg.validate_user_proc(?,?,?,?,?)}";
 		try{
-			callStmt = dbConn.con.prepareCall(validateCall);
+			callStmt = DBConnection.con.prepareCall(validateCall);
 			callStmt.setString(1, userName);
 			callStmt.setString(2, password);
 			callStmt.registerOutParameter(3, java.sql.Types.VARCHAR);
@@ -103,20 +104,17 @@ public class Login {
 	// Admin welcome  Screen Menu Items
 	private void adminWelcomeMenu(String userName, String firstName, String lastName){
 		System.out.println("Hello Admin...");
-		@SuppressWarnings("unused")
 		Admin admin = new Admin(userName,firstName, lastName);
 	}
 	// Student welcome  Screen Menu Items
 
 	private void studentWelcomeMenu(String userName, String firstName, String lastName){
-		@SuppressWarnings("unused")
 		Student student = new Student(userName,firstName, lastName);
 
 	}
 	// Faculty welcome  Screen Menu Items
 
 	private void facultyWelcomeMenu(String userName, String firstName, String lastName){
-		@SuppressWarnings("unused")
 		Faculty faculty = new Faculty(userName,firstName, lastName);
 
 	}
