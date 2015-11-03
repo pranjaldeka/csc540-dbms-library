@@ -52,10 +52,30 @@ user_room_pkg.user_reserves_rooms_proc('S','sud','R2','LIB2',' 2015-12-01 05:00:
  END;
  /
  
+ set serveroutput on;
  declare
 out_message varchar2(20000);
+R varchar2(32000);
+resource_name varchar2(32000);
+due_date varchar2(32000);
+checkout_time varchar2(32000);
+pref SYS_REFCURSOR;
 begin
-user_room_pkg.user_checksout_rooms_proc('S','sud','RB2',out_message);
+user_notification_pkg.show_notification_proc('S','sud',pref,out_message);
+LOOP
+  FETCH pref into R,resource_name,due_date,checkout_time;
+  DBMS_OUTPUT.PUT_LINE(R || ' ' || resource_name || ' ' ||due_date|| ' ' ||checkout_time);
+  EXIT WHEN pref%NOTFOUND;
+END LOOP;
+ END;
+ /
+ 
+ 
+  declare
+out_message varchar2(20000);
+pref SYS_REFCURSOR;
+begin
+user_notification_pkg.show_notification_proc('S','sud','RB2',out_message);
     dbms_output.put_line(OUT_MESSAGE );
  END;
  /
@@ -64,29 +84,40 @@ user_room_pkg.user_checksout_rooms_proc('S','sud','RB2',out_message);
 SELECT * FROM students_reserves_rooms;
 TRUNCATE TABLE students_reserves_rooms;
  desc rooms;
--- All jobs
-select * from user_scheduler_jobs;
 
-delete from user_scheduler_jobs where job_name = 'INSERT_SUD_DATA';
-
--- Get information to job
-select * from user_scheduler_job_log order by log_date desc;
-
--- Show details on job run
-select * from user_scheduler_job_run_details;
-
+SELECT r.room_no,
+  r.capacity,
+  r.floor_no,
+  CASE r.room_type
+    WHEN 'C'
+    THEN 'Conference'
+    ELSE 'Study'
+  END AS room_type,
+  l.name
+FROM rooms r,
+  libraries l
+WHERE r.library_id = l.library_id
+AND r.capacity    >=TO_NUMBER('2', '99')
+AND r.library_id   = LIB1
+AND r.room_type    = 'S';
+desc students_co_books;
 select * from sud_dummy;
 truncate table sud_dummy;
-desc temp;
-create table temp (val clob);
-begin
-dbms_scheduler.disable('INSERT_SUD_DATA', TRUE);
-dbms_scheduler.stop_job('INSERT_SUD_DATA', TRUE);
-end;
-/
-grant MANAGE SCHEDULER to SYS;
+select * from rooms;
+select * from students;
+INSERT INTO students_reserves_rooms VALUES('S','R1','LIB2',
+TO_TIMESTAMP('2015-11-01 05:00:00', 'yyyy-mm-dd HH24 mi-ss'),
+TO_TIMESTAMP('2015-11-01 05:00:00', 'yyyy-mm-dd HH24 mi-ss'),
+'0');
 
-begin
-dbms_scheduler.run_job('JOB_COLLECT_SESS_DATA',TRUE);
-end;
+desc students_reserves_rooms;
+
+DELETE
+FROM students_reserves_rooms
+WHERE TO_NUMBER(EXTRACT( HOUR FROM (SYSTIMESTAMP - RESERV_START_TIME)))>1
+AND IS_CHECKED_OUT                                                     = '0';
+
+    SELECT ROOM_BOOKING_ID_FUNC  FROM DUAL;
  
+
+INSERT INTO students_reserves_rooms VALUES('S','R1','LIB1',timestamp'01-NOV-15 06.00.00.000000 AM',TIMESTAMP'01-NOV-15 05.00.00.000000 AM','0')
