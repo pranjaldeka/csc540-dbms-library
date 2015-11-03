@@ -253,15 +253,13 @@ public class Resource {
 	       	if(!arrayList.get(1).equals(Constant.kBlankString))
 	       	{
 	       		System.out.println(arrayList.get(1));
-	       	    Resource sr = new Resource(this.userName, this.userType);
-                sr.showPublicationMenuItems();
+	       		Utility.callUserDialogueBox(this.userName, this.userType);
 	       		return;
 	       	}  
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
                 System.out.println("\nYou don't have any due !!\n");
-                Resource sr = new Resource(this.userName, this.userType);
-                sr.showPublicationMenuItems();
+                Utility.callUserDialogueBox(this.userName, this.userType);
                 return;
             } else {
                 System.out.println("Resource Type"+"\t" +"Name" +"\t" +"Expected due date"+"\t" +"Total Dues (USD)");

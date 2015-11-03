@@ -1,8 +1,15 @@
 package com.ncsu.dbms.lib.users;
 
+import java.sql.CallableStatement;
+import java.sql.SQLException;
 import java.util.Scanner;
 
-import com.ncsu.dbms.lib.resources.Resource;
+import oracle.jdbc.OracleTypes;
+
+import com.ncsu.dbms.lib.connection.DBConnection;
+import com.ncsu.dbms.lib.exception.PrintSQLException;
+import com.ncsu.dbms.lib.utilities.Constant;
+
 
 
 public abstract class User {
@@ -22,7 +29,7 @@ public abstract class User {
 	}
 	
 	public  void showMenuItems() {
-		System.out.println("Please select from the below options: ");
+		System.out.println("\nPlease select from the below options: ");
 		System.out.println("\n1. Profile \t\t 2. Resources");
 		System.out.println("3. Checked-Out Resources \t\t 4. Notification");
 		System.out.println("5. Due-Balance\t\t  6. Logout");
@@ -45,7 +52,6 @@ public abstract class User {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Modifying Profile");
 						// Call Modify profile method method
 						modifyProfileDataMenu();
 						flag = false;
@@ -70,5 +76,26 @@ public abstract class User {
 	
 	protected abstract void modifyProfileDataMenu();
 
+	protected void updateProfileData(String columnName, String newColumnValue){
+		  try {
+	        	CallableStatement cstmt = DBConnection.con.prepareCall("{call user_profile_pkg.update_user_profile_proc(?, ?, ?, ?, ?)}");
+	        	cstmt.setString(1, userType);
+	        	cstmt.setString(2, userName);
+	        	cstmt.setString(3, columnName);
+	        	cstmt.setString(4, newColumnValue);
+	        	cstmt.registerOutParameter(5, OracleTypes.VARCHAR);
+	        	cstmt.executeQuery();
+	        	String error = cstmt.getString(5);
+	        	if(error != null)
+	        	{
+	        		System.out.println(error);
+	        	}else
+	        		System.out.println("\nUpdate Successful!!!\n");
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				PrintSQLException.printSQLException(e);
+				}
+	        showProfile();
 
+	}
 }

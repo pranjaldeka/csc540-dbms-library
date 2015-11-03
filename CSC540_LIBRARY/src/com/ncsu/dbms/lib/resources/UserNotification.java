@@ -4,7 +4,6 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
@@ -39,10 +38,11 @@ public class UserNotification {
 	       	}  
 	       	rs = (ResultSet)arrayList.get(0);
             if (!rs.next() ) {
+            	System.out.println("\n"+ "You do not have any notification!!\n");
     			Utility.callUserDialogueBox(this.userName, this.userType);
                 return;
             } else {
-            	System.out.println("\n"+ "You have following notifications!!");
+            	System.out.println("\n"+ "You have the following notifications!!\n");
                 do {
                 	String resourceType = rs.getString("R");
 		            String resourceName = rs.getString("resource_name");
