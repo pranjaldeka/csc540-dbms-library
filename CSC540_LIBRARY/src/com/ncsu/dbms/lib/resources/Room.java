@@ -231,7 +231,7 @@ public class Room {
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Check out a room.\t0:Go back to previous menu.");
+			System.out.println("1: Check out a room.\t0 :Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
