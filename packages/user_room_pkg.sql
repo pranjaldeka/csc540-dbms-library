@@ -5,6 +5,10 @@ set serveroutput on;
 
 CREATE OR REPLACE PACKAGE user_room_pkg AS 
 user_error	EXCEPTION;
+/*********************************************************************
+user_fetches_rooms_proc : This procedure fetches all room data 
+						based on the room size and library. 
+**********************************************************************/
 PROCEDURE user_fetches_rooms_proc(
 	user_type 		VARCHAR2,
 	room_size		VARCHAR2,
@@ -13,6 +17,9 @@ PROCEDURE user_fetches_rooms_proc(
 	out_msg			OUT VARCHAR2
 );
 
+/*********************************************************************
+user_reserves_rooms_proc : This procedure reserves a room for a user.
+**********************************************************************/
 PROCEDURE user_reserves_rooms_proc(
 		user_type VARCHAR2,
 		userid    VARCHAR2,
@@ -22,23 +29,46 @@ PROCEDURE user_reserves_rooms_proc(
 		end_time	VARCHAR2,
 		out_msg		OUT VARCHAR2
 );
+
+/*********************************************************************
+user_checksout_rooms_proc : This procedure checks out a reserved room 
+							for a user.
+**********************************************************************/
 PROCEDURE user_checksout_rooms_proc(
 		user_type VARCHAR2,
 		userid    VARCHAR2,
 		in_booking_id	VARCHAR2,
 		out_msg		OUT VARCHAR2
 );
+
+/*********************************************************************
+user_reserved_rooms_proc : This procedure displays all reserved rooms
+							 to a user.
+**********************************************************************/
 PROCEDURE user_reserved_rooms_proc(
 	in_user_type 		VARCHAR2,
 	in_userid    		VARCHAR2,
 	pref				OUT SYS_REFCURSOR,
 	out_msg				OUT VARCHAR2
 );
+
+/*********************************************************************
+del_unchkd_room_proc : This procedure is called from DBMS scheduler and
+						updates the is_checked_out flag of 
+						students_reserves_rooms/faculties_reserves_rooms
+						to 2, if a user does not check out a room 1 hour
+						after reservation start time.
+**********************************************************************/
 PROCEDURE del_unchkd_room_proc;
 END user_room_pkg;
 /
 CREATE OR REPLACE PACKAGE BODY user_room_pkg 
 IS
+
+/*********************************************************************
+user_fetches_rooms_proc : This procedure fetches all room data 
+						based on the room size and library. 
+**********************************************************************/
 	PROCEDURE user_fetches_rooms_proc(
 		user_type 		VARCHAR2,
 		room_size		VARCHAR2,
@@ -75,6 +105,9 @@ IS
 	 	   out_msg:=SQLERRM;
 	END user_fetches_rooms_proc;
 
+/*********************************************************************
+user_reserves_rooms_proc : This procedure reserves a room for a user.
+**********************************************************************/
 	PROCEDURE user_reserves_rooms_proc(
 		user_type VARCHAR2,
 		userid    VARCHAR2,
@@ -130,11 +163,13 @@ IS
 	  		FROM students_reserves_rooms sr
 	  		WHERE sr.room_no = in_room_no 
 	  			AND sr.library_id = in_library_id
+	  			AND sr.is_checked_out  IN ('0','1')
 	 		UNION
 			SELECT fr.reserv_start_time AS s_time,fr.reserv_end_time as e_time
 	  		FROM faculties_reserves_rooms fr
 	  		WHERE fr.room_no = in_room_no 
 	  			AND fr.library_id = in_library_id
+	  			AND fr.is_checked_out  IN ('0','1')
 	  ) LOOP
 			IF((item.s_time<= v_start_time AND v_start_time <=item.e_time) OR (item.s_time<=v_end_time AND v_end_time<=item.e_time)) THEN
 				out_msg:='Can not reserve. The entered time interval is already reserved!!';
@@ -188,6 +223,11 @@ IS
 		WHEN OTHERS THEN
 			out_msg:= sql_step || SQLERRM;
 	END user_reserves_rooms_proc;
+
+/*********************************************************************
+user_checksout_rooms_proc : This procedure checks out a reserved room 
+							for a user.
+**********************************************************************/
 	PROCEDURE user_checksout_rooms_proc(
 		user_type VARCHAR2,
 		userid    VARCHAR2,
@@ -281,6 +321,10 @@ IS
 			out_msg:=sql_step || SQLERRM;
 	END user_checksout_rooms_proc;
 
+/*********************************************************************
+user_reserved_rooms_proc : This procedure displays all reserved rooms
+							 to a user.
+**********************************************************************/
 	PROCEDURE user_reserved_rooms_proc(
 	in_user_type 		VARCHAR2,
 	in_userid    		VARCHAR2,
@@ -342,6 +386,13 @@ EXCEPTION
 			out_msg:=sql_step || SQLERRM;
 END user_reserved_rooms_proc;
 
+/*********************************************************************
+del_unchkd_room_proc : This procedure is called from DBMS scheduler and
+						updates the is_checked_out flag of 
+						students_reserves_rooms/faculties_reserves_rooms
+						to 2, if a user does not check out a room 1 hour
+						after reservation start time.
+**********************************************************************/
 PROCEDURE del_unchkd_room_proc
 IS
 sql_stmt VARCHAR2(20000):='';
@@ -367,3 +418,4 @@ END del_unchkd_room_proc;
 
 END user_room_pkg;
 /
+SHOW ERRORS

@@ -102,7 +102,32 @@ show_notification_proc : This procedure collects all plausible
 						FROM STUDENTS_CO_CAMERAS
 						WHERE DUE_DATE >= SYSTIMESTAMP
 						AND  RETURN_DATE IS NULL
-						AND student_id = v_id;
+						AND student_id = v_id
+
+						UNION
+						 SELECT
+						    CASE q.RESOURCE_TYPE
+						      WHEN 'B'
+						      THEN 'Book'
+						      WHEN 'C'
+						      THEN 'Camera'
+						      WHEN 'P'
+						      THEN 'Conference Paper'
+						      WHEN 'J'
+						      THEN 'Journal'
+						      ELSE 'Xtras'
+						    END AS R,
+						    q.RESOURCE_ID
+						    || ' is in a waiting queue, ' AS resource_name,
+						    TO_CHAR(q.PRIORITY)           AS due_date ,
+						    ' in '
+						    ||l.name
+						    || ' library. ' AS checkout_time
+						  FROM RESOURCES_QUEUE q,
+						    libraries l
+						  WHERE q.library_id = l.library_id
+							AND q.patron_id = v_id;
+
 			EXCEPTION
 				WHEN NO_DATA_FOUND THEN
 					out_msg:='There is no reservation for you!!';
@@ -172,7 +197,31 @@ show_notification_proc : This procedure collects all plausible
 					FROM FACULTIES_CO_CAMERAS
 					WHERE DUE_DATE >= SYSTIMESTAMP
 					AND  RETURN_DATE IS NULL
-					AND faculty_id = v_id;
+					AND faculty_id = v_id
+
+					UNION
+					 SELECT
+					    CASE q.RESOURCE_TYPE
+					      WHEN 'B'
+					      THEN 'Book'
+					      WHEN 'C'
+					      THEN 'Camera'
+					      WHEN 'P'
+					      THEN 'Conference Paper'
+					      WHEN 'J'
+					      THEN 'Journal'
+					      ELSE 'Xtras'
+					    END AS R,
+					    q.RESOURCE_ID
+					    || ' is in a waiting queue, ' AS resource_name,
+					    TO_CHAR(q.PRIORITY)           AS due_date ,
+					    ' in '
+					    ||l.name
+					    || ' library. ' AS checkout_time
+					  FROM RESOURCES_QUEUE q,
+					    libraries l
+					  WHERE q.library_id = l.library_id
+					AND q.patron_id = v_id;
 			EXCEPTION
 				WHEN NO_DATA_FOUND THEN
 					out_msg:='There is no reservation for you!!';	
