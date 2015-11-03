@@ -186,7 +186,7 @@ BEGIN
 										output :=SQLERRM;
 							
 							END;
-							if is_student_in_course = 1
+							if is_student_in_course = 1 or USER_TYPE = 'F'
 							then
 								DBMS_OUTPUT.PUT_LINE('coming to if');
 								/*set valid duration to 4 hours and validate return date*/
