@@ -191,7 +191,8 @@ BEGIN
 										DBMS_OUTPUT.put_line(sql_statement);	
 										EXECUTE IMMEDIATE sql_statement INTO no_reservation ;	
 										
-								  BEGIN
+								  /*BEGIN
+								  
 									  sql_statement := 
 												  '
 													SELECT no_of_hardcopies
@@ -212,7 +213,8 @@ BEGIN
 									  output := 'Camera not avaialable in library';
 									  
 								  END;
-														
+									*/
+									no_available := 1; --for cuurent scenario this is 1
 									IF no_available <> -1
 									THEN
 										  IF no_reservation >= no_available 
@@ -338,7 +340,7 @@ COMMIT;
 
 
 END delete_camera_reserve_proc;
-/
+
 
 END camera_reserve_pkg;
 /

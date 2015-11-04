@@ -4,7 +4,7 @@ INSERT INTO SSINGH25.CONFERENCE_PAPERS VALUES
 	'WWW',
 	'HyeongSik Kim',
   2013,
-	'International Journal on Semantic Web and Information'
+	'Optimization Techniques for Large Scale Graph Analytics on Map Reduce'
 );
 
 INSERT INTO SSINGH25.CONFERENCE_PAPERS VALUES

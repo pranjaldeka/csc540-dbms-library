@@ -33,6 +33,7 @@ IS
 no_of_hard_copies	number(2);
 already_in_resource_q_flag number(2);
 is_reserved_book	number(2);
+eligible_for_camera_co number(2);
 user_priority		number(2);
 max_priority		number(10);
 max_faculty_priority number(10);
@@ -249,13 +250,39 @@ BEGIN
 				INTO day_week
 				from dual;
 				
-				IF day_week = 3
+				IF day_week = 6
 				THEN
 					select to_char(sysdate,'HH24MMSS') 
 					INTO time_day from dual;
 				
-					if time_day >= '00000' AND time_day <= '235959'
+					if time_day >= '090000' AND time_day <= '120000'
 					then
+							
+					/*if this returns a single row then that student can check out */
+					eligible_for_camera_co := 0;
+					sql_statement := '
+						select count(1) from cameras_reservation
+						where patron_type= '''||user_type||'''
+						and patron_id = '''||primary_id||'''
+						and camera_id = '''||issue_type_id||''' 
+						and trunc(sysdate) = trunc(reservation_timestamp)
+						and library_id = '''||library_id||'''
+						and priority = 1
+					';
+					BEGIN
+					EXECUTE IMMEDIATE sql_statement INTO eligible_for_camera_co;
+					EXCEPTION
+						WHEN NO_DATA_FOUND THEN
+							eligible_for_camera_co := 0;
+						WHEN OTHERS THEN
+							output :=SQLERRM;
+					END;
+					if eligible_for_camera_co = 0 
+					then
+						output := 'Sorry! Cannot checkout camera because you are not on top of queue';
+						raise user_error;
+					
+					end if;
 						invalid := 0;
 						
 						SELECT to_timestamp(NEXT_DAY(sysdate,'thursday')) + interval '18' hour 
@@ -378,6 +405,7 @@ BEGIN
 									END;
 									IF user_priority > 0 and user_priority <= no_of_hard_copies
 									THEN
+										DBMS_OUTPUT.PUT_LINE(user_priority || ' ' || no_of_hard_copies);
 										/* delete from queue */
 										sql_statement := '
 											delete from SSINGH25.RESOURCES_QUEUE
