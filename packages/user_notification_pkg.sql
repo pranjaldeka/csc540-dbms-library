@@ -103,7 +103,23 @@ show_notification_proc : This procedure collects all plausible
 						WHERE DUE_DATE >= SYSTIMESTAMP
 						AND  RETURN_DATE IS NULL
 						AND student_id = v_id
-
+						
+						UNION 
+						
+						SELECT
+						'Camera',
+						q.CAMERA_ID
+						|| ' is in a waiting queue, ' AS resource_name,
+						TO_CHAR(q.PRIORITY)           AS due_date ,
+						' in '
+						||l.name
+						|| ' library for date :-'||trunc(q.reservation_timestamp) || '.' AS checkout_time
+													
+					  FROM CAMERAS_RESERVATION q,
+						libraries l
+					  WHERE q.library_id = l.library_id
+						AND q.patron_id = v_id
+						
 						UNION
 						 SELECT
 						    CASE q.RESOURCE_TYPE
@@ -199,6 +215,21 @@ show_notification_proc : This procedure collects all plausible
 					AND  RETURN_DATE IS NULL
 					AND faculty_id = v_id
 
+					UNION
+					 SELECT
+						'Camera',
+						q.CAMERA_ID
+						|| ' is in a waiting queue, ' AS resource_name,
+						TO_CHAR(q.PRIORITY)           AS due_date ,
+						' in '
+						||l.name
+						|| ' library for date :-'||trunc(q.reservation_timestamp) || '.' AS checkout_time
+													
+					  FROM CAMERAS_RESERVATION q,
+						libraries l
+					  WHERE q.library_id = l.library_id
+						AND q.patron_id = v_id
+						
 					UNION
 					 SELECT
 					    CASE q.RESOURCE_TYPE
