@@ -5,10 +5,10 @@ Database management (CSC540) online library project
 
 ##Team members:
 
-Anindita Mozumder (amozumd@)
-Devarshi Pratap Singh (dsingh4@)
-Pranjal Deka (pdeka@)
-Simerdeep Singh Jolly (sjolly@)
+Anindita Mozumder (amozumd@)  
+Devarshi Pratap Singh (dsingh4@)  
+Pranjal Deka (pdeka@)  
+Simerdeep Singh Jolly (sjolly@)  
 Sudhansu Shekhar Singh (ssingh25@)
 
 ###Running the application:
@@ -35,12 +35,7 @@ Upon successful login, user will be presented with a menu.
 
 2. Selecting resources will prompt the user to select from publications, rooms and cameras. Upon selecting the appropriate option, user can checkout a book , reserve a room, reserve a camera.
 
-3. Selecting Checked-Out Resources will prompt the user to select from publications, rooms and cameras. Upon selecting books inside publications, user can view the list of books checked out by him/her. User can either return a book or renew a book.
-
-On selecting rooms, user can view the list of rooms reserved by the user. If the user has reserved a room, the user can check out a room.
-
-On selecting cameras, user can view the list of cameras reserved by the user. User can checkout a camera from the list with appropriate constraints.
-
+3. Selecting Checked-Out Resources will prompt the user to select from publications, rooms and cameras. Upon selecting books inside publications, user can view the list of books checked out by him/her. User can either return a book or renew a book. On selecting rooms, user can view the list of rooms reserved by the user. If the user has reserved a room, the user can check out a room. On selecting cameras, user can view the list of cameras reserved by the user. User can checkout a camera from the list with appropriate constraints.
 
 4. Selecting Notification will lists down the due dates for the un-returned resources.
 
@@ -52,5 +47,3 @@ On selecting cameras, user can view the list of cameras reserved by the user. Us
 Jars:
 -----------------
 ojdbc14.jar : Add this jar to project build settings.
-
-
