@@ -152,7 +152,7 @@ BEGIN
 				INTO day_week
 				from dual;
 				
-				IF day_week = 2
+				IF day_week = 3
 				THEN
 					select to_char(sysdate,'HH24MMSS') 
 					INTO time_day from dual;
