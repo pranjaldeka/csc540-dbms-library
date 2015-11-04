@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.users.Student;
+@SuppressWarnings("unused")
 
 public class ConferenceRoom {
 	public ConferenceRoom(){

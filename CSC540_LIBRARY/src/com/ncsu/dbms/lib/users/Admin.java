@@ -2,7 +2,6 @@ package com.ncsu.dbms.lib.users;
 
 import java.util.Scanner;
 
-import com.ncsu.dbms.lib.utilities.Constant;
 
 public class Admin extends User {
 
@@ -10,6 +9,7 @@ public class Admin extends User {
 	private String userName;
 	public Admin(String userName, String firstName, String lastName) {
 		super(userName, firstName, lastName);
+		showMenuItems();
 	}
 	
 	public Admin(String userName){
@@ -18,9 +18,11 @@ public class Admin extends User {
 	
 	public  void showMenuItems() {
 		System.out.println("Please select from the below options: ");
-		System.out.println("\n1. Profile \t\t 2. Resources");
-		System.out.println("3. Checked-Out Resources \t\t 4. Notification");
-		System.out.println("5. Due-Balance\t\t  6. Logout");
+		System.out.println("\n1. Add Book \t\t 2. Delete Book");
+		System.out.println("3. Add Student \t\t 4. Delete Student");
+		System.out.println("5. Add Faculty \t\t 6. Delete Faculty");
+		System.out.println("7. Add Admin \t\t 8. Delete Admin");
+		System.out.println("9. Logout");
 		selectAnAction();
 	}
 
@@ -62,6 +64,11 @@ public class Admin extends User {
 					break;
 				case 8:
 					System.out.println("Deleting a new Admin");
+					flag = false;
+					break;
+				case 9:
+					//Log Out
+					System.out.println("Goodbye!!!");
 					flag = false;
 					break;
 				default:

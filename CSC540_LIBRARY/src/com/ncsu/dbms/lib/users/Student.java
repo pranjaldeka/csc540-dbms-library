@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
+import com.ncsu.dbms.lib.console.LibConsole;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.resources.Resource;
 import com.ncsu.dbms.lib.resources.UserNotification;
@@ -72,9 +73,8 @@ public class Student extends User {
 						break;
 					case 6:
 						//Log Out
-						System.out.println("Goodbye!!!");
 						// ask for login again
-						
+						LogOut();
 						flag = false;
 						break;
 					default:
@@ -91,6 +91,11 @@ public class Student extends User {
 		}
 	
 	
+	private void LogOut() {
+		LibConsole lib = new LibConsole();
+		lib.logout();
+	}
+
 	protected void showProfile(){
 		// Searching a book;
         ResultSet rs;
@@ -156,7 +161,7 @@ public class Student extends User {
         System.out.println("1. User ID" +"\t\t" + "2. First Name"+"\t\t" 
 		+"3. Last Name\n" + "4. Phone No." +"\t\t"  + "5. Alt. Phone No." +"\t" +
         "6. Date Of Birth\n"+ "7. Address"+"\t\t" + "8. Nationality"+"\t\t" +
-		"9. Password\n"+"10. Sex"+"\t\t\t"+"0. Go to the Previous Menu.");
+		"9. Password\n"+"10. Sex"+"\t\t\t"+ "11. Password\n" + "0. Go to the Previous Menu.");
         modifyProfileData();
 	}
 	private void modifyProfileData() {
@@ -195,6 +200,10 @@ public class Student extends User {
 		else if(enteredValue==10){
 			//sex
 			updateProfileData("sex", enteredProfileData());
+		}
+		else if(enteredValue==11){
+			//password
+			updateProfileData("password", enteredProfileData());
 		}
 		else if(enteredValue==0){
 			showMenuItems();

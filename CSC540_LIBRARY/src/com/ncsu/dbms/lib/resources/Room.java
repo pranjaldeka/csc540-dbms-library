@@ -171,7 +171,7 @@ public class Room {
 	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call user_room_pkg.user_reserves_rooms_proc(?, ?,?,?,?,?,?)}");
 	    	cstmt.setString(1, userType);
 	    	cstmt.setString(2, userName);
-	    	cstmt.setString(3, roomNo);
+	    	cstmt.setString(3, roomNo.toUpperCase());
 	    	cstmt.setString(4, Utility.getLibraryId(library));
 	    	cstmt.setString(5, startTime);
 	    	cstmt.setString(6, endTime);
@@ -274,7 +274,7 @@ public class Room {
 			CallableStatement cstmt = DBConnection.returnCallableStatememt("{call user_room_pkg.user_checksout_rooms_proc(?, ?,?,?)}");
 	    	cstmt.setString(1, userType);
 	    	cstmt.setString(2, userName);
-	    	cstmt.setString(3, bookingId);
+	    	cstmt.setString(3, bookingId.toUpperCase());
 	    	
 	    	cstmt.registerOutParameter(4, java.sql.Types.VARCHAR);
 			String outputMessage = DBConnection.returnMessage(cstmt, 4);

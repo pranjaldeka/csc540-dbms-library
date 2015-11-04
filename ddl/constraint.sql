@@ -57,6 +57,14 @@ ADD CONSTRAINT F_ROOM_RES CHECK(RESERV_END_TIME>=RESERV_START_TIME);
 alter table FACULTIES_RESERVES_COURSE_BOOK
 add constraint constraint_name check ((trunc (RESERV_END_TIME) - trunc (RESERV_START_TIME)) <= 124);
 
+alter table CAMERAS_RESERVATION
+add constraint con1 check (TO_CHAR(RESERVATION_TIMESTAMP, 'D') = 6);
+
+alter table FACULTIES_CO_CAMERAS
+add constraint con2 check (TO_CHAR(ISSUE_DATE, 'D') = 6);
+
+alter table STUDENTS_CO_CAMERAS
+add constraint con3 check (TO_CHAR(ISSUE_DATE, 'D') = 6);
 
 COMMIT;
 

@@ -8,8 +8,6 @@ import oracle.jdbc.OracleTypes;
 
 import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
-import com.ncsu.dbms.lib.utilities.Constant;
-
 
 
 public abstract class User {

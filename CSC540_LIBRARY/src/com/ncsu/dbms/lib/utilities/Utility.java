@@ -30,6 +30,10 @@ public final class Utility {
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		String value = scanner.nextLine();
+		if (value.isEmpty()) {
+			setMessage("\nYou have not entered anything. Please try again..\n");
+			return enteredConsoleString();
+		}
 		return value;
 		
 	}
@@ -73,7 +77,6 @@ public final class Utility {
 		do{
 				String enteredDate = null;
 				String enteredTime = null;
-				//String validFormat = "yyyy-mm-dd hh:mm:ss";
 				String validDateFormat = "yyyy-MM-dd";
 				String validTimeFormat = "HH:mm:ss";
 				do{
@@ -84,7 +87,6 @@ public final class Utility {
 							do{
 								Utility.setMessage("Please enter time in HH:mm format:");
 								enteredTime = Utility.enteredConsoleString();
-								//append :00 to make it compatible with HH:mm:ss format
 								enteredTime = enteredTime + ":00";
 								if(Utility.validateDateFormat(enteredTime, validTimeFormat)){
 									flagTime = false;
@@ -105,6 +107,25 @@ public final class Utility {
 		}
 		while (flag);	
 		return return_date;
+	}
+	
+	public static String getDateInput() {
+		String enteredDate = null;
+		boolean flag = true;
+				String validDateFormat = "yyyy-MM-dd";
+				do{
+					Utility.setMessage("Please enter date in yyyy-MM-dd format:");
+					enteredDate = Utility.enteredConsoleString();
+					if(Utility.validateDateFormat(enteredDate, validDateFormat)){
+						enteredDate = enteredDate + " 00:00:00";
+						flag = false;
+					}else{
+						System.out.println("Date is invalid. Please try again!");
+					}
+				}
+				while(flag);
+		
+		return enteredDate;
 	}
 	
 	public static String getLibraryInput() {

@@ -10,9 +10,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import com.ncsu.dbms.lib.utilities.Constant;
-import com.ncsu.dbms.lib.utilities.Utility;
-
-import oracle.jdbc.OracleTypes;
 
 public class DBConnection {
 

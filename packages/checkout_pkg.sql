@@ -1,6 +1,6 @@
 SET SERVEROUTPUT ON;
-CREATE OR REPLACE PACKAGE  CHECK_OUT_PKG 
-IS
+CREATE OR REPLACE PACKAGE  CHECK_OUT_PKG  AS
+user_error	EXCEPTION;
 
 PROCEDURE CHECK_OUT_PROC(    
 	issue_type	    	IN 	VARCHAR2,
@@ -32,11 +32,13 @@ IS
 
 no_of_hard_copies	number(2);
 already_in_resource_q_flag number(2);
+is_reserved_book	number(2);
 user_priority		number(2);
 max_priority		number(10);
 max_faculty_priority number(10);
 already_co_flag		number(2);
 resource_exists_in_lib_flag number(2);
+is_student_in_course number(2);
 chk_user_in_q_flag	number(2);
 sql_statement		varchar2(32000);
 user_id_column 		varchar2(100);
@@ -44,6 +46,7 @@ table_name 			varchar2(100);
 user_table 			varchar2(100);
 current_datetime 	varchar2(100);
 invalid 			number(2);
+courseid 			VARCHAR2(50);
 search_parameter 	VARCHAR2(50);
 primary_id varchar2(100);
 valid_duration varchar2(200);
@@ -114,36 +117,130 @@ BEGIN
 			
       SELECT CURRENT_TIMESTAMP INTO currentdate_timestamp 
       FROM dual;
+	  
+	  /*find student id or facultyid */
+					  sql_statement := 
+					  '
+					  SELECT '||user_id_column||' 
+					  FROM '||user_table||'
+					  WHERE user_id = '''||user_id||'''';
+					  /*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
+					  EXECUTE IMMEDIATE sql_statement INTO primary_id;
       
 		IF ISSUE_TYPE <> 'C'  
-        THEN
-					sql_statement :='
-					SELECT DISTINCT VALID_DURATION 
-					FROM CHECKOUT_VALID_DURATION
-					WHERE USER_TYPE = '''||user_type||''' 
-					AND RESOURCE_TYPE = '''||issue_type||'''
-							';
-				
-					/*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
-					EXECUTE IMMEDIATE sql_statement INTO valid_duration;
-		  
-					sql_statement :='
-					SELECT CURRENT_TIMESTAMP + '||valid_duration||'
-					FROM DUAL
-					';
-					/*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
-					EXECUTE IMMEDIATE sql_statement INTO validdate_timestamp;
-					/*DBMS_OUTPUT.PUT_LINE(validdate_timestamp);
-            	DBMS_OUTPUT.PUT_LINE(currentdate_timestamp);
-              	DBMS_OUTPUT.PUT_LINE(duedate_timestamp);
+        THEN		
+					/*check if it is reserved book*/
+					/*if yes, make valid_duration = 4hr
+					  check if user is NOT student of that course
+						if so, output : can't checkout bcz not of that course
+					  else
+						go further in
 					*/
-          IF duedate_timestamp <= validdate_timestamp AND duedate_timestamp >=currentdate_timestamp
-						THEN
-							invalid := 0;
-						ELSE
-							invalid := 1;						
-						END IF;
+					IF ISSUE_TYPE = 'B'
+					THEN
+						BEGIN
+						/*check if reserved book */
+						is_reserved_book := 0;
+						sql_statement := '
+							select 1
+							from FACULTIES_RESERVES_COURSE_BOOK 
+							where ISBN = '''||issue_type_id||'''	
+							and RESERV_END_TIME >= '''||currentdate_timestamp||'''
+							and RESERV_START_TIME <= '''||currentdate_timestamp||'''
+						';
+						DBMS_OUTPUT.PUT_LINE(sql_statement);
+						EXECUTE IMMEDIATE sql_statement INTO is_reserved_book;
+						DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || is_reserved_book);
+						EXCEPTION
+						WHEN NO_DATA_FOUND THEN
+									is_reserved_book := 0;
+									DBMS_OUTPUT.PUT_LINE('yessss'||is_reserved_book);
+						WHEN OTHERS THEN
+									DBMS_OUTPUT.PUT_LINE('nooooo'||is_reserved_book);
+									output :=SQLERRM;
 						
+						END;
+						DBMS_OUTPUT.PUT_LINE('yup' || is_reserved_book);
+						if is_reserved_book = 1		/*it IS a current reserved book*/
+						then
+							/*join reservation, enroll and books table*/
+							BEGIN
+							is_student_in_course := 0;
+							/*check if student is enrolled in that course*/
+							sql_statement := '
+								select 1
+								from STUDENTS_ENROLLS_COURSES S, FACULTIES_RESERVES_COURSE_BOOK F
+								where S.STUDENT_ID = '''||primary_id||'''
+								and S.COURSE_ID = F.COURSE_ID
+								and F.ISBN = '''||issue_type_id||'''
+							';
+							DBMS_OUTPUT.PUT_LINE(sql_statement || is_student_in_course);
+							EXECUTE IMMEDIATE sql_statement INTO is_student_in_course;
+							DBMS_OUTPUT.PUT_LINE('yoyoyoy2222' || is_student_in_course);
+							EXCEPTION
+							WHEN NO_DATA_FOUND THEN
+										is_student_in_course := 0;
+										DBMS_OUTPUT.PUT_LINE(is_student_in_course);
+							WHEN OTHERS THEN
+										DBMS_OUTPUT.PUT_LINE('checking student in course');
+										output :=SQLERRM;
+							
+							END;
+							if is_student_in_course = 1 or USER_TYPE = 'F'
+							then
+								DBMS_OUTPUT.PUT_LINE('coming to if');
+								/*set valid duration to 4 hours and validate return date*/
+								valid_duration := 'INTERVAL ''4'' HOUR';
+								sql_statement :='
+								SELECT CURRENT_TIMESTAMP + '||valid_duration||'
+								FROM DUAL
+								';
+								EXECUTE IMMEDIATE sql_statement INTO validdate_timestamp;
+								DBMS_OUTPUT.PUT_LINE(validdate_timestamp);
+								IF duedate_timestamp <= validdate_timestamp AND duedate_timestamp >=currentdate_timestamp
+									THEN
+										DBMS_OUTPUT.PUT_LINE('invalid');
+										invalid := 0;
+									ELSE
+										DBMS_OUTPUT.PUT_LINE('invalidddd');
+										invalid := 1;						
+								END IF;
+							else
+								DBMS_OUTPUT.PUT_LINE('coming to else');
+								OUTPUT := 'Sorry This is a RESERVED book and you are not in that COURSE';
+								RAISE user_error;
+							end if;
+						end if;						
+					ELSE
+						/*follow normal procedure*/
+							sql_statement :='
+							SELECT DISTINCT VALID_DURATION 
+							FROM CHECKOUT_VALID_DURATION
+							WHERE USER_TYPE = '''||user_type||''' 
+							AND RESOURCE_TYPE = '''||issue_type||'''
+									';
+							
+							/*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
+							EXECUTE IMMEDIATE sql_statement INTO valid_duration;
+				  
+							sql_statement :='
+							SELECT CURRENT_TIMESTAMP + '||valid_duration||'
+							FROM DUAL
+							';
+							/*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
+							EXECUTE IMMEDIATE sql_statement INTO validdate_timestamp;
+							/*DBMS_OUTPUT.PUT_LINE(validdate_timestamp);
+							DBMS_OUTPUT.PUT_LINE(currentdate_timestamp);
+							DBMS_OUTPUT.PUT_LINE(duedate_timestamp);
+							*/
+							IF duedate_timestamp <= validdate_timestamp AND duedate_timestamp >=currentdate_timestamp
+								THEN
+									invalid := 0;
+								ELSE
+									invalid := 1;						
+							END IF;
+								
+					END IF;					
 
   
 		ELSIF issue_type = 'C' 
@@ -409,7 +506,8 @@ BEGIN
 												'''||primary_id||''',										
 												'''||USER_TYPE||''',											
 												'||max_priority||',
-												'''||LIBRARY_ID||'''
+												'''||LIBRARY_ID||''',
+												'''||ISSUE_TYPE||'''
 												)';	
 											DBMS_OUTPUT.PUT_LINE(sql_statement);
 											EXECUTE IMMEDIATE sql_statement;
@@ -472,7 +570,8 @@ BEGIN
 												'''||primary_id||''',										
 												'''||USER_TYPE||''',											
 												'||max_faculty_priority||',
-												'''||LIBRARY_ID||'''										
+												'''||LIBRARY_ID||''',
+												'''||ISSUE_TYPE||'''												
 												)';	
 											DBMS_OUTPUT.PUT_LINE(sql_statement);
 											EXECUTE IMMEDIATE sql_statement;
@@ -503,6 +602,8 @@ BEGIN
   END IF;
   /*DBMS_OUTPUT.PUT_LINE(avail_flag);*/
   EXCEPTION
+	WHEN USER_ERROR THEN
+		OUTPUT := OUTPUT;
 	WHEN NO_DATA_FOUND THEN
     /*DBMS_OUTPUT.PUT_LINE('Invalid Inputs');*/
 		 OUTPUT := 'RESOURCE UNAVAILABLE/ ALREADY ISSUED TO THE USER';

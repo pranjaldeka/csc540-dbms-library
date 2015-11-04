@@ -13,6 +13,7 @@ import com.ncsu.dbms.lib.connection.DBConnection;
 import com.ncsu.dbms.lib.exception.PrintSQLException;
 import com.ncsu.dbms.lib.utilities.Constant;
 import com.ncsu.dbms.lib.utilities.Utility;
+@SuppressWarnings("unused")
 
 public class ConferencePaper {
 	private String userName;
@@ -108,10 +109,9 @@ public class ConferencePaper {
 		Utility.setMessage("Please enter the conf id number of conference paper you want to check out");
 		String confId = Utility.enteredConsoleString();
 		String library = null;
+		library = Utility.getLibraryInput();
 		String return_date = null;
 		if (isHardCopy) {
-			library = Utility.getLibraryInput();
-
 			Utility.setMessage("Please enter return date and time");
 			return_date = Utility.getTimeInput();
 		}
@@ -120,13 +120,19 @@ public class ConferencePaper {
 		
 	}
 	private  void checkOutConfPaper(String confId, String lib, String return_date, boolean isHardCopy) {
+		Resource sr = new Resource(this.userName, this.userType);
 		if (!isHardCopy) {
-			Utility.setMessage("Not implemented yet..");
+			try{
+				sr.checkOutElectronicResource(Constant.kConferencePaper, confId, Utility.getLibraryId(lib));
+		       	
+			}
+	       	catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+			}
 		}
 		else {
 			try{
-
-				Resource sr = new Resource(this.userName, this.userType);
 				sr.checkOutResource(Constant.kConferencePaper, confId, Utility.getLibraryId(lib), return_date);
 		       	
 			}
