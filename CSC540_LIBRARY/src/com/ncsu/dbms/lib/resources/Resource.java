@@ -131,6 +131,31 @@ public class Resource {
 		} 	
 
 	}
+	/**
+	 * 
+	 * @param resourceType
+	 * @param resourceName
+	 * @param returnDate
+	 * @throws SQLException
+	 */
+	public  void renewResource(String resourceType, String resourceName, String returnDate)throws SQLException {
+		try{
+	    	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call renew_pkg.renew_proc(?, ?,?,?,?,?)}");
+	    	cstmt.setString(1, resourceType);
+	    	cstmt.setString(2, resourceName.toUpperCase());
+	    	cstmt.setString(3, userType);
+	    	cstmt.setString(4, userName);
+	    	cstmt.setString(5, returnDate);
+	    	
+	    	cstmt.registerOutParameter(6, java.sql.Types.VARCHAR);
+			String outputMessage = DBConnection.returnMessage(cstmt, 6);
+	       	System.out.println(outputMessage);
+		}
+		catch(SQLException e){
+       		throw e;
+		} 	
+
+	}
 
 
 	/**

@@ -85,7 +85,7 @@ public class ConferencePaper {
 					case 1:
 						System.out.println("Checking out a Conference Paper");
 						// Call check out method
-						checkOutConfPaperConsole();
+						checkOutConfPaperConsole("C");
 						flag = false;
 							break;
 					case 0:
@@ -104,8 +104,8 @@ public class ConferencePaper {
 			displayDialogueAfterSearch();
 		}
 	}
-	private void checkOutConfPaperConsole(){
-		boolean isHardCopy = Utility.getDeliveryType();
+	private void checkOutConfPaperConsole(String flag){
+	/*	boolean isHardCopy = Utility.getDeliveryType();
 		Utility.setMessage("Please enter the conf id number of conference paper you want to check out");
 		String confId = Utility.enteredConsoleString();
 		String library = null;
@@ -116,7 +116,38 @@ public class ConferencePaper {
 			return_date = Utility.getTimeInput();
 		}
 
-		checkOutConfPaper(confId,library,return_date, isHardCopy);	
+		checkOutConfPaper(confId,library,return_date, isHardCopy);*/
+		
+		
+		String library = null;
+		boolean isHardCopy=false;
+		String id = null;
+		String return_date = null;
+
+			if(flag.equals("R")){
+				// renew an old book
+				Utility.setMessage("Please enter the conference paper id of the conference paper you want to renew.");
+				id = Utility.enteredConsoleString();
+				library = "";
+				isHardCopy = true;
+				return_date = Utility.getTimeInput();
+
+				renewResource(id, return_date, true);
+			}
+			else if(flag.equals("C")){
+				//check out a book
+				Utility.setMessage("Please enter the conference paper id of the conference paper you want to check out.");
+				 id = Utility.enteredConsoleString();
+				 isHardCopy = Utility.getDeliveryType();
+				library = Utility.getLibraryInput();
+				if (isHardCopy) {
+					Utility.setMessage("Please enter return date and time");
+					return_date = Utility.getTimeInput();
+				}
+
+				checkOutConfPaper(id,library,return_date, isHardCopy);	
+
+			}
 		
 	}
 	private  void checkOutConfPaper(String confId, String lib, String return_date, boolean isHardCopy) {
@@ -187,7 +218,8 @@ public class ConferencePaper {
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Return a conference paper.\t0:Go back to previous menu.");
+			
+			System.out.println("1: Return a conference paper. \t2. Renew a Conference Paper. \t0:Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -198,6 +230,11 @@ public class ConferencePaper {
 						System.out.println("Return a conference paper");
 						// Call check out method
 						checkInConferencePaperConsole();
+						flag = false;
+						break;
+					case 2:
+					// Call check out method
+						checkOutConfPaperConsole("R");
 						flag = false;
 						break;
 					case 0:
@@ -233,5 +270,20 @@ public class ConferencePaper {
 				Utility.badErrorMessage();
 	    } 	
 		Utility.callUserDialogueBox(userName, userType);
+	}
+	
+	// renew 
+	private  void renewResource(String issn, String return_date, boolean isHardCopy) {
+		Resource sr = new Resource(this.userName, this.userType);
+
+			try{
+				sr.renewResource(Constant.kConferencePaper, issn, return_date);
+			}
+	       	catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+			} 
+		Utility.callUserDialogueBox(userName, userType);
+
 	}
 }

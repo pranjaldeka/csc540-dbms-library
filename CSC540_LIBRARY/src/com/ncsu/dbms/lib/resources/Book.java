@@ -47,7 +47,7 @@ public class Book {
                 sr.showPublicationMenuItems();
                 return;
             } else {
-                System.out.println("ISBN"+"\t" +"Publisher" +"\t" +"Type"+"\t" +"Library" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title\t"+"No. Of Hard Copies");
+                System.out.println("ISBN"+"\t" +"Publisher" +"\t" +"Type"+"\t" +"Library" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title"+"No. Of Hard Copies");
                 System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------");
 
                 do {
@@ -78,6 +78,9 @@ public class Book {
 		try{
 			System.out.println("\nPlease enter your choice:");
 			System.out.println("1: Check-out a book.\t 0:Go back to previous menu.");
+			if (userType.equals(Constant.kFaculty)) {
+				Utility.setMessage("2: Reserve a book\t");
+			}
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -86,13 +89,21 @@ public class Book {
 					switch(choice){
 					case 1:
 						// Call check out method
-						checkOutBookConsole();
+						checkOutBookConsole("C");
 						flag = false;
 							break;
 					case 0:
 		                Resource sr = new Resource(this.userName, this.userType);
 		                sr.searchResources();
 						flag = false;
+						break;
+					case 2:
+						if (userType.equals(Constant.kFaculty)) {
+							reserveBookConsole();
+						}
+						else {
+							Utility.setMessage("Invalid choice: Please enter again.");
+						}
 						break;
 					default:
 						System.out.println("Invalid choice: Please enter again.");
@@ -118,20 +129,38 @@ public class Book {
 			String reserve_end_date) {
 	}
 
-	private  void checkOutBookConsole() {
-		boolean isHardCopy = Utility.getDeliveryType();
-		Utility.setMessage("Please enter the ISBN number of book you want to check out");
-		String isbn = Utility.enteredConsoleString();
+	private  void checkOutBookConsole(String flag) {
 		String library = null;
-		library = Utility.getLibraryInput();
+		boolean isHardCopy=false;
+		String isbn = null;
 		String return_date = null;
-		if (isHardCopy) {
-			Utility.setMessage("Please enter return date and time");
-			return_date = Utility.getTimeInput();
-		}
-		
-		
-		checkOutBook(isbn,library,return_date, isHardCopy);	
+
+			if(flag.equals("R")){
+				// renew an old book
+				Utility.setMessage("Please enter the ISBN number of book you want to renew:");
+				 isbn = Utility.enteredConsoleString();
+				 System.out.println(isbn);
+				library = "";
+				isHardCopy = true;
+				return_date = Utility.getTimeInput();
+
+				renewResource(isbn, return_date, true);
+			}
+			else if(flag.equals("C")){
+				//check out a book
+				Utility.setMessage("Please enter the ISBN number of book you want to check out");
+				 isbn = Utility.enteredConsoleString();
+				 isHardCopy = Utility.getDeliveryType();
+				library = Utility.getLibraryInput();
+				if (isHardCopy) {
+					Utility.setMessage("Please enter return date and time");
+					return_date = Utility.getTimeInput();
+				}
+
+				checkOutBook(isbn,library,return_date, isHardCopy);	
+
+			}
+
 	}
 	
 	private  void checkOutBook(String isbn, String lib, String return_date, boolean isHardCopy) {
@@ -157,6 +186,21 @@ public class Book {
 		Utility.callUserDialogueBox(userName, userType);
 
 	}
+	
+	private  void renewResource(String isbn, String return_date, boolean isHardCopy) {
+		Resource sr = new Resource(this.userName, this.userType);
+
+			try{
+				sr.renewResource(Constant.kBook, isbn, return_date);
+			}
+	       	catch(SQLException e){
+	       		PrintSQLException.printSQLException(e);
+				Utility.badErrorMessage();
+			} 
+		Utility.callUserDialogueBox(userName, userType);
+
+	}
+
 
 	
 	public void checkedOutBooks() {
@@ -202,7 +246,7 @@ public class Book {
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Return a book.\t0:Go back to previous menu.");
+			System.out.println("1: Return a book. \t2. Renew a book. \t0 :Go back to previous menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -211,10 +255,15 @@ public class Book {
 					switch(choice){
 					case 1:
 						System.out.println("Return a book");
-						// Call check out method
+						// Call check in method
 						checkInBookConsole();
 						flag = false;
 						break;
+					case 2:
+						// Call check out method
+						checkOutBookConsole("R");
+						flag = false;
+						break;	
 					case 0:
 						System.out.println("Going back to main menu");
 						Utility.callUserDialogueBox(userName, userType);
@@ -249,4 +298,5 @@ public class Book {
 	    } 	
 		Utility.callUserDialogueBox(userName, userType);
 	}
+
 }

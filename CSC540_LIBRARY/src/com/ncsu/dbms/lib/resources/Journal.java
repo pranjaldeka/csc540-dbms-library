@@ -74,7 +74,7 @@ public class Journal {
 					switch(choice){
 					case 1:
 						// Call check out method
-						checkOutJournalConsole();
+						checkOutJournalConsole("C");
 						flag = false;
 							break;
 					case 0:
@@ -92,8 +92,8 @@ public class Journal {
 			displayDialogueAfterSearch();
 		}
 	}
-	private void checkOutJournalConsole(){
-		boolean isHardCopy = Utility.getDeliveryType();
+	private void checkOutJournalConsole(String flag){
+	/*	boolean isHardCopy = Utility.getDeliveryType();
 		Utility.setMessage("Please enter the ISSN number of journal you want to check out");
 		String issn = Utility.enteredConsoleString();
 		String library = null;
@@ -103,9 +103,37 @@ public class Journal {
 			Utility.setMessage("Please enter return date and time");
 			return_date = Utility.getTimeInput();
 		}
+*/
+		String library = null;
+		boolean isHardCopy=false;
+		String isbn = null;
+		String return_date = null;
 
-		
-		checkOutJournal(issn,library,return_date, isHardCopy);
+			if(flag.equals("R")){
+				// renew an old Journal
+				Utility.setMessage("Please enter the  ISSN number of journal you want to renew:");
+				 isbn = Utility.enteredConsoleString();
+				 System.out.println(isbn);
+				library = "";
+				isHardCopy = true;
+				return_date = Utility.getTimeInput();
+
+				renewResource(isbn, return_date, true);
+			}
+			else if(flag.equals("C")){
+				//check out a Journal
+				Utility.setMessage("Please enter the ISSN number of journal you want to check out");
+				 isbn = Utility.enteredConsoleString();
+				 isHardCopy = Utility.getDeliveryType();
+				library = Utility.getLibraryInput();
+				if (isHardCopy) {
+					Utility.setMessage("Please enter return date and time");
+					return_date = Utility.getTimeInput();
+				}
+
+				checkOutJournal(isbn,library,return_date, isHardCopy);	
+
+			}
 	}
 	private  void checkOutJournal(String issn, String lib, String return_date, boolean isHardCopy) {
 		Resource sr = new Resource(this.userName, this.userType);
@@ -171,7 +199,7 @@ public class Journal {
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
-			System.out.println("1: Return a journal.\t0:Go back to main menu.");
+			System.out.println("1: Return a journal. \t2. Renew a Journal. \t0:Go back to main menu.");
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -183,6 +211,11 @@ public class Journal {
 						checkInJournalConsole();
 						flag = false;
 						break;
+					case 2:
+						// Call check out method
+						checkOutJournalConsole("R");
+						flag = false;
+						break;		
 					case 0:
 						System.out.println("Going back to main menu");
 						Utility.callUserDialogueBox(userName, userType);
@@ -217,4 +250,18 @@ public class Journal {
 	    } 	
 		Utility.callUserDialogueBox(userName, userType);
 	}
+	// renew 
+		private  void renewResource(String issn, String return_date, boolean isHardCopy) {
+			Resource sr = new Resource(this.userName, this.userType);
+
+				try{
+					sr.renewResource(Constant.kJournal, issn, return_date);
+				}
+		       	catch(SQLException e){
+		       		PrintSQLException.printSQLException(e);
+					Utility.badErrorMessage();
+				} 
+			Utility.callUserDialogueBox(userName, userType);
+
+		}
 }
