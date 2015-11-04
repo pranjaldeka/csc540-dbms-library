@@ -126,7 +126,6 @@ public class Camera {
         	cstmt.setString(6,flag);
 	       	cstmt.registerOutParameter(7, OracleTypes.VARCHAR);
 	       	cstmt.registerOutParameter(8, OracleTypes.VARCHAR);
-	       	System.out.println(cameraId + reserveDate + library );
 	       	
 	    	cstmt.executeQuery();
 	     	String outputMessage = cstmt.getString(7);
@@ -194,9 +193,49 @@ public class Camera {
 	}
 
 	public void reservedOrCheckoutCameras() {
+		 try {
+	        	ResultSet rs;
+	        	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call STUDENT_PUBLICATION_PKG.reserved_cameras_data_proc(?,?,?,?)}");
+	        	cstmt.setString(2, this.userName);
+	        	cstmt.setString(3, this.userType);
+		       	cstmt.registerOutParameter(1, OracleTypes.CURSOR);
+		       	cstmt.registerOutParameter(4, OracleTypes.VARCHAR);
+		       	ArrayList<Object> arrayList = DBConnection.returnResultSetAndError(cstmt, 1, 4);
+		       	if(!arrayList.get(1).equals(Constant.kBlankString))
+		       	{
+		       		System.out.println(arrayList.get(1));
+		            Resource sr = new Resource(this.userName, this.userType);
+	                sr.showPublicationMenuItems();
+		       		return;
+		       	}  
+		       	rs = (ResultSet)arrayList.get(0);
+	            if (!rs.next() ) {
+	                System.out.println("No cameras found !!");
+	                Resource sr = new Resource(this.userName, this.userType);
+	                sr.showPublicationMenuItems();
+	                return;
+	            } else {		
+	                System.out.println("Camera id"+"\t" +"Library" +"\t" + "Reservation Date");
+	                System.out.println("-----------------------------------------------------------------------------------------");
+
+	                do {
+	                	String camera_id = rs.getString("camera_id");
+			            String library_id = rs.getString("name");
+			            String date = rs.getString("reservation_timestamp");
+			            String model = rs.getString("model");
+//			            String lens_config = rs.getString("lens_config");
+//			            String memory_available = rs.getString("memory_available");
+			            System.out.println(camera_id +"\t" + "\t" + model+ "\t" + library_id +"\t" + date);
+	                } while (rs.next());
+	            }
+	            displayDialogueAfterReservedOrCheckout();
+			} catch (SQLException e) {
+				PrintSQLException.printSQLException(e);
+				displayDialogueAfterReservedOrCheckout();
+			}
 	}
 	
-/*	private  void displayDialogueAfterReservedOrCheckout(){
+	private  void displayDialogueAfterReservedOrCheckout(){
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
@@ -238,9 +277,9 @@ public class Camera {
 		
 		checkOutCamera(cameraid,library,return_date);
 	}
-	*/
+	
 
-	/*private  void checkOutCamera(String cameraid, String lib, String return_date) {
+	private  void checkOutCamera(String cameraid, String lib, String return_date) {
 		try{
 	
 			Resource sr = new Resource(this.userName, this.userType);
@@ -252,7 +291,7 @@ public class Camera {
 		} 
 		Utility.callUserDialogueBox(userName, userType);
 	
-	}*/
+	}
 
 }
 

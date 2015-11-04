@@ -34,7 +34,6 @@ public class ConferencePaper {
 	       	ArrayList<Object> arrayList = DBConnection.returnResultSetAndError(cstmt, 1, 2);
 	       	if(!arrayList.get(1).equals(Constant.kBlankString))
 	       	{
-	       		System.out.println(arrayList.get(1));
 	       		Resource sr = new Resource(this.userName, this.userType);
                 sr.showPublicationMenuItems();
 	       		return;
@@ -89,7 +88,6 @@ public class ConferencePaper {
 						flag = false;
 							break;
 					case 0:
-						System.out.println("Going back to previous menu");
 						Utility.callUserDialogueBox(userName, userType);
 						flag = false;
 						break;
