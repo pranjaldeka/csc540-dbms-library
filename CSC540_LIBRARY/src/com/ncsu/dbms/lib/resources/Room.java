@@ -111,7 +111,6 @@ public class Room {
 						flag = false;
 						break;
 					case 0:
-						System.out.println("Going back to previous menu\n");
 		                Resource sr = new Resource(this.userName, this.userType);
 		                sr.searchResources();
 						flag = false;

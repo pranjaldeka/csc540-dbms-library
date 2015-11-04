@@ -59,9 +59,8 @@ public class Camera {
             }
 			 displayDialogueAfterSearch();
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-	    }
+			PrintSQLException.printSQLException(e);
+		}
        
         //conn.close();
 
@@ -79,13 +78,11 @@ public class Camera {
 					int choice = Integer.parseInt(value);
 					switch(choice){
 					case 1:
-						System.out.println("Reserve a Camera");
 						// Call check out method
 						reserveCameraConsole();
 						flag = false;
 							break;
 					case 0:
-						System.out.println("Going back to previous menu");
 						Utility.callUserDialogueBox(userName, userType);
 						flag = false;
 						break;
@@ -107,19 +104,99 @@ public class Camera {
 		String library = Utility.getLibraryInput();
 		
 		Utility.setMessage("Please enter date and time when you want to reserve");
-		String reserveTime = Utility.getTimeInput();
+		String reserveDate = Utility.getDateInput();
 		
-		reserveCamera(library, cameraId, reserveTime);
+		reserveCamera(Utility.getLibraryId(library), cameraId, reserveDate,"0");
 	}
+	/**
+	 * Reserve a camera for user 
+	 * 
+	 * @param library
+	 * @param cameraId
+	 * @param reserveTime
+	 */
+	private void reserveCamera(String library, String cameraId, String reserveDate, String flag) {
+		try {
+        	CallableStatement cstmt = DBConnection.returnCallableStatememt("{call camera_reserve_pkg.camera_reserve_proc(?,?,?,?,?,?,?,?)}");
+        	cstmt.setString(1, cameraId.toUpperCase());
+        	cstmt.setString(2, this.userName);
+        	cstmt.setString(3, this.userType);
+        	cstmt.setString(4, reserveDate);
+        	cstmt.setString(5,library);
+        	cstmt.setString(6,flag);
+	       	cstmt.registerOutParameter(7, OracleTypes.VARCHAR);
+	       	cstmt.registerOutParameter(8, OracleTypes.VARCHAR);
+	       	System.out.println(cameraId + reserveDate + library );
+	       	
+	    	cstmt.executeQuery();
+	     	String outputMessage = cstmt.getString(7);
+	     	String waitFlag = cstmt.getString(8);
+	     	if(Integer.parseInt(waitFlag) ==1){// 1. waiting 2. available
+	     		// the camera is in waiting list
+	     		reserveCameraInWaiting(library,cameraId,reserveDate,outputMessage,"W");
+	     	}
+	     	else if(Integer.parseInt(waitFlag) ==2){ // available
+	     		reserveCameraInWaiting(library,cameraId,reserveDate,outputMessage,"A");
+	     	}
+	     	else{
+	     		Utility.setMessage(outputMessage);
 
-	private void reserveCamera(String library, String cameraId,
-			String reserveTime) {
+	     	}
+//	     	if(outputMessage!=null)
+//	       		Utility.setMessage(outputMessage);
+//			//Utility.callUserDialogueBox(userName, userType);
+	       		displayDialogueAfterSearch();
+
+            }
+		catch(SQLException e){
+       		PrintSQLException.printSQLException(e);
+			Utility.badErrorMessage();
+			//Utility.callUserDialogueBox(userName, userType);
+			displayDialogueAfterSearch();
+		}
 	}
 	
+	private void reserveCameraInWaiting(String library, String cameraId, String reserveDate, String outMessage, String availableFlag) {
+		// TODO Auto-generated method stub
+		if(availableFlag.equals("A")){
+     		Utility.setMessage("The camera is available on the date: " + reserveDate);
+     		Utility.setMessage("Please enter your choice : \n1. Reserve the camera.  \t\t0. Go back to previous menu.");
+		}
+		else{
+			Utility.setMessage("The camera is in " + outMessage);
+			Utility.setMessage("You can still reserve it or check back later.");
+	 		Utility.setMessage("Please enter your choice : \n1. Reserve a camera in waiting list.  \t\t0. Go back to previous menu.");
+		}
+ 		try{
+ 			boolean flag = true;
+ 			while(flag){
+ 					int choice = Integer.parseInt(Utility.enteredConsoleString());
+ 					switch(choice){
+ 					case 1:
+ 						reserveCamera(library, cameraId, reserveDate,"1");
+ 						flag = false;
+ 						break;
+ 					case 0:
+ 						flag = false;
+ 						break;
+ 					default:
+ 						System.out.println("Invalid choice: Please enter again.");
+ 					}
+ 				}
+				displayDialogueAfterSearch();
+
+ 			}
+ 			catch(Exception e){
+ 				Utility.badErrorMessage();
+					displayDialogueAfterSearch();
+ 			}
+		
+	}
+
 	public void reservedOrCheckoutCameras() {
 	}
 	
-	private  void displayDialogueAfterReservedOrCheckout(){
+/*	private  void displayDialogueAfterReservedOrCheckout(){
 		boolean flag = true;
 		try{
 			System.out.println("\nPlease enter your choice:");
@@ -136,7 +213,6 @@ public class Camera {
 						flag = false;
 						break;
 					case 0:
-						System.out.println("Going back to main menu");
 						Utility.callUserDialogueBox(userName, userType);
 						flag = false;
 						break;
@@ -150,7 +226,7 @@ public class Camera {
 			System.out.println("Something bad happened!!! Please try again...");
 			displayDialogueAfterReservedOrCheckout();
 		}
-	}
+	} 
 
 	private void checkOutCameraConsole(){
 		Utility.setMessage("Please enter the Camera ID of camera you want to check out");
@@ -162,9 +238,9 @@ public class Camera {
 		
 		checkOutCamera(cameraid,library,return_date);
 	}
-	
+	*/
 
-	private  void checkOutCamera(String cameraid, String lib, String return_date) {
+	/*private  void checkOutCamera(String cameraid, String lib, String return_date) {
 		try{
 	
 			Resource sr = new Resource(this.userName, this.userType);
@@ -176,7 +252,7 @@ public class Camera {
 		} 
 		Utility.callUserDialogueBox(userName, userType);
 	
-	}
+	}*/
 
 }
 
