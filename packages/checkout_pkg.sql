@@ -149,19 +149,19 @@ BEGIN
 							and RESERV_END_TIME >= '''||currentdate_timestamp||'''
 							and RESERV_START_TIME <= '''||currentdate_timestamp||'''
 						';
-						DBMS_OUTPUT.PUT_LINE(sql_statement);
+						/*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
 						EXECUTE IMMEDIATE sql_statement INTO is_reserved_book;
-						DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || is_reserved_book);
+						/*DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || is_reserved_book);*/
 						EXCEPTION
 						WHEN NO_DATA_FOUND THEN
 									is_reserved_book := 0;
-									DBMS_OUTPUT.PUT_LINE('yessss'||is_reserved_book);
+									/*DBMS_OUTPUT.PUT_LINE('yessss'||is_reserved_book);*/
 						WHEN OTHERS THEN
-									DBMS_OUTPUT.PUT_LINE('nooooo'||is_reserved_book);
+									/*DBMS_OUTPUT.PUT_LINE('nooooo'||is_reserved_book);*/
 									output :=SQLERRM;
 						
 						END;
-						DBMS_OUTPUT.PUT_LINE('yup' || is_reserved_book);
+						/*DBMS_OUTPUT.PUT_LINE('yup' || is_reserved_book);*/
 						if is_reserved_book = 1		/*it IS a current reserved book*/
 						then
 							/*join reservation, enroll and books table*/
@@ -175,21 +175,21 @@ BEGIN
 								and S.COURSE_ID = F.COURSE_ID
 								and F.ISBN = '''||issue_type_id||'''
 							';
-							DBMS_OUTPUT.PUT_LINE(sql_statement || is_student_in_course);
+							/*DBMS_OUTPUT.PUT_LINE(sql_statement || is_student_in_course);*/
 							EXECUTE IMMEDIATE sql_statement INTO is_student_in_course;
-							DBMS_OUTPUT.PUT_LINE('yoyoyoy2222' || is_student_in_course);
+							/*DBMS_OUTPUT.PUT_LINE('yoyoyoy2222' || is_student_in_course);*/
 							EXCEPTION
 							WHEN NO_DATA_FOUND THEN
 										is_student_in_course := 0;
-										DBMS_OUTPUT.PUT_LINE(is_student_in_course);
+										/*DBMS_OUTPUT.PUT_LINE(is_student_in_course);*/
 							WHEN OTHERS THEN
-										DBMS_OUTPUT.PUT_LINE('checking student in course');
+										/*DBMS_OUTPUT.PUT_LINE('checking student in course');*/
 										output :=SQLERRM;
 							
 							END;
 							if is_student_in_course = 1 or USER_TYPE = 'F'
 							then
-								DBMS_OUTPUT.PUT_LINE('coming to if');
+								/*DBMS_OUTPUT.PUT_LINE('coming to if');*/
 								/*set valid duration to 4 hours and validate return date*/
 								valid_duration := 'INTERVAL ''4'' HOUR';
 								sql_statement :='
@@ -197,17 +197,17 @@ BEGIN
 								FROM DUAL
 								';
 								EXECUTE IMMEDIATE sql_statement INTO validdate_timestamp;
-								DBMS_OUTPUT.PUT_LINE(validdate_timestamp);
+								/*DBMS_OUTPUT.PUT_LINE(validdate_timestamp);*/
 								IF duedate_timestamp <= validdate_timestamp AND duedate_timestamp >=currentdate_timestamp
 									THEN
-										DBMS_OUTPUT.PUT_LINE('invalid');
+										/*DBMS_OUTPUT.PUT_LINE('invalid');*/
 										invalid := 0;
 									ELSE
-										DBMS_OUTPUT.PUT_LINE('invalidddd');
+										/*DBMS_OUTPUT.PUT_LINE('invalidddd');*/
 										invalid := 1;						
 								END IF;
 							else
-								DBMS_OUTPUT.PUT_LINE('coming to else');
+								/*DBMS_OUTPUT.PUT_LINE('coming to else');*/
 								OUTPUT := 'Sorry This is a RESERVED book and you are not in that COURSE';
 								RAISE user_error;
 							end if;
@@ -349,9 +349,9 @@ BEGIN
 							EXCEPTION
 								WHEN NO_DATA_FOUND THEN
 									already_co_flag := 0;
-									DBMS_OUTPUT.PUT_LINE(already_co_flag);
+									/*DBMS_OUTPUT.PUT_LINE(already_co_flag);*/
 								WHEN OTHERS THEN
-									DBMS_OUTPUT.PUT_LINE('Hii');
+									/*DBMS_OUTPUT.PUT_LINE('Hii');*/
 									output :=SQLERRM;
 							END;
 							IF already_co_flag = 1
@@ -375,9 +375,9 @@ BEGIN
 								EXCEPTION
 								WHEN NO_DATA_FOUND THEN
 									no_of_hard_copies := 0;
-									DBMS_OUTPUT.PUT_LINE(no_of_hard_copies || 'Hiiiiii');
+									/*DBMS_OUTPUT.PUT_LINE(no_of_hard_copies || 'Hiiiiii');*/
 								WHEN OTHERS THEN
-									DBMS_OUTPUT.PUT_LINE(no_of_hard_copies || 'Hellllllo');
+									/*DBMS_OUTPUT.PUT_LINE(no_of_hard_copies || 'Hellllllo');*/
 									output :=SQLERRM;
 								END;
 								/*DBMS_OUTPUT.PUT_LINE(avail_flag);*/
@@ -388,7 +388,7 @@ BEGIN
 									/* Eitherways call checkout transaction */
 									user_priority := 0;
 									sql_statement := '
-											select MIN(PRIORITY) 
+											select NVL(MIN(PRIORITY), 0) 
 											from SSINGH25.RESOURCES_QUEUE
 											where 
 											RESOURCE_ID = '''||ISSUE_TYPE_ID||'''
@@ -403,9 +403,10 @@ BEGIN
 										WHEN OTHERS THEN
 											output :=SQLERRM;
 									END;
+									/*DBMS_OUTPUT.PUT_LINE(user_priority || ' ' || no_of_hard_copies);*/
 									IF user_priority > 0 and user_priority <= no_of_hard_copies
 									THEN
-										DBMS_OUTPUT.PUT_LINE(user_priority || ' ' || no_of_hard_copies);
+										/*DBMS_OUTPUT.PUT_LINE(user_priority || ' ' || no_of_hard_copies);*/
 										/* delete from queue */
 										sql_statement := '
 											delete from SSINGH25.RESOURCES_QUEUE
@@ -428,7 +429,12 @@ BEGIN
 										';
 										EXECUTE IMMEDIATE sql_statement;
 										COMMIT;
-									end if;							
+									end if;
+									if user_priority > 0 and user_priority > no_of_hard_copies
+									then 
+										output := 'Cannot checkout. There are people above you in queue';
+										raise user_error;
+									end if;
 									/*
 									#######################CALL CHECKOUT TRANSACTION#######################;
 									*/	
@@ -508,15 +514,15 @@ BEGIN
 										';
 										BEGIN
 
-											DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || max_priority);
+											/*DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || max_priority);*/
 											EXECUTE IMMEDIATE sql_statement into max_priority;
-											DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || max_priority);
+											/*DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || max_priority);*/
 											EXCEPTION
 												WHEN NO_DATA_FOUND THEN
 													max_priority := 0;
-													DBMS_OUTPUT.PUT_LINE(max_priority || 'sud');
+													/*DBMS_OUTPUT.PUT_LINE(max_priority || 'sud');*/
 												WHEN OTHERS THEN
-													DBMS_OUTPUT.PUT_LINE(max_priority || 'dev');
+													/*DBMS_OUTPUT.PUT_LINE(max_priority || 'dev');*/
 													output :=SQLERRM;
 										END;														
 										
@@ -525,7 +531,7 @@ BEGIN
 										begin
 										/* insert */
 											max_priority:= max_priority+1;
-											DBMS_OUTPUT.PUT_LINE('at here ' ||max_priority);
+											/*DBMS_OUTPUT.PUT_LINE('at here ' ||max_priority);*/
 
 											sql_statement := '
 												INSERT INTO RESOURCES_QUEUE
@@ -537,15 +543,15 @@ BEGIN
 												'''||LIBRARY_ID||''',
 												'''||ISSUE_TYPE||'''
 												)';	
-											DBMS_OUTPUT.PUT_LINE(sql_statement);
+											/*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
 											EXECUTE IMMEDIATE sql_statement;
 											commit;
 											exception
 											WHEN NO_DATA_FOUND THEN
 												max_priority := 0;
-												DBMS_OUTPUT.PUT_LINE(max_priority || 'sud2');
+												/*DBMS_OUTPUT.PUT_LINE(max_priority || 'sud2');*/
 											WHEN OTHERS THEN
-												DBMS_OUTPUT.PUT_LINE(max_priority || 'dev2');
+												/*DBMS_OUTPUT.PUT_LINE(max_priority || 'dev2');*/
 												output :=SQLERRM;
 											
 										end;
@@ -564,10 +570,10 @@ BEGIN
 												and RESOURCE_ID = '''||ISSUE_TYPE_ID||''' 
 												and LIBRARY_ID = '''||LIBRARY_ID||''' 
 											';
-											DBMS_OUTPUT.PUT_LINE('atttttt here ' ||max_faculty_priority);
+											/*DBMS_OUTPUT.PUT_LINE('atttttt here ' ||max_faculty_priority);*/
 											BEGIN
 												EXECUTE IMMEDIATE sql_statement into max_faculty_priority;
-												DBMS_OUTPUT.PUT_LINE('atttttt here ' ||max_faculty_priority);
+												/*DBMS_OUTPUT.PUT_LINE('atttttt here ' ||max_faculty_priority);*/
 												EXCEPTION
 													WHEN NO_DATA_FOUND THEN
 														max_faculty_priority := 0;
@@ -583,7 +589,7 @@ BEGIN
 												and RESOURCE_ID = '''||ISSUE_TYPE_ID||''' 
 												and LIBRARY_ID = '''||LIBRARY_ID||''' 
 											';
-											DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || max_faculty_priority);
+											/*DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || max_faculty_priority);*/
 											EXECUTE IMMEDIATE sql_statement;
 											COMMIT;										
 											
@@ -601,7 +607,7 @@ BEGIN
 												'''||LIBRARY_ID||''',
 												'''||ISSUE_TYPE||'''												
 												)';	
-											DBMS_OUTPUT.PUT_LINE(sql_statement);
+											/*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
 											EXECUTE IMMEDIATE sql_statement;
 											commit;									
 										
