@@ -30,6 +30,10 @@ public final class Utility {
 		@SuppressWarnings("resource")
 		Scanner scanner = new Scanner(System.in);
 		String value = scanner.nextLine();
+		if (value.isEmpty()) {
+			setMessage("\nYou have not entered anything. Please try again..\n");
+			return enteredConsoleString();
+		}
 		return value;
 		
 	}

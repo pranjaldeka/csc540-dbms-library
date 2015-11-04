@@ -47,7 +47,7 @@ public class Book {
                 sr.showPublicationMenuItems();
                 return;
             } else {
-                System.out.println("ISBN"+"\t" +"Publisher" +"\t" +"Type"+"\t" +"Library" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title"+"No. Of Hard Copies");
+                System.out.println("ISBN"+"\t" +"Publisher" +"\t" +"Type"+"\t" +"Library" +"\t" + "Edition"+"\t  " +"Year_Of_Pub" +"\t" + "Authors" +"\t\t\t" + "Title\t"+"No. Of Hard Copies");
                 System.out.println("---------------------------------------------------------------------------------------------------------------------------------------------------------");
 
                 do {
@@ -78,9 +78,6 @@ public class Book {
 		try{
 			System.out.println("\nPlease enter your choice:");
 			System.out.println("1: Check-out a book.\t 0:Go back to previous menu.");
-			if (userType.equals(Constant.kFaculty)) {
-				Utility.setMessage("2: Reserve a book\t");
-			}
 			while(flag){
 					@SuppressWarnings("resource")
 					Scanner scanner = new Scanner(System.in);
@@ -96,14 +93,6 @@ public class Book {
 		                Resource sr = new Resource(this.userName, this.userType);
 		                sr.searchResources();
 						flag = false;
-						break;
-					case 2:
-						if (userType.equals(Constant.kFaculty)) {
-							reserveBookConsole();
-						}
-						else {
-							Utility.setMessage("Invalid choice: Please enter again.");
-						}
 						break;
 					default:
 						System.out.println("Invalid choice: Please enter again.");

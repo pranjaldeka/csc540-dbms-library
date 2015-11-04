@@ -41,11 +41,11 @@ public class LibConsole {
 					flag = false;
 					break;
 				case 0:
-					logout();
 					flag = false;
+					Utility.setMessage("Successfully exited library application");
 					break;
 				default:
-					System.out.println("Invalid choice: Please enter again.");
+					System.out.println("Invalid choice: Please enter again.\n");
 						
 				}
 			}
@@ -92,21 +92,7 @@ public class LibConsole {
 
 
 	public void logout() {
-			Utility.setMessage("Goodbye !!!");
-			Utility.setMessage("Enter enter 1 to login again: ");
-			boolean flag = true;
-			while(flag){
-					int choice = Integer.parseInt(Utility.enteredConsoleString());
-					switch(choice){
-					case 1:
-						loginScreen(1);
-						flag = false;
-						break;
-					default:
-						System.out.println("Invalid choice: Please enter again.");
-							
-					}
-				}
-
+			Utility.setMessage("Goodbye !!!\n");
+			loginAgain();
 	}
 }
