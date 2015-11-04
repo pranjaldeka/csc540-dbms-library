@@ -25,6 +25,13 @@ PROCEDURE fetch_cameras_data_proc(
 	p_ref			OUT SYS_REFCURSOR,
 	out_err_msg		OUT VARCHAR2
 );
+
+PROCEDURE reserved_cameras_data_proc(
+	p_ref			OUT SYS_REFCURSOR,
+	userid			in VARCHAR2,
+	user_type		in	varchar2,
+	out_err_msg		OUT VARCHAR2
+);
 END student_publication_pkg;
 /
 CREATE OR REPLACE PACKAGE BODY student_publication_pkg 
@@ -138,7 +145,7 @@ BEGIN
 	OPEN p_ref FOR
 		SELECT 
 		      c.*,
-		      l.name,
+		      l.name
 		      
 		FROM
 		        cameras c,
@@ -154,5 +161,62 @@ BEGIN
 END fetch_cameras_data_proc;
 
 
+PROCEDURE reserved_cameras_data_proc(
+	p_ref			OUT SYS_REFCURSOR,
+	userid			in VARCHAR2,
+	user_type		in	varchar2,
+	out_err_msg		OUT VARCHAR2
+)
+IS
+user_id_column 		varchar2(100);
+table_name 			varchar2(100);
+user_table 			varchar2(100);
+primary_id VARCHAR2(100);
+sql_statement varchar2(32000);
+BEGIN
+	 IF USER_TYPE = 'S' 
+	  THEN
+			 user_table := 'STUDENTS';
+			 user_id_column := 'STUDENT_ID';
+	  ELSIF USER_TYPE = 'F'
+		  THEN
+			 user_table := 'FACULTIES';
+			 user_id_column := 'FACULTY_ID';
+	  
+	  END IF;
+		sql_statement := 
+          '
+          SELECT '||user_id_column||' 
+          FROM '||user_table||'
+          WHERE user_id = '''||userid||'''';
+          
+          EXECUTE IMMEDIATE sql_statement INTO primary_id;
+          
+	
+		
+		sql_statement := 'SELECT 
+		      c.camera_id,
+			  cil.model,
+		      l.name,
+		      c.reservation_timestamp
+		FROM
+		        cameras_reservation c,
+				cameras cil,
+		        libraries l
+       WHERE
+		       c.camera_id = cil.camera_id
+			   AND c.library_id = l.library_id
+			   and c.patron_id = '''||primary_id||''' 
+			   and c.patron_type= '''||user_type||'''';
+	
+	OPEN p_ref FOR  sql_statement;
+	
+  EXCEPTION
+ WHEN NO_DATA_FOUND THEN
+    out_err_msg:='No Camera reserved!!';
+END reserved_cameras_data_proc;
+
 END student_publication_pkg;
+
+
 /
