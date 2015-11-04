@@ -249,13 +249,24 @@ BEGIN
 				INTO day_week
 				from dual;
 				
-				IF day_week = 3
+				IF day_week = 6
 				THEN
 					select to_char(sysdate,'HH24MMSS') 
 					INTO time_day from dual;
 				
-					if time_day >= '00000' AND time_day <= '235959'
+					if time_day >= '090000' AND time_day <= '120000'
 					then
+							
+					/* if this return a single row then that student can check out 
+						select count(1) from cameras_reservation
+						where patron_type= 'user_type'
+						and patron_id = 'primary_id'
+						and cameras_id = 'cameras_id' 
+						and trunc(sysdate) = trunc(reservation_timestamp)
+						and library_id = 'library_id'
+						and priority = 1
+					*/
+					
 						invalid := 0;
 						
 						SELECT to_timestamp(NEXT_DAY(sysdate,'thursday')) + interval '18' hour 
