@@ -35,6 +35,7 @@ already_in_resource_q_flag number(2);
 is_reserved_book	number(2);
 eligible_for_camera_co number(2);
 user_priority		number(2);
+is_on_hold			number(2);
 max_priority		number(10);
 max_faculty_priority number(10);
 already_co_flag		number(2);
@@ -61,7 +62,7 @@ BEGIN
   IF USER_TYPE = 'S' 
 	  THEN
 		 user_table := 'STUDENTS';
-		 user_id_column := 'student_id';
+		 user_id_column := 'student_id';		 
   ELSIF USER_TYPE = 'F'
 	  THEN
 		 user_table := 'FACULTIES';
@@ -72,9 +73,44 @@ BEGIN
   
 
 
-  IF invalid = 0
-  /*Assign table name and its primary to apppropriate variables*/
+  IF invalid = 0  
+  /*Assign table name and its primary to appropriate variables*/
    THEN
+			/*find student id or facultyid */
+					  sql_statement := 
+					  '
+					  SELECT '||user_id_column||' 
+					  FROM '||user_table||'
+					  WHERE user_id = '''||user_id||'''';
+					  /*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
+					  EXECUTE IMMEDIATE sql_statement INTO primary_id;
+   
+			sql_statement := '
+				select 1 
+				from PATRON_IN_HOLD
+				where patron_id = '''||primary_id||'''
+				and hold_end_date is null
+			';
+			BEGIN
+			is_on_hold := 0;
+			EXECUTE IMMEDIATE sql_statement INTO is_on_hold;
+						/*DBMS_OUTPUT.PUT_LINE(sql_statement || ' ' || is_reserved_book);*/
+			EXCEPTION
+			WHEN NO_DATA_FOUND THEN
+						is_on_hold := 0;
+						/*DBMS_OUTPUT.PUT_LINE('yessss'||is_reserved_book);*/
+			WHEN OTHERS THEN
+						/*DBMS_OUTPUT.PUT_LINE('nooooo'||is_reserved_book);*/
+						output :=SQLERRM;
+			
+			END;
+			
+			IF is_on_hold = 1
+			then
+				OUTPUT := 'Sorry! Cannot Check Out! You are currently on HOLD.';
+				raise user_error;
+			end if;
+   
 			IF ISSUE_TYPE = 'B' 
             THEN
                 table_name := 'BOOKS';
@@ -120,13 +156,13 @@ BEGIN
       FROM dual;
 	  
 	  /*find student id or facultyid */
-					  sql_statement := 
+					  /*sql_statement := 
 					  '
 					  SELECT '||user_id_column||' 
 					  FROM '||user_table||'
 					  WHERE user_id = '''||user_id||'''';
 					  /*DBMS_OUTPUT.PUT_LINE(sql_statement);*/
-					  EXECUTE IMMEDIATE sql_statement INTO primary_id;
+					  /*EXECUTE IMMEDIATE sql_statement INTO primary_id*/
       
 		IF ISSUE_TYPE <> 'C'  
         THEN		
